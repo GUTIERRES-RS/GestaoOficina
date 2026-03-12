@@ -2,7 +2,7 @@
 Sistema Administrativo para oficinas mecânicas
 
 ## Tecnologias
-- Frontend: React
+- Frontend: React + Vite
 - Backend: Node.js
 - Banco de dados: MySQL
 
