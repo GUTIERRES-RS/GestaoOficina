@@ -1,0 +1,465 @@
+/* ===== Mechanics Page ===== */
+.mechanics-page {
+    position: relative;
+}
+
+
+
+/* Stats */
+.mechanics-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+}
+
+.stat-card {
+    background: var(--bg-secondary);
+    border-radius: var(--radius-lg);
+    padding: 1.25rem 1.5rem;
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--border-color);
+    border-left: 4px solid;
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: -20px;
+    right: -20px;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    opacity: 0.08;
+}
+
+.stat-blue {
+    border-left-color: var(--accent-color);
+}
+
+.stat-green {
+    border-left-color: var(--success-color);
+}
+
+.stat-orange {
+    border-left-color: var(--warning-color);
+}
+
+.stat-blue::before {
+    background: var(--accent-color);
+}
+
+.stat-green::before {
+    background: var(--success-color);
+}
+
+.stat-orange::before {
+    background: var(--warning-color);
+}
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    font-family: var(--font-heading);
+    color: var(--text-primary);
+    line-height: 1;
+    margin-bottom: 0.2rem;
+}
+
+.stat-label {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+/* Filters */
+.mechanics-filters {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+    padding: 1rem 1.25rem;
+    flex-wrap: wrap;
+}
+
+.search-box {
+    position: relative;
+    flex: 1;
+    min-width: 200px;
+}
+
+.search-icon {
+    position: absolute;
+    left: 0.875rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-tertiary);
+}
+
+.search-input {
+    width: 100%;
+    padding: 0.6rem 0.875rem 0.6rem 2.25rem;
+    font-size: 0.875rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.search-clear {
+    position: absolute;
+    right: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-tertiary);
+    padding: 0;
+    line-height: 1;
+}
+
+.search-clear:hover {
+    color: var(--danger-color);
+}
+
+.status-tabs {
+    display: flex;
+    gap: 0.25rem;
+    background: var(--bg-primary);
+    border-radius: var(--radius-md);
+    padding: 0.2rem;
+    border: 1px solid var(--border-color);
+}
+
+.status-tab {
+    padding: 0.4rem 1rem;
+    font-size: 0.8rem;
+    font-weight: 500;
+    border-radius: calc(var(--radius-md) - 2px);
+    color: var(--text-secondary);
+    transition: all var(--transition-fast);
+}
+
+.status-tab.active {
+    background: var(--bg-secondary);
+    color: var(--accent-color);
+    box-shadow: var(--shadow-sm);
+    font-weight: 600;
+}
+
+/* Table */
+.mechanics-table-card {
+    padding: 0;
+    overflow: hidden;
+}
+
+.table-responsive {
+    overflow-x: auto;
+}
+
+.mechanics-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+}
+
+.mechanics-table th {
+    padding: 0.875rem 1.25rem;
+    text-align: left;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    background: var(--bg-primary);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.mechanics-table td {
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--border-color);
+    vertical-align: middle;
+}
+
+.mechanics-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.mechanics-table tbody tr {
+    transition: background var(--transition-fast);
+}
+
+.mechanics-table tbody tr:hover {
+    background: var(--bg-primary);
+}
+
+.mechanic-name {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent-color), #7c3aed);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+.mechanic-name .name {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.mechanic-name .doc {
+    font-size: 0.75rem;
+    color: var(--text-tertiary);
+    margin-top: 1px;
+}
+
+.specialty-badge {
+    display: inline-block;
+    padding: 0.25rem 0.65rem;
+    background: var(--accent-light);
+    color: var(--accent-color);
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.commission-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.3rem 0.7rem;
+    background: var(--warning-light);
+    color: var(--warning-text);
+    border-radius: 9999px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.badge-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.3rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.badge-active {
+    background: var(--success-light);
+    color: var(--success-text);
+}
+
+.badge-inactive {
+    background: var(--danger-light);
+    color: var(--danger-text);
+}
+
+.text-muted {
+    color: var(--text-tertiary);
+}
+
+.action-buttons {
+    display: flex;
+    gap: 0.4rem;
+}
+
+.btn-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-color);
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+    transition: all var(--transition-fast);
+}
+
+.btn-icon:hover {
+    transform: translateY(-1px);
+}
+
+.btn-edit:hover {
+    color: var(--accent-color);
+    border-color: var(--accent-color);
+    background: var(--accent-light);
+}
+
+.btn-del:hover {
+    color: var(--danger-color);
+    border-color: var(--danger-color);
+    background: var(--danger-light);
+}
+
+/* Loading */
+.spinner {
+    width: 36px;
+    height: 36px;
+    border: 3px solid var(--border-color);
+    border-top-color: var(--accent-color);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Modal */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.5);
+    backdrop-filter: blur(4px);
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    animation: fadeIn 0.15s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.modal-box {
+    background: var(--bg-secondary);
+    border-radius: var(--radius-xl);
+    width: 100%;
+    max-width: 640px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    animation: slideUp 0.2s ease;
+}
+
+.modal-small {
+    max-width: 420px;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+
+    to {
+        transform: none;
+        opacity: 1;
+    }
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.5rem 1.75rem 1rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.modal-header h2 {
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.modal-close {
+    color: var(--text-tertiary);
+    padding: 0.25rem;
+    border-radius: var(--radius-sm);
+    transition: color var(--transition-fast);
+}
+
+.modal-close:hover {
+    color: var(--danger-color);
+}
+
+.modal-form {
+    padding: 1.5rem 1.75rem;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.form-group.col-2 {
+    grid-column: 1 / -1;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--border-color);
+    margin-top: 0.75rem;
+}
+
+.delete-body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1.5rem 2rem;
+    text-align: center;
+}
+
+.delete-icon {
+    color: var(--danger-color);
+}
+
+.delete-warning {
+    font-size: 0.8rem;
+    color: var(--text-tertiary);
+}
+
+@media (max-width: 640px) {
+    .mechanics-stats {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .form-group.col-2 {
+        grid-column: 1;
+    }
+
+    .mechanics-filters {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}

@@ -1,0 +1,228 @@
+/* ===== Finances Page ===== */
+.finances-page {
+    position: relative;
+}
+
+
+
+/* Filter */
+.finance-filter {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+    flex-wrap: wrap;
+}
+
+.filter-label {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+}
+
+.period-tabs {
+    display: flex;
+    gap: 0.25rem;
+    background: var(--bg-primary);
+    border-radius: var(--radius-md);
+    padding: 0.2rem;
+    border: 1px solid var(--border-color);
+    flex-wrap: wrap;
+}
+
+.period-tab {
+    padding: 0.4rem 1rem;
+    font-size: 0.8rem;
+    font-weight: 500;
+    border-radius: calc(var(--radius-md) - 2px);
+    color: var(--text-secondary);
+    transition: all var(--transition-fast);
+    white-space: nowrap;
+}
+
+.period-tab.active {
+    background: var(--bg-secondary);
+    color: var(--accent-color);
+    box-shadow: var(--shadow-sm);
+    font-weight: 600;
+}
+
+.custom-dates {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.date-field {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.date-field .form-control {
+    width: 140px;
+    padding: 0.4rem 0.75rem;
+    font-size: 0.8rem;
+}
+
+/* Summary Cards */
+.finance-summary {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+}
+
+.summary-card {
+    background: var(--bg-secondary);
+    border-radius: var(--radius-lg);
+    padding: 1.25rem 1.5rem;
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.summary-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.icon-blue {
+    background: var(--accent-light);
+    color: var(--accent-color);
+}
+
+.icon-green {
+    background: var(--success-light);
+    color: var(--success-color);
+}
+
+.icon-red {
+    background: var(--danger-light);
+    color: var(--danger-color);
+}
+
+.summary-value {
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    font-family: var(--font-heading);
+    line-height: 1;
+    margin-bottom: 0.2rem;
+}
+
+.summary-label {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+/* Table */
+.finance-card {
+    padding: 0;
+    overflow: hidden;
+}
+
+.finance-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+}
+
+.finance-table th {
+    padding: 0.875rem 1.25rem;
+    text-align: left;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    background: var(--bg-primary);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.finance-table td {
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--border-color);
+    vertical-align: middle;
+}
+
+.finance-row {
+    transition: background var(--transition-fast);
+}
+
+.finance-row:hover {
+    background: var(--bg-primary);
+}
+
+.text-money {
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+}
+
+.amount-badge {
+    display: inline-block;
+    padding: 0.3rem 0.75rem;
+    border-radius: 9999px;
+    font-weight: 700;
+    font-size: 0.875rem;
+}
+
+.amount-income {
+    background: var(--success-light);
+    color: var(--success-text);
+}
+
+.amount-expense {
+    background: var(--danger-light);
+    color: var(--danger-text);
+}
+
+.type-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    flex-shrink: 0;
+}
+
+.indicator-income {
+    background: var(--success-light);
+    color: var(--success-color);
+}
+
+.indicator-expense {
+    background: var(--danger-light);
+    color: var(--danger-color);
+}
+
+@media (max-width: 768px) {
+    .finance-summary {
+        grid-template-columns: 1fr;
+    }
+
+    .finance-filter {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}

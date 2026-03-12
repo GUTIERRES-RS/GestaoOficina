@@ -1,0 +1,9 @@
+/* App.css - Cleaned: Layout is managed by index.css and Sidebar.css */
+
+/* Remove Vite default styles that conflict with our design system */
+#root {
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  text-align: left;
+}

@@ -1,0 +1,322 @@
+.dashboard-container {
+    animation: fadeIn var(--transition-normal);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.mb-4 {
+    margin-bottom: 1rem;
+}
+
+.mb-6 {
+    margin-bottom: 1.5rem;
+}
+
+.mb-8 {
+    margin-bottom: 2rem;
+}
+
+.text-2xl {
+    font-size: 1.5rem;
+}
+
+.font-bold {
+    font-weight: 700;
+}
+
+.font-medium {
+    font-weight: 500;
+}
+
+.font-semibold {
+    font-weight: 600;
+}
+
+.text-secondary {
+    color: var(--text-secondary);
+}
+
+.text-sm {
+    font-size: 0.875rem;
+}
+
+.py-3 {
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+}
+
+.w-full {
+    width: 100%;
+}
+
+.h-64 {
+    height: 16rem;
+    /* 256px */
+}
+
+.h-full {
+    height: 100%;
+}
+
+.text-left {
+    text-align: left;
+}
+
+.border-b {
+    border-bottom: 1px solid var(--border-color);
+}
+
+.hover-bg:hover {
+    background-color: var(--bg-tertiary);
+}
+
+.last-mb-0:last-child {
+    margin-bottom: 0;
+}
+
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+}
+
+/* Stats Cards */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.5rem;
+}
+
+.stat-card {
+    display: flex;
+    flex-direction: column;
+}
+
+.stat-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+}
+
+.stat-icon-wrapper {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--bg-primary);
+}
+
+.icon-success {
+    color: var(--success-color);
+}
+
+.icon-primary {
+    color: var(--accent-color);
+}
+
+.icon-warning {
+    color: var(--warning-color);
+}
+
+.icon-info {
+    color: #8b5cf6;
+}
+
+/* Purple for info/ticket */
+
+.stat-trend {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    padding: 0.25rem 0.625rem;
+    border-radius: 999px;
+}
+
+.stat-trend.positive {
+    color: var(--success-text);
+    background-color: var(--success-light);
+}
+
+.stat-trend.negative {
+    color: var(--danger-text);
+    background-color: var(--danger-light);
+}
+
+.stat-value {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-top: 0.5rem;
+    margin-bottom: 0.25rem;
+    font-family: var(--font-heading);
+}
+
+.stat-title {
+    color: var(--text-secondary);
+    font-weight: 500;
+    font-size: 0.875rem;
+}
+
+.stat-subtitle {
+    color: var(--text-tertiary);
+    font-size: 0.75rem;
+    margin-top: 0.5rem;
+}
+
+/* Grids */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(1, 1fr);
+    gap: 1.5rem;
+}
+
+@media (min-width: 1024px) {
+    .dashboard-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .lg-col-span-2 {
+        grid-column: span 2 / span 2;
+    }
+
+    .lg-col-span-3 {
+        grid-column: span 3 / span 3;
+    }
+}
+
+/* Table Responsive */
+.table-responsive {
+    overflow-x: auto;
+}
+
+table th {
+    color: var(--text-secondary);
+    font-weight: 500;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+/* Progress Bars */
+.progress-bar-bg {
+    height: 6px;
+    width: 100%;
+    background-color: var(--bg-tertiary);
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent-light), var(--accent-color));
+    border-radius: 999px;
+    transition: width 1s ease-out;
+}
+
+@media (max-width: 768px) {
+    .dashboard-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .period-selector {
+        width: 100%;
+    }
+
+    .period-selector select {
+        width: 100%;
+    }
+}
+
+/* Dashboard Filter (Reused from Finances) */
+.dashboard-filter {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+    flex-wrap: wrap;
+}
+
+.filter-label {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+}
+
+.period-tabs {
+    display: flex;
+    gap: 0.25rem;
+    background: var(--bg-primary);
+    border-radius: var(--radius-md);
+    padding: 0.2rem;
+    border: 1px solid var(--border-color);
+    flex-wrap: wrap;
+}
+
+.period-tab {
+    padding: 0.4rem 1rem;
+    font-size: 0.8rem;
+    font-weight: 500;
+    border-radius: calc(var(--radius-md) - 2px);
+    color: var(--text-secondary);
+    transition: all var(--transition-fast);
+    white-space: nowrap;
+    border: none;
+    cursor: pointer;
+}
+
+.period-tab:hover {
+    background: var(--bg-tertiary);
+}
+
+.period-tab.active {
+    background: var(--bg-secondary);
+    color: var(--accent-color);
+    box-shadow: var(--shadow-sm);
+    font-weight: 600;
+}
+
+.custom-dates {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.date-field {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.date-field .form-control {
+    width: 140px;
+    padding: 0.4rem 0.75rem;
+    font-size: 0.8rem;
+}

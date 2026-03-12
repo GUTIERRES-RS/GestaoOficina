@@ -1,0 +1,233 @@
+.settings-layout {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 2rem;
+    align-items: start;
+    margin-top: 1rem;
+}
+
+.settings-sidebar {
+    padding: 1.25rem !important;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    position: sticky;
+    top: 90px;
+}
+
+.settings-tab-btn {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    border-radius: var(--radius-md);
+    color: var(--text-secondary);
+    font-weight: 500;
+    transition: all var(--transition-fast);
+    text-align: left;
+    width: 100%;
+}
+
+.settings-tab-btn:hover {
+    background-color: var(--bg-tertiary);
+    color: var(--text-primary);
+    transform: translateX(4px);
+}
+
+.settings-tab-btn.active {
+    background-color: var(--accent-light);
+    color: var(--accent-color);
+    font-weight: 600;
+    box-shadow: inset 4px 0 0 var(--accent-color);
+}
+
+.settings-content {
+    padding: 2.5rem !important;
+    min-height: 600px;
+}
+
+.section-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+    letter-spacing: -0.02em;
+}
+
+.section-desc {
+    color: var(--text-secondary);
+    font-size: 0.9375rem;
+    margin-bottom: 2rem;
+}
+
+.settings-group {
+    margin-bottom: 3rem;
+}
+
+.group-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.group-header h4 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.group-header svg {
+    color: var(--accent-color);
+}
+
+/* Logo Upload Customization */
+.logo-upload-container {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    padding: 2rem;
+    background-color: var(--bg-primary);
+    border-radius: var(--radius-xl);
+    border: 2px dashed var(--border-color);
+    transition: all var(--transition-normal);
+    position: relative;
+}
+
+.logo-upload-container:hover {
+    border-color: var(--accent-color);
+    background-color: var(--accent-light);
+}
+
+.logo-preview-wrapper {
+    position: relative;
+}
+
+.logo-preview {
+    width: 140px;
+    height: 140px;
+    border-radius: var(--radius-lg);
+    background-color: var(--bg-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    flex-shrink: 0;
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--border-color);
+    transition: transform var(--transition-fast);
+}
+
+.logo-upload-container:hover .logo-preview {
+    transform: scale(1.02);
+}
+
+.logo-image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    padding: 0.5rem;
+}
+
+.logo-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 0.5rem;
+}
+
+.logo-upload-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+/* Form Enhancements */
+.form-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-icon {
+    position: absolute;
+    left: 1rem;
+    color: var(--text-tertiary);
+    pointer-events: none;
+    transition: color var(--transition-fast);
+}
+
+.form-control-with-icon {
+    padding-left: 2.75rem !important;
+}
+
+.form-control:focus + .input-icon {
+    color: var(--accent-color);
+}
+
+.profile-info-card {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 2rem;
+    background-color: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-premium);
+    margin-top: 1.5rem;
+    margin-bottom: 2.5rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.profile-info-card::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 6px;
+    background-color: var(--accent-color);
+}
+
+.avatar-initials {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent-color), var(--accent-hover));
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    font-weight: 700;
+    box-shadow: 0 8px 16px rgba(var(--accent-rgb, 37, 99, 235), 0.25);
+}
+
+.profile-details h4 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+}
+
+@media (max-width: 992px) {
+    .settings-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .settings-sidebar {
+        flex-direction: row;
+        overflow-x: auto;
+        padding-bottom: 1rem !important;
+        position: static;
+    }
+
+    .settings-tab-btn {
+        white-space: nowrap;
+        padding: 0.75rem 1rem;
+    }
+}
