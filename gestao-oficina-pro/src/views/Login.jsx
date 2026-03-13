@@ -54,9 +54,9 @@ const Login = () => {
                             <input
                                 type="email"
                                 id="email"
+                                autoComplete="new-password"
                                 className="form-control form-control-with-icon"
                                 placeholder="seu@email.com.br"
-                                defaultValue="admin@oficinapro.com.br"
                                 required
                             />
                         </div>
@@ -72,9 +72,9 @@ const Login = () => {
                             <input
                                 type="password"
                                 id="password"
+                                autoComplete="new-password"
                                 className="form-control form-control-with-icon"
                                 placeholder="••••••••"
-                                defaultValue="123456"
                                 required
                             />
                         </div>

@@ -6,6 +6,20 @@ const api = axios.create({
     timeout: 10000,
 });
 
+// Interceptor para adicionar o token em todas as requisições
+api.interceptors.request.use(
+    (config) => {
+        const token = localStorage.getItem('@GestaoOficinaPro:token');
+        if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
+        }
+        return config;
+    },
+    (error) => {
+        return Promise.reject(error);
+    }
+);
+
 // Interceptor para tratar erros globais
 api.interceptors.response.use(
     (response) => {

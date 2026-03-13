@@ -13,7 +13,8 @@ app.use((req, res, next) => {
 });
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
-// Import Routes
+// Import routes
+const authRoutes = require('./routes/authRoutes');
 const clientRoutes = require('./routes/clientRoutes');
 const osRoutes = require('./routes/osRoutes');
 const inventoryRoutes = require('./routes/inventoryRoutes');
@@ -21,12 +22,27 @@ const financeRoutes = require('./routes/financeRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
 const vehicleRoutes = require('./routes/vehicleRoutes');
 const settingsRoutes = require('./routes/settingsRoutes');
+const publicSettingsRoutes = require('./routes/publicSettingsRoutes');
 const mechanicRoutes = require('./routes/mechanicRoutes');
-const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 
+// Import Middleware
+const authMiddleware = require('./middleware/authMiddleware');
+
 console.log('Mounting routes...');
+// Public routes
 app.use('/api/auth', authRoutes);
+app.get('/api/health', (req, res) => {
+    res.json({ status: 'ok', message: 'API Gestão Oficina Pro rodando perfeitamente!' });
+});
+app.use('/api/settings', (req, res, next) => {
+    console.log('Public settings route hit');
+    next();
+}, publicSettingsRoutes);
+
+// Protected routes
+app.use(authMiddleware);
+
 app.use('/api/clients', clientRoutes);
 app.use('/api/os', osRoutes);
 app.use('/api/inventory', inventoryRoutes);
@@ -38,10 +54,6 @@ app.use('/api/mechanics', mechanicRoutes);
 app.use('/api/users', userRoutes);
 console.log('Routes mounted: clients, os, inventory, finances, dashboard, vehicles, settings, mechanics, users');
 
-// Basic Route for testing
-app.get('/api/health', (req, res) => {
-    res.json({ status: 'ok', message: 'API Gestão Oficina Pro rodando perfeitamente!' });
-});
 
 // Error handling middleware
 app.use((err, req, res, next) => {

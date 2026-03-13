@@ -13,7 +13,6 @@ export const AuthProvider = ({ children }) => {
 
         if (storedToken && storedUser) {
             setUser(JSON.parse(storedUser));
-            api.defaults.headers.Authorization = `Bearer ${storedToken}`;
         }
         
         setLoading(false);
@@ -26,7 +25,6 @@ export const AuthProvider = ({ children }) => {
         localStorage.setItem('@GestaoOficinaPro:token', token);
         localStorage.setItem('@GestaoOficinaPro:user', JSON.stringify(user));
 
-        api.defaults.headers.Authorization = `Bearer ${token}`;
         setUser(user);
     };
 
@@ -34,7 +32,6 @@ export const AuthProvider = ({ children }) => {
         localStorage.removeItem('@GestaoOficinaPro:token');
         localStorage.removeItem('@GestaoOficinaPro:user');
         setUser(null);
-        api.defaults.headers.Authorization = '';
     };
 
     const updateAuthUser = (updatedUser) => {
