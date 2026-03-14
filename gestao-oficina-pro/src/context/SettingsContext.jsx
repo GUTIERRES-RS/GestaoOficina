@@ -13,14 +13,18 @@ export const useSettings = () => {
 
 export const SettingsProvider = ({ children }) => {
     const [settings, setSettings] = useState({
-        workshop_name: 'Oficina Pro',
+        workshop_name: '',
         workshop_phone: '',
         workshop_email: '',
         workshop_address: '',
         workshop_document: '',
-        theme: 'dark',
+        theme: 'light',
         currency: 'BRL',
-        items_per_page: 10
+        logo_url: null,
+        whatsapp: '',
+        review_days: 30,
+        next_os_number: 1,
+        items_per_page: null
     });
     const [loading, setLoading] = useState(true);
 
@@ -29,7 +33,7 @@ export const SettingsProvider = ({ children }) => {
             setLoading(true);
             const res = await api.get('/settings');
             if (res.data) {
-                setSettings(res.data);
+                setSettings(prev => ({ ...prev, ...res.data }));
             }
         } catch (error) {
             console.error('Error fetching settings in context:', error);

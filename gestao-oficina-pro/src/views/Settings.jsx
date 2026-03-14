@@ -54,7 +54,12 @@ const Settings = () => {
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setSettings(prev => ({ ...prev, [name]: value }));
+        
+        if (['items_per_page', 'review_days', 'next_os_number'].includes(name)) {
+            setSettings(prev => ({ ...prev, [name]: value === '' ? '' : parseInt(value) }));
+        } else {
+            setSettings(prev => ({ ...prev, [name]: value }));
+        }
     };
 
     const handleProfileChange = (e) => {
@@ -471,10 +476,8 @@ const Settings = () => {
                                                     type="number"
                                                     name="items_per_page"
                                                     className="form-control form-control-with-icon"
-                                                    value={settings.items_per_page || 10}
+                                                    value={settings.items_per_page}
                                                     onChange={handleChange}
-                                                    min="1"
-                                                    max="100"
                                                     placeholder="Padrão: 10"
                                                 />
                                             </div>

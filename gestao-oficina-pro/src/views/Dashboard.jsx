@@ -19,6 +19,8 @@ import { StatusBadge } from '../utils/statusStyles';
 import TableEmptyState from '../components/TableEmptyState';
 import { formatMoney, formatDate } from '../utils/format';
 import { getPeriodDates, PERIODS } from '../utils/date';
+import Pagination from '../components/Pagination';
+import { useSettings } from '../context/SettingsContext';
 
 const StatCard = ({ title, value, icon, iconBgClass, iconColorClass, valueColorClass, loading }) => (
     <div className="stat-card card">
@@ -41,6 +43,11 @@ const StatCard = ({ title, value, icon, iconBgClass, iconColorClass, valueColorC
 const Dashboard = () => {
     const [stats, setStats] = useState(null);
     const [loading, setLoading] = useState(true);
+    const { settings } = useSettings();
+
+    // Pagination State for OS Table
+    const [osCurrentPage, setOsCurrentPage] = useState(1);
+    const itemsPerPage = settings.items_per_page || 10;
 
     // Filter State
     const [period, setPeriod] = useState('year');
@@ -73,6 +80,18 @@ const Dashboard = () => {
     useEffect(() => {
         fetchDashboardStats();
     }, [fetchDashboardStats]);
+
+    // Reset OS pagination when stats change
+    useEffect(() => {
+        setOsCurrentPage(1);
+    }, [stats]);
+
+    // OS Pagination Logic
+    const osTotalPages = Math.ceil((stats?.recent_os?.length || 0) / itemsPerPage);
+    const currentOSItems = (stats?.recent_os || []).slice(
+        (osCurrentPage - 1) * itemsPerPage,
+        osCurrentPage * itemsPerPage
+    );
 
 
     return (
@@ -364,44 +383,58 @@ const Dashboard = () => {
                                 <Loader className="animate-spin text-primary-color" size={24} />
                             </div>
                         ) : (
-                            <table className="data-table">
-                                <thead>
-                                    <tr>
-                                        <th>OS</th>
-                                        <th>Cliente</th>
-                                        <th>Veículo</th>
-                                        <th>Data</th>
-                                        <th>Status</th>
-                                        <th className="text-right">Valor</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {stats && stats.recent_os && stats.recent_os.length > 0 ? stats.recent_os.map(os => (
-                                        <tr key={os.id}>
-                                            <td className="font-medium text-primary-color">#{os.id}</td>
-                                            <td>{os.client_name}</td>
-                                            <td className="text-secondary text-sm">{os.vehicle_model} ({os.plate})</td>
-                                            <td className="text-secondary text-sm">
-                                                <div className="flex items-center gap-1">
-                                                    <Clock size={14} /> {formatDate(os.created_at, true)}
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <StatusBadge status={os.status} />
-                                            </td>
-                                            <td className="text-right font-bold text-primary-color">
-                                                {formatMoney(os.total_cost)}
-                                            </td>
+                            <div className="space-y-4">
+                                <table className="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>OS</th>
+                                            <th>Cliente</th>
+                                            <th>Veículo</th>
+                                            <th>Data</th>
+                                            <th>Status</th>
+                                            <th className="text-right">Valor</th>
                                         </tr>
-                                    )) : (
-                                        <TableEmptyState
-                                            colSpan={6}
-                                            icon={Clock}
-                                            message="Nenhuma ordem de serviço recente."
+                                    </thead>
+                                    <tbody>
+                                        {currentOSItems.length > 0 ? currentOSItems.map(os => (
+                                            <tr key={os.id}>
+                                                <td className="font-medium text-primary-color">#{os.id}</td>
+                                                <td>{os.client_name}</td>
+                                                <td className="text-secondary text-sm">{os.vehicle_model} ({os.plate})</td>
+                                                <td className="text-secondary text-sm">
+                                                    <div className="flex items-center gap-1">
+                                                        <Clock size={14} /> {formatDate(os.created_at, true)}
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <StatusBadge status={os.status} />
+                                                </td>
+                                                <td className="text-right font-bold text-primary-color">
+                                                    {formatMoney(os.total_cost)}
+                                                </td>
+                                            </tr>
+                                        )) : (
+                                            <TableEmptyState
+                                                colSpan={6}
+                                                icon={Clock}
+                                                message="Nenhuma ordem de serviço recente."
+                                            />
+                                        )}
+                                    </tbody>
+                                </table>
+
+                                {stats?.recent_os?.length > itemsPerPage && (
+                                    <div className="px-4 pb-4">
+                                        <Pagination
+                                            currentPage={osCurrentPage}
+                                            totalPages={osTotalPages}
+                                            onPageChange={(page) => setOsCurrentPage(page)}
+                                            itemsPerPage={itemsPerPage}
+                                            totalItems={stats.recent_os.length}
                                         />
-                                    )}
-                                </tbody>
-                            </table>
+                                    </div>
+                                )}
+                            </div>
                         )}
                     </div>
                 </div>

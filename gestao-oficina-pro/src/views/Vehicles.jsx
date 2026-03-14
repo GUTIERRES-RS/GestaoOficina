@@ -263,6 +263,7 @@ const Vehicles = () => {
                                     <th>Veículo / Placa</th>
                                     <th>Marca / Ano</th>
                                     <th>Proprietário</th>
+                                    <th className="text-center">Total O.S.</th>
                                     <th>Status</th>
                                     <th className="text-right">Ações</th>
                                 </tr>
@@ -292,6 +293,9 @@ const Vehicles = () => {
                                         </td>
                                         <td>
                                             <div className="font-medium">{v.client_name || '--'}</div>
+                                        </td>
+                                        <td className="text-center">
+                                            <span className="font-bold text-primary-color" style={{ fontSize: '0.95rem' }}>{v.total_os || 0}</span>
                                         </td>
                                         <td>
                                             {Number(v.os_abertas) > 0 ? (
