@@ -18,7 +18,12 @@ const vehicleController = {
                         SELECT COUNT(*) FROM service_orders so 
                         WHERE so.vehicle_id = v.id 
                         AND so.status NOT IN ('Finalizado', 'Entregue', 'Cancelado')
-                    ), 0) as os_abertas
+                    ), 0) as os_abertas,
+                    COALESCE((
+                        SELECT SUM(total_cost) FROM service_orders so 
+                        WHERE so.vehicle_id = v.id 
+                        AND so.status != 'Cancelado'
+                    ), 0) as total_faturado
                 FROM vehicles v
                 LEFT JOIN clients c ON v.client_id = c.id
                 ORDER BY v.created_at DESC

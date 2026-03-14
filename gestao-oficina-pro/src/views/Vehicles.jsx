@@ -7,6 +7,7 @@ import Pagination from '../components/Pagination';
 import { useSettings } from '../context/SettingsContext';
 import toast from 'react-hot-toast';
 import { StatusBadge } from '../utils/statusStyles';
+import { formatMoney } from '../utils/format';
 import VehicleHistory from './clients/VehicleHistory';
 
 
@@ -264,6 +265,7 @@ const Vehicles = () => {
                                     <th>Marca / Ano</th>
                                     <th>Proprietário</th>
                                     <th className="text-center">Total O.S.</th>
+                                    <th className="text-left">Total Faturado</th>
                                     <th>Status</th>
                                     <th className="text-right">Ações</th>
                                 </tr>
@@ -296,6 +298,11 @@ const Vehicles = () => {
                                         </td>
                                         <td className="text-center">
                                             <span className="font-bold text-primary-color" style={{ fontSize: '0.95rem' }}>{v.total_os || 0}</span>
+                                        </td>
+                                        <td className="text-left">
+                                            <span className="font-bold" style={{ color: '#3b82f6' }}>
+                                                {formatMoney(v.total_faturado || 0)}
+                                            </span>
                                         </td>
                                         <td>
                                             {Number(v.os_abertas) > 0 ? (
