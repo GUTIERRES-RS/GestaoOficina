@@ -14,7 +14,6 @@ const Settings = () => {
     const navigate = useNavigate();
 
     const [activeTab, setActiveTab] = useState('workshop');
-    const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
     const [settings, setSettings] = useState(globalSettings);
 
@@ -52,18 +51,6 @@ const Settings = () => {
         navigate(`/configuracoes?tab=${tab}`);
     };
 
-    const fetchSettings = async () => {
-        try {
-            setLoading(true);
-            const res = await api.get('/settings');
-            setSettings(res.data);
-        } catch (error) {
-            console.error('Error fetching settings:', error);
-            toast.error('Erro ao carregar configurações.');
-        } finally {
-            setLoading(false);
-        }
-    };
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -80,7 +67,7 @@ const Settings = () => {
         try {
             setSaving(true);
             if (activeTab === 'profile') {
-                const res = await api.put(`/users/profile/${user.id}`, profileForm);
+                await api.put(`/users/profile/${user.id}`, profileForm);
                 updateAuthUser({ name: profileForm.name, email: profileForm.email });
                 setProfileForm(prev => ({ ...prev, password: '' })); // clear password
                 toast.success('Perfil atualizado com sucesso!');
@@ -117,14 +104,6 @@ const Settings = () => {
         }
     };
 
-    if (loading) {
-        return (
-            <div className="flex justify-center items-center h-64">
-                <Loader className="animate-spin text-accent-color" size={32} />
-                <span className="ml-2">Carregando configurações...</span>
-            </div>
-        );
-    }
 
     return (
         <div className="settings-container animation-fade-in">
@@ -481,6 +460,22 @@ const Settings = () => {
                                                     value={settings.next_os_number || ''}
                                                     onChange={handleChange}
                                                     placeholder="Contador OS"
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="form-group">
+                                            <label className="form-label">Registros por Página (Tabelas)</label>
+                                            <div className="form-input-wrapper">
+                                                <Monitor className="input-icon" size={18} />
+                                                <input
+                                                    type="number"
+                                                    name="items_per_page"
+                                                    className="form-control form-control-with-icon"
+                                                    value={settings.items_per_page || 10}
+                                                    onChange={handleChange}
+                                                    min="1"
+                                                    max="100"
+                                                    placeholder="Padrão: 10"
                                                 />
                                             </div>
                                         </div>

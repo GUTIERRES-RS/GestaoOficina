@@ -4,7 +4,6 @@ import TableEmptyState from '../../components/TableEmptyState';
 import { formatMoney } from '../../utils/format';
 
 const PartList = ({ 
-    inventory, 
     filteredInventory, 
     loading, 
     getStatusInfo,

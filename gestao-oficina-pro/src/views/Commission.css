@@ -26,7 +26,7 @@
     white-space: nowrap;
 }
 
-.period-tabs {
+.filter-tabs {
     display: flex;
     gap: 0.25rem;
     background: var(--bg-primary);
@@ -36,7 +36,7 @@
     flex-wrap: wrap;
 }
 
-.period-tab {
+.filter-tab {
     padding: 0.4rem 1rem;
     font-size: 0.8rem;
     font-weight: 500;
@@ -44,9 +44,10 @@
     color: var(--text-secondary);
     transition: all var(--transition-fast);
     white-space: nowrap;
+    background: transparent;
 }
 
-.period-tab.active {
+.filter-tab.active {
     background: var(--bg-secondary);
     color: var(--accent-color);
     box-shadow: var(--shadow-sm);

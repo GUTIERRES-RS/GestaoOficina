@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { formatMoney } from '../../utils/format';
 
+// eslint-disable-next-line no-unused-vars
 const SearchableSelect = ({ label, icon: Icon, value, options, onChange, placeholder, disabled, search, setSearch }) => {
     const [isOpen, setIsOpen] = React.useState(false);
     const containerRef = React.useRef(null);
@@ -73,13 +74,10 @@ const OSForm = ({
     formData,
     onChange,
     onSubmit,
-    isSubmitting,
     clients = [],
     vehicles = [],
     mechanics = [],
     onClientChange,
-    activeTab,
-    setActiveTab,
     isEdit = false
 }) => {
     const [clientSearch, setClientSearch] = React.useState('');

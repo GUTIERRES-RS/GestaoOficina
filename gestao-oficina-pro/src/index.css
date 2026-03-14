@@ -1099,3 +1099,52 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
   color: var(--text-secondary);
   font-size: 0.875rem;
 }
+/* Pagination Styles */
+.pagination-container {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  padding: 1.25rem 1.5rem !important;
+  border-top: 1px solid var(--border-color) !important;
+  margin-top: 0 !important;
+}
+
+.pagination-controls {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+}
+
+.btn-page {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-width: 2.25rem !important;
+  height: 2.25rem !important;
+  padding: 0 0.5rem !important;
+  border-radius: var(--radius-md) !important;
+  font-size: 0.875rem !important;
+  font-weight: 500 !important;
+  transition: all var(--transition-fast) !important;
+  background-color: var(--bg-secondary) !important;
+  border: 1px solid var(--border-color) !important;
+  color: var(--text-secondary) !important;
+}
+
+.btn-page:hover {
+  background-color: var(--bg-tertiary) !important;
+  color: var(--accent-color) !important;
+  border-color: var(--accent-color) !important;
+}
+
+.btn-page.active {
+  background-color: var(--accent-color) !important;
+  color: white !important;
+  border-color: var(--accent-color) !important;
+}
+
+.btn-page:disabled {
+  opacity: 0.5 !important;
+  cursor: not-allowed !important;
+}
+

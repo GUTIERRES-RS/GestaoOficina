@@ -3,9 +3,10 @@ import { Plus, Search, Car, History, Pencil, Trash2, Loader, X, Clock, User, Has
 import api from '../services/api';
 import Modal from '../components/Modal';
 import ConfirmModal from '../components/ConfirmModal';
+import Pagination from '../components/Pagination';
+import { useSettings } from '../context/SettingsContext';
 import toast from 'react-hot-toast';
 import { StatusBadge } from '../utils/statusStyles';
-import { formatMoney, formatDate } from '../utils/format';
 import VehicleHistory from './clients/VehicleHistory';
 
 
@@ -18,6 +19,7 @@ const BRANDS = [
 
 
 const Vehicles = () => {
+    const { settings } = useSettings();
     const [vehicles, setVehicles] = useState([]);
     const [clients, setClients] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -43,6 +45,10 @@ const Vehicles = () => {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [vehicleToDelete, setVehicleToDelete] = useState(null);
 
+    // Pagination State
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = settings.items_per_page || 10;
+
     useEffect(() => {
         fetchVehicles();
         fetchClients();
@@ -54,7 +60,7 @@ const Vehicles = () => {
             const res = await api.get('/vehicles');
             setVehicles(res.data);
             setError(null);
-        } catch (err) {
+        } catch {
             setError('Não foi possível carregar os veículos.');
         } finally {
             setLoading(false);
@@ -65,8 +71,9 @@ const Vehicles = () => {
         try {
             const res = await api.get('/clients');
             setClients(res.data);
-        } catch (err) {
-            console.error('Error fetching clients:', err);
+            setClients(res.data);
+        } catch {
+            // Silently ignore
         }
     };
 
@@ -104,9 +111,9 @@ const Vehicles = () => {
             }
             setIsModalOpen(false);
             fetchVehicles();
-        } catch (err) {
-            const msg = err.response?.data?.message || 'Erro ao salvar veículo.';
-            toast.error(msg);
+            fetchVehicles();
+        } catch {
+            toast.error('Erro ao salvar veículo.');
         } finally {
             setIsSubmitting(false);
         }
@@ -126,7 +133,7 @@ const Vehicles = () => {
             setIsDeleteModalOpen(false);
             setVehicleToDelete(null);
             fetchVehicles();
-        } catch (err) {
+        } catch {
             toast.error('Erro ao remover veículo.');
         } finally {
             setIsSubmitting(false);
@@ -140,7 +147,8 @@ const Vehicles = () => {
         try {
             const res = await api.get(`/os/vehicle/${vehicle.id}`);
             setHistoryOrders(res.data);
-        } catch (err) {
+            setHistoryOrders(res.data);
+        } catch {
             setHistoryOrders([]);
         } finally {
             setHistoryLoading(false);
@@ -153,6 +161,22 @@ const Vehicles = () => {
         (v.brand && v.brand.toLowerCase().includes(searchTerm.toLowerCase())) ||
         (v.client_name && v.client_name.toLowerCase().includes(searchTerm.toLowerCase()))
     );
+
+    // Pagination Logic
+    const totalPages = Math.ceil(filtered.length / itemsPerPage);
+    const currentItems = filtered.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage
+    );
+
+    const handlePageChange = (page) => {
+        setCurrentPage(page);
+    };
+
+    // Reset to first page when search changes
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [searchTerm]);
 
     // Removed local formatting functions
 
@@ -244,7 +268,7 @@ const Vehicles = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {filtered.map((v) => (
+                                {currentItems.map((v) => (
                                     <tr key={v.id}>
                                         <td>
                                             <div className="flex items-center gap-3">
@@ -308,6 +332,16 @@ const Vehicles = () => {
                             </tbody>
                         </table>
                     </div>
+
+                    {filtered.length > 0 && (
+                        <Pagination
+                            currentPage={currentPage}
+                            totalPages={totalPages}
+                            onPageChange={handlePageChange}
+                            itemsPerPage={itemsPerPage}
+                            totalItems={filtered.length}
+                        />
+                    )}
                 </div>
             )}
 

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Settings, Hash, Layers, Truck, AlignLeft, Package, AlertTriangle, DollarSign } from 'lucide-react';
 
-const PartForm = ({ formData, onChange, onSubmit, isSubmitting, isEditMode }) => {
+const PartForm = ({ formData, onChange, isEditMode }) => {
     return (
         <div className="space-y-6">
             <div>

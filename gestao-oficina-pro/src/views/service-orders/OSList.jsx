@@ -4,7 +4,7 @@ import { StatusBadge } from '../../utils/statusStyles';
 import TableEmptyState from '../../components/TableEmptyState';
 import { formatMoney, formatDate } from '../../utils/format';
 
-const OSList = ({ orders, loading, onView, onEdit, onPrint }) => {
+const OSList = ({ orders, loading, onEdit, onPrint }) => {
     if (loading) {
         return (
             <div className="flex justify-center items-center py-12">

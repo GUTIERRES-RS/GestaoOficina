@@ -7,6 +7,8 @@ import {
 import Modal from '../components/Modal';
 import ConfirmModal from '../components/ConfirmModal';
 import EmptyState from '../components/EmptyState';
+import Pagination from '../components/Pagination';
+import { useSettings } from '../context/SettingsContext';
 import toast from 'react-hot-toast';
 import api from '../services/api';
 import './Mechanics.css';
@@ -18,7 +20,8 @@ const emptyForm = {
     status: 'Ativo', hire_date: '', notes: '', email: ''
 };
 
-function Mechanics() {
+const Mechanics = () => { // Changed from function Mechanics() to const Mechanics = () =>
+    const { settings } = useSettings(); // Added useSettings hook
     const [mechanics, setMechanics] = useState([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
@@ -28,6 +31,10 @@ function Mechanics() {
     const [form, setForm] = useState(emptyForm);
     const [saving, setSaving] = useState(false);
     const [deleteConfirm, setDeleteConfirm] = useState(null);
+
+    // Pagination State
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = settings.items_per_page || 10; // Modified itemsPerPage to use settings
 
     const fetchMechanics = useCallback(async () => {
         setLoading(true);
@@ -49,6 +56,14 @@ function Mechanics() {
         const matchStatus = filterStatus === 'Todos' || m.status === filterStatus;
         return matchSearch && matchStatus;
     });
+
+    // Pagination Calculation
+    const totalPages = Math.ceil(filteredMechanics.length / itemsPerPage);
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    const currentItems = filteredMechanics.slice(indexOfFirstItem, indexOfLastItem);
+
+    const handlePageChange = (pageNumber) => setCurrentPage(pageNumber);
 
     const openCreate = () => {
         setForm(emptyForm);
@@ -213,7 +228,7 @@ function Mechanics() {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {filteredMechanics.map(m => (
+                                    {currentItems.map(m => (
                                         <tr key={m.id}>
                                             <td>
                                                 <div className="mechanic-name">
@@ -260,6 +275,16 @@ function Mechanics() {
                                 </tbody>
                             </table>
                         </div>
+                    )}
+
+                    {filteredMechanics.length > 0 && (
+                        <Pagination
+                            currentPage={currentPage}
+                            totalPages={totalPages}
+                            onPageChange={handlePageChange}
+                            itemsPerPage={itemsPerPage}
+                            totalItems={filteredMechanics.length}
+                        />
                     )}
                 </div>
             </div>

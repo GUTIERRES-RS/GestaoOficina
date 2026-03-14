@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
     Plus, Minus, ArrowUpRight, ArrowDownRight, DollarSign, Wallet,
-    MoreVertical, CreditCard, Loader, Filter, Calendar, Search,
+    MoreVertical, CreditCard, Loader, Filter, Calendar,
     TrendingUp, TrendingDown, Box, Landmark, BadgeDollarSign, Edit, Trash2,
     FileText, Layers, Activity
 } from 'lucide-react';
@@ -11,7 +11,10 @@ import ConfirmModal from '../components/ConfirmModal';
 import TableEmptyState from '../components/TableEmptyState';
 import toast from 'react-hot-toast';
 import { formatMoney, formatDate } from '../utils/format';
+
 import { getPeriodDates, PERIODS } from '../utils/date';
+import Pagination from '../components/Pagination';
+import { useSettings } from '../context/SettingsContext';
 import './Finances.css';
 
 const STATUS_LABELS = {
@@ -46,6 +49,11 @@ const Finances = () => {
     const [itemToDelete, setItemToDelete] = useState(null); // This will now store the whole object if possible, or just ID
     const [isSubmitting, setIsSubmitting] = useState(false);
 
+    // Pagination State
+    const { settings } = useSettings();
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = settings.items_per_page || 10;
+
     const fetchFinancialData = useCallback(async () => {
         try {
             setLoading(true);
@@ -61,8 +69,7 @@ const Finances = () => {
             setTransactions(transRes.data);
             setSummary(sumRes.data);
             setError(null);
-        } catch (err) {
-            console.error('Error fetching Finances:', err);
+        } catch {
             setError('Não foi possível carregar os dados financeiros.');
         } finally {
             setLoading(false);
@@ -72,6 +79,27 @@ const Finances = () => {
     useEffect(() => {
         fetchFinancialData();
     }, [fetchFinancialData]);
+
+    const filteredTransactions = transactions.filter(t => {
+        if (activeTab === 'todas') return true;
+        return t.type === activeTab;
+    });
+
+    // Pagination Logic
+    const totalPages = Math.ceil(filteredTransactions.length / itemsPerPage);
+    const currentItems = filteredTransactions.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage
+    );
+
+    const handlePageChange = (page) => {
+        setCurrentPage(page);
+    };
+
+    // Reset to first page when tab or period changes
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [activeTab, period, customStart, customEnd]);
 
     const handleOpenModal = (type) => {
         setModalType(type);
@@ -108,8 +136,7 @@ const Finances = () => {
             fetchFinancialData();
             setIsDeleteModalOpen(false);
             setItemToDelete(null);
-        } catch (err) {
-            console.error('Error deleting transaction:', err);
+        } catch {
             toast.error('Erro ao excluir transação.');
         } finally {
             setIsSubmitting(false);
@@ -126,8 +153,7 @@ const Finances = () => {
             });
             toast.success('Status atualizado!');
             fetchFinancialData();
-        } catch (err) {
-            console.error('Error toggling status:', err);
+        } catch {
             toast.error('Erro ao atualizar status.');
         }
     };
@@ -152,8 +178,7 @@ const Finances = () => {
             }
             setIsModalOpen(false);
             fetchFinancialData();
-        } catch (err) {
-            console.error('Error saving transaction:', err);
+        } catch {
             toast.error('Erro ao salvar transação.');
         } finally {
             setIsSubmitting(false);
@@ -292,15 +317,7 @@ const Finances = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {transactions.filter(item => {
-                                    if (activeTab === 'receber') return item.type === 'income';
-                                    if (activeTab === 'pagar') return item.type === 'expense';
-                                    return true;
-                                }).length > 0 ? transactions.filter(item => {
-                                    if (activeTab === 'receber') return item.type === 'income';
-                                    if (activeTab === 'pagar') return item.type === 'expense';
-                                    return true;
-                                }).map((item) => (
+                                {currentItems.length > 0 ? currentItems.map((item) => (
                                     <tr key={item.id}>
                                         <td>
                                             <div className="flex items-center gap-3">
@@ -345,10 +362,7 @@ const Finances = () => {
                                                 </button>
                                                 <button
                                                     className="btn-icon text-danger"
-                                                    onClick={() => {
-                                                        setItemToDelete(item);
-                                                        setIsDeleteModalOpen(true);
-                                                    }}
+                                                    onClick={() => handleDelete(item)}
                                                     title="Excluir"
                                                 >
                                                     <Trash2 size={15} />
@@ -367,6 +381,16 @@ const Finances = () => {
                         </table>
                     )}
                 </div>
+
+                {filteredTransactions.length > 0 && (
+                    <Pagination
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        onPageChange={handlePageChange}
+                        itemsPerPage={itemsPerPage}
+                        totalItems={filteredTransactions.length}
+                    />
+                )}
             </div>
 
             {/* Modal Nova Transação */}

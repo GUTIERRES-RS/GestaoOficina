@@ -19,7 +19,8 @@ export const SettingsProvider = ({ children }) => {
         workshop_address: '',
         workshop_document: '',
         theme: 'dark',
-        currency: 'BRL'
+        currency: 'BRL',
+        items_per_page: 10
     });
     const [loading, setLoading] = useState(true);
 

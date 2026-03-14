@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Search, Filter, ArrowUpCircle, ArrowDownCircle, Package, X, AlignLeft, Loader, Trash2 } from 'lucide-react';
+import { Plus, Search, Filter, Package, X, AlignLeft, Loader, Trash2, AlertTriangle } from 'lucide-react';
 import api from '../services/api';
 import Modal from '../components/Modal';
 import ConfirmModal from '../components/ConfirmModal';
 import toast from 'react-hot-toast';
-import { formatMoney } from '../utils/format';
+
+import Pagination from '../components/Pagination';
+import { useSettings } from '../context/SettingsContext';
 
 // Modular Components
 import PartList from './inventory/PartList';
@@ -40,6 +42,11 @@ const Inventory = () => {
     const [adjustmentType, setAdjustmentType] = useState('entrada'); // 'entrada' or 'saida'
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
+    // Pagination State
+    const { settings } = useSettings();
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = settings.items_per_page || 10;
+
 
     useEffect(() => {
         if (activeTab === 'catalogo') {
@@ -55,8 +62,7 @@ const Inventory = () => {
             const response = await api.get('/inventory/movements');
             setMovements(response.data);
             setError(null);
-        } catch (err) {
-            console.error('Error fetching movements:', err);
+        } catch {
             setError('Não foi possível carregar as movimentações.');
             setMovements([]);
         } finally {
@@ -70,8 +76,7 @@ const Inventory = () => {
             const response = await api.get('/inventory');
             setInventory(response.data);
             setError(null);
-        } catch (err) {
-            console.error('Error fetching inventory:', err);
+        } catch {
             setError('Não foi possível carregar o estoque.');
             setInventory([]);
         } finally {
@@ -116,10 +121,8 @@ const Inventory = () => {
             toast.success('Peça excluída com sucesso!');
             setIsDeleteModalOpen(false);
             fetchInventory();
-        } catch (err) {
-            console.error('Error deleting inventory item:', err);
-            const errorMsg = err.response?.data?.message || 'Erro ao excluir peça.';
-            toast.error(errorMsg);
+        } catch {
+            toast.error('Erro ao excluir peça.');
         } finally {
             setIsSubmitting(false);
         }
@@ -155,8 +158,7 @@ const Inventory = () => {
             }
             setIsModalOpen(false);
             fetchInventory();
-        } catch (err) {
-            console.error('Error saving inventory item:', err);
+        } catch {
             toast.error('Erro ao salvar peça.');
         } finally {
             setIsSubmitting(false);
@@ -174,8 +176,7 @@ const Inventory = () => {
             toast.success('Estoque atualizado com sucesso!');
             setIsAdjustmentModalOpen(false);
             fetchInventory();
-        } catch (err) {
-            console.error('Error adjusting stock:', err);
+        } catch {
             toast.error('Erro ao ajustar estoque.');
         } finally {
             setIsSubmitting(false);
@@ -195,6 +196,23 @@ const Inventory = () => {
         item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         (item.code && item.code.toLowerCase().includes(searchTerm.toLowerCase()))
     );
+
+    // Pagination Logic
+    const currentList = activeTab === 'catalogo' ? filteredInventory : movements;
+    const totalPages = Math.ceil(currentList.length / itemsPerPage);
+    const currentItems = currentList.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage
+    );
+
+    const handlePageChange = (page) => {
+        setCurrentPage(page);
+    };
+
+    // Reset to first page when filters or tabs change
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [searchTerm, activeTab]);
 
     const getStatusInfo = (stock, min) => {
         if (stock <= 0) return { label: 'esgotado', color: 'badge-danger' };
@@ -266,14 +284,24 @@ const Inventory = () => {
                             <p className="text-sm text-secondary">Gerenciamento de itens e disponibilidade</p>
                         </div>
                         <PartList
-                            inventory={inventory}
-                            filteredInventory={filteredInventory}
+                            inventory={currentItems}
+                            filteredInventory={currentItems}
                             loading={loading}
                             getStatusInfo={getStatusInfo}
                             onEdit={handleEdit}
                             onDelete={handleDelete}
                             onAdjustStock={handleAdjustStock}
                         />
+
+                        {filteredInventory.length > 0 && (
+                            <Pagination
+                                currentPage={currentPage}
+                                totalPages={totalPages}
+                                onPageChange={handlePageChange}
+                                itemsPerPage={itemsPerPage}
+                                totalItems={filteredInventory.length}
+                            />
+                        )}
                     </div>
                 </>
             )}
@@ -284,7 +312,17 @@ const Inventory = () => {
                         <h2 className="text-lg font-bold text-primary-color mb-1">Histórico de Movimentações</h2>
                         <p className="text-sm text-secondary">Registro de entradas e saídas do estoque</p>
                     </div>
-                    <MovementHistory movements={movements} loading={loading} />
+                    <MovementHistory movements={currentItems} loading={loading} />
+                    
+                    {movements.length > 0 && (
+                        <Pagination
+                            currentPage={currentPage}
+                            totalPages={totalPages}
+                            onPageChange={handlePageChange}
+                            itemsPerPage={itemsPerPage}
+                            totalItems={movements.length}
+                        />
+                    )}
                 </div>
             )}
 
@@ -307,7 +345,6 @@ const Inventory = () => {
                     <PartForm
                         formData={formData}
                         onChange={handleFormChange}
-                        isSubmitting={isSubmitting}
                         isEditMode={isEditMode}
                     />
                 </form>
@@ -351,7 +388,7 @@ const Inventory = () => {
 };
 
 // Internal component for Stock Adjustment
-const StockAdjustmentForm = ({ item, type, onSubmit, isSubmitting, onCancel }) => {
+const StockAdjustmentForm = ({ item, type, onSubmit }) => {
     const [quantity, setQuantity] = React.useState('');
     const [reason, setReason] = React.useState('');
 

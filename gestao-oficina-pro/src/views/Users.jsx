@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
     Plus, Pencil, Trash2, Search, X,
-    ShieldCheck, User, ShieldAlert, KeyRound, Info, Mail
+    ShieldCheck, User, ShieldAlert, KeyRound, Mail
 } from 'lucide-react';
 import Modal from '../components/Modal';
 import ConfirmModal from '../components/ConfirmModal';
 import EmptyState from '../components/EmptyState';
+import Pagination from '../components/Pagination';
+import { useSettings } from '../context/SettingsContext';
 import toast from 'react-hot-toast';
 import api from '../services/api';
 import './Users.css';
@@ -24,6 +26,11 @@ export default function Users() {
     const [form, setForm] = useState(emptyForm);
     const [saving, setSaving] = useState(false);
     const [deleteConfirm, setDeleteConfirm] = useState(null);
+
+    // Pagination State
+    const { settings } = useSettings();
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = settings.items_per_page || 10;
 
     const fetchUsers = useCallback(async () => {
         setLoading(true);
@@ -46,6 +53,22 @@ export default function Users() {
         const matchRole = filterRole === 'Todos' || u.role === filterRole;
         return matchSearch && matchRole;
     });
+
+    // Pagination Logic
+    const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
+    const currentItems = filteredUsers.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage
+    );
+
+    const handlePageChange = (page) => {
+        setCurrentPage(page);
+    };
+
+    // Reset to first page when filters change
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [search, filterRole]);
 
     const openCreate = () => {
         setForm(emptyForm);
@@ -213,7 +236,7 @@ export default function Users() {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {filteredUsers.map(u => (
+                                    {currentItems.map(u => (
                                         <tr key={u.id}>
                                             <td>
                                                 <div className="user-name">
@@ -246,6 +269,16 @@ export default function Users() {
                                 </tbody>
                             </table>
                         </div>
+                    )}
+
+                    {filteredUsers.length > 0 && (
+                        <Pagination
+                            currentPage={currentPage}
+                            totalPages={totalPages}
+                            onPageChange={handlePageChange}
+                            itemsPerPage={itemsPerPage}
+                            totalItems={filteredUsers.length}
+                        />
                     )}
                 </div>
             </div>

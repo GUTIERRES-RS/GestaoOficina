@@ -4,7 +4,7 @@ import EmptyState from '../../components/EmptyState';
 import { StatusBadge } from '../../utils/statusStyles';
 import { formatMoney, formatDate } from '../../utils/format';
 
-const VehicleHistory = ({ history, loading, vehicleName }) => {
+const VehicleHistory = ({ history, loading }) => {
     return (
         <div className="vehicle-history p-2">
             {loading ? (

@@ -5,6 +5,7 @@ import Modal from '../components/Modal';
 import toast from 'react-hot-toast';
 import { useSettings } from '../context/SettingsContext';
 import { getPeriodDates, PERIODS } from '../utils/date';
+import Pagination from '../components/Pagination';
 
 // Modular Components
 import OSList from './service-orders/OSList';
@@ -12,7 +13,6 @@ import OSForm from './service-orders/OSForm';
 import OSPrint from './service-orders/OSPrint';
 
 const ServiceOrders = () => {
-    const { settings } = useSettings();
     const [searchTerm, setSearchTerm] = useState('');
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -33,6 +33,11 @@ const ServiceOrders = () => {
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [selectedOS, setSelectedOS] = useState(null);
 
+    const { settings } = useSettings();
+
+    // Pagination State
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = settings.items_per_page || 10;
     const [formData, setFormData] = useState({
         client_id: '',
         vehicle_id: '',
@@ -76,7 +81,7 @@ const ServiceOrders = () => {
         fetchOrders();
     }, [period, customStart, customEnd]);
 
-    const fetchOrders = async () => {
+    const fetchOrders = useCallback(async () => {
         try {
             setLoading(true);
             const { start, end } = getDateRange();
@@ -87,13 +92,37 @@ const ServiceOrders = () => {
             const response = await api.get('/os', { params });
             setOrders(response.data);
             setError(null);
-        } catch (err) {
-            console.error('Error fetching Service Orders:', err);
+        } catch {
             setError('Não foi possível carregar as Ordens de Serviço.');
         } finally {
             setLoading(false);
         }
+    }, [getDateRange]);
+
+    // Filter Logic
+    const filteredOrders = orders.filter(os => {
+        const matchesSearch =
+            os.client_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            os.id?.toString().includes(searchTerm) ||
+            os.plate?.toLowerCase().includes(searchTerm.toLowerCase());
+        return matchesSearch;
+    });
+
+    // Pagination Logic
+    const totalPages = Math.ceil(filteredOrders.length / itemsPerPage);
+    const currentItems = filteredOrders.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage
+    );
+
+    const handlePageChange = (page) => {
+        setCurrentPage(page);
     };
+
+    // Reset to first page when search changes
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [searchTerm]);
 
     const handleOpenModal = async () => {
         setIsModalOpen(true);
@@ -142,8 +171,7 @@ const ServiceOrders = () => {
             toast.success('Ordem de Serviço aberta com sucesso!');
             setIsModalOpen(false);
             fetchOrders();
-        } catch (err) {
-            console.error('Error creating OS:', err);
+        } catch {
             toast.error('Erro ao abrir OS.');
         } finally {
             setIsSubmitting(false);
@@ -175,8 +203,7 @@ const ServiceOrders = () => {
             toast.success('Ordem de Serviço atualizada com sucesso!');
             setIsEditModalOpen(false);
             fetchOrders();
-        } catch (err) {
-            console.error('Error updating OS:', err);
+        } catch {
             toast.error('Erro ao atualizar OS.');
         } finally {
             setIsSubmitting(false);
@@ -190,11 +217,6 @@ const ServiceOrders = () => {
         }, 500);
     };
 
-    const filteredOrders = orders.filter(os =>
-        (os.client_name && os.client_name.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        (os.plate && os.plate.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        os.id.toString().includes(searchTerm)
-    );
 
     const handleFormChange = (updates) => {
         if (updates.cancel) {
@@ -287,11 +309,21 @@ const ServiceOrders = () => {
                     <p className="text-sm text-secondary">Acompanhamento de ordens de serviço em andamento</p>
                 </div>
                 <OSList
-                    orders={filteredOrders}
+                    orders={currentItems}
                     loading={loading}
                     onEdit={handleEditOS}
                     onPrint={handlePrintOS}
                 />
+
+                {filteredOrders.length > 0 && (
+                    <Pagination
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        onPageChange={handlePageChange}
+                        itemsPerPage={itemsPerPage}
+                        totalItems={filteredOrders.length}
+                    />
+                )}
             </div>
 
             <Modal 

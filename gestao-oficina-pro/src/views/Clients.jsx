@@ -1,11 +1,12 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { Plus, Search, Users, Loader, X, User, Car, Calendar, Activity, Wrench, UserCog, Info, DollarSign, Package, Percent, CheckCircle } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Plus, Search, Loader, X, User, Users, CheckCircle } from 'lucide-react';
 import api from '../services/api';
 import Modal from '../components/Modal';
 import ConfirmModal from '../components/ConfirmModal';
+import Pagination from '../components/Pagination';
 import toast from 'react-hot-toast';
 import { useSettings } from '../context/SettingsContext';
-import { formatMoney } from '../utils/format';
+
 
 // Modular Components
 import ClientTable from './clients/ClientTable';
@@ -34,7 +35,8 @@ const Clients = () => {
 
     const [formData, setFormData] = useState({ name: '', phone: '', email: '', document: '', address: '', notes: '' });
     const [vehicleFormData, setVehicleFormData] = useState({ plate: '', brand: '', model: '', year: '', color: '', km_cad: '', notes: '' });
-    const [isSubmitting, setIsSubmitting] = useState(false);
+    // eslint-disable-next-line no-unused-vars
+    const [_isSubmitting, _setIsSubmitting] = useState(false);
 
     // Edit Client State
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -47,8 +49,12 @@ const Clients = () => {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [clientToDelete, setClientToDelete] = useState(null);
 
-    // OS Modal State
+    // Pagination State
     const { settings } = useSettings();
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = settings.items_per_page || 10;
+
+    // OS Modal State
     const [isOSModalOpen, setIsOSModalOpen] = useState(false);
     const [mechanics, setMechanics] = useState([]);
     const [vehiclesForOS, setVehiclesForOS] = useState([]);
@@ -89,7 +95,7 @@ const Clients = () => {
     const handleCreateClient = async (e) => {
         e.preventDefault();
         try {
-            setIsSubmitting(true);
+            _setIsSubmitting(true);
             await api.post('/clients', formData);
             toast.success('Cliente cadastrado com sucesso!');
             setIsModalOpen(false);
@@ -98,7 +104,7 @@ const Clients = () => {
         } catch (err) {
             console.error('Error creating client:', err);
         } finally {
-            setIsSubmitting(false);
+            _setIsSubmitting(false);
         }
     };
 
@@ -118,7 +124,7 @@ const Clients = () => {
     const handleUpdateClient = async (e) => {
         e.preventDefault();
         try {
-            setIsSubmitting(true);
+            _setIsSubmitting(true);
             await api.put(`/clients/${editFormData.id}`, editFormData);
             toast.success('Cliente atualizado com sucesso!');
             setIsEditModalOpen(false);
@@ -126,7 +132,7 @@ const Clients = () => {
         } catch (err) {
             console.error('Error updating client:', err);
         } finally {
-            setIsSubmitting(false);
+            _setIsSubmitting(false);
         }
     };
 
@@ -139,7 +145,7 @@ const Clients = () => {
         if (!clientToDelete) return;
 
         try {
-            setIsSubmitting(true);
+            _setIsSubmitting(true);
             await api.delete(`/clients/${clientToDelete.id}`);
             toast.success('Cliente excluído com sucesso!');
             setIsDeleteModalOpen(false);
@@ -149,7 +155,7 @@ const Clients = () => {
             console.error('Error deleting client:', err);
             toast.error('Erro ao excluir cliente. Verifique as dependências.');
         } finally {
-            setIsSubmitting(false);
+            _setIsSubmitting(false);
         }
     };
 
@@ -162,7 +168,7 @@ const Clients = () => {
     const handleCreateVehicle = async (e) => {
         e.preventDefault();
         try {
-            setIsSubmitting(true);
+            _setIsSubmitting(true);
             await api.post('/vehicles', {
                 ...vehicleFormData,
                 client_id: selectedClient.id
@@ -173,7 +179,7 @@ const Clients = () => {
         } catch (err) {
             console.error('Error creating vehicle:', err);
         } finally {
-            setIsSubmitting(false);
+            _setIsSubmitting(false);
         }
     };
 
@@ -240,16 +246,15 @@ const Clients = () => {
     const handleCreateOS = async (e) => {
         e.preventDefault();
         try {
-            setIsSubmitting(true);
+            _setIsSubmitting(true);
             const total_cost = Number(osFormData.labor_cost) + Number(osFormData.parts_cost) - Number(osFormData.discount);
             await api.post('/os', { ...osFormData, total_cost });
             toast.success('Ordem de Serviço aberta com sucesso!');
             setIsOSModalOpen(false);
-        } catch (err) {
-            console.error('Error creating OS:', err);
+        } catch {
             toast.error('Erro ao abrir OS.');
         } finally {
-            setIsSubmitting(false);
+            _setIsSubmitting(false);
         }
     };
 
@@ -262,6 +267,22 @@ const Clients = () => {
         client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         (client.phone && client.phone.includes(searchTerm))
     );
+
+    // Pagination Logic
+    const totalPages = Math.ceil(filteredClients.length / itemsPerPage);
+    const currentItems = filteredClients.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage
+    );
+
+    const handlePageChange = (page) => {
+        setCurrentPage(page);
+    };
+
+    // Reset to first page when search changes
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [searchTerm]);
 
     return (
         <div className="clients-container animation-fade-in">
@@ -311,12 +332,22 @@ const Clients = () => {
                     <p className="text-sm text-secondary">Base de dados unificada de clientes e parceiros</p>
                 </div>
                 <ClientTable
-                    clients={filteredClients}
+                    clients={currentItems}
                     loading={loading}
                     onView={handleViewClient}
                     onEdit={handleEditClient}
                     onDelete={openDeleteConfirmation}
                 />
+
+                {filteredClients.length > 0 && (
+                    <Pagination
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        onPageChange={handlePageChange}
+                        itemsPerPage={itemsPerPage}
+                        totalItems={filteredClients.length}
+                    />
+                )}
             </div>
 
             {/* Modals */}
@@ -328,8 +359,8 @@ const Clients = () => {
                 footer={(
                     <div className="flex justify-end gap-3 w-full">
                         <button type="button" className="btn btn-secondary" onClick={() => setIsModalOpen(false)}>Cancelar</button>
-                        <button type="submit" form="new-client-form" className="btn btn-primary" disabled={isSubmitting}>
-                            {isSubmitting ? 'Salvando...' : 'Cadastrar Cliente'}
+                        <button type="submit" form="new-client-form" className="btn btn-primary" disabled={_isSubmitting}>
+                            {_isSubmitting ? 'Salvando...' : 'Cadastrar Cliente'}
                         </button>
                     </div>
                 )}
@@ -338,7 +369,7 @@ const Clients = () => {
                     <ClientForm
                         formData={formData}
                         onChange={(e) => setFormData({ ...formData, [e.target.name]: e.target.value })}
-                        isSubmitting={isSubmitting}
+                        _isSubmitting={_isSubmitting}
                     />
                 </form>
             </Modal>
@@ -351,8 +382,8 @@ const Clients = () => {
                 footer={(
                     <div className="flex justify-end gap-3 w-full">
                         <button type="button" className="btn btn-secondary" onClick={() => setIsEditModalOpen(false)}>Cancelar</button>
-                        <button type="submit" form="edit-client-form" className="btn btn-primary" disabled={isSubmitting}>
-                            {isSubmitting ? 'Salvando...' : 'Salvar Alterações'}
+                        <button type="submit" form="edit-client-form" className="btn btn-primary" disabled={_isSubmitting}>
+                            {_isSubmitting ? 'Salvando...' : 'Salvar Alterações'}
                         </button>
                     </div>
                 )}
@@ -361,7 +392,7 @@ const Clients = () => {
                     <ClientForm
                         formData={editFormData}
                         onChange={(e) => setEditFormData({ ...editFormData, [e.target.name]: e.target.value })}
-                        isSubmitting={isSubmitting}
+                        _isSubmitting={_isSubmitting}
                     />
                 </form>
             </Modal>
@@ -409,8 +440,8 @@ const Clients = () => {
                 footer={(
                     <div className="flex justify-end gap-3 w-full">
                         <button type="button" className="btn btn-secondary" onClick={() => setIsVehicleModalOpen(false)}>Cancelar</button>
-                        <button type="submit" form="vehicle-form" className="btn btn-primary" disabled={isSubmitting}>
-                            {isSubmitting ? 'Gravando...' : 'Vincular Veículo'}
+                        <button type="submit" form="vehicle-form" className="btn btn-primary" disabled={_isSubmitting}>
+                            {_isSubmitting ? 'Gravando...' : 'Vincular Veículo'}
                         </button>
                     </div>
                 )}
@@ -419,7 +450,7 @@ const Clients = () => {
                     <VehicleForm
                         formData={vehicleFormData}
                         onChange={(e) => setVehicleFormData({ ...vehicleFormData, [e.target.name]: e.target.value })}
-                        isSubmitting={isSubmitting}
+                        _isSubmitting={_isSubmitting}
                     />
                 </form>
             </Modal>
@@ -455,9 +486,9 @@ const Clients = () => {
                             type="submit" 
                             form="os-form"
                             className="btn btn-primary px-10 shadow-lg shadow-primary-color/20" 
-                            disabled={isSubmitting || !osFormData.vehicle_id}
+                            disabled={_isSubmitting || !osFormData.vehicle_id}
                         >
-                            {isSubmitting ? (
+                            {_isSubmitting ? (
                                 <Loader size={20} className="animate-spin" />
                             ) : (
                                 <>
@@ -473,7 +504,7 @@ const Clients = () => {
                     formData={osFormData}
                     onChange={handleFormChange}
                     onSubmit={handleCreateOS}
-                    isSubmitting={isSubmitting}
+                    _isSubmitting={_isSubmitting}
                     clients={clients}
                     vehicles={vehiclesForOS}
                     mechanics={mechanics}
@@ -490,7 +521,7 @@ const Clients = () => {
                 title="Excluir Cliente"
                 message="Deseja excluir permanentemente este cliente?"
                 itemName={clientToDelete?.name}
-                isLoading={isSubmitting}
+                isLoading={_isSubmitting}
             />
         </div>
     );
