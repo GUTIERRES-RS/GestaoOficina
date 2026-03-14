@@ -1,5 +1,5 @@
 import React from 'react';
-import { Loader, Clock, Eye, Pencil, Printer } from 'lucide-react';
+import { Loader, Clock, Pencil, Printer, Calendar } from 'lucide-react';
 import { StatusBadge } from '../../utils/statusStyles';
 import TableEmptyState from '../../components/TableEmptyState';
 import { formatMoney, formatDate } from '../../utils/format';
@@ -22,6 +22,7 @@ const OSList = ({ orders, loading, onView, onEdit, onPrint }) => {
                         <th>Nº OS</th>
                         <th>Cliente / Veículo</th>
                         <th>Data Abertura</th>
+                        <th>Data Entrega</th>
                         <th>Status</th>
                         <th>Mecânico</th>
                         <th>Valor Total</th>
@@ -43,6 +44,15 @@ const OSList = ({ orders, loading, onView, onEdit, onPrint }) => {
                                     <Clock size={14} /> {formatDate(os.created_at)}
                                 </div>
                             </td>
+                            <td className="text-secondary text-sm">
+                                {os.expected_delivery_date ? (
+                                    <div className="flex items-center gap-1">
+                                        <Calendar size={14} /> {formatDate(os.expected_delivery_date)}
+                                    </div>
+                                ) : (
+                                    <span className="opacity-50">--</span>
+                                )}
+                            </td>
                             <td>
                                 <StatusBadge status={os.status} />
                             </td>
@@ -50,9 +60,6 @@ const OSList = ({ orders, loading, onView, onEdit, onPrint }) => {
                             <td className="font-semibold">{formatMoney(os.total_cost)}</td>
                             <td className="text-right">
                                 <div className="action-buttons justify-end">
-                                    <button className="btn-icon btn-view" title="Visualizar" onClick={() => onView(os)}>
-                                        <Eye size={15} />
-                                    </button>
                                     <button className="btn-icon btn-edit" title="Editar" onClick={() => onEdit(os)}>
                                         <Pencil size={15} />
                                     </button>
@@ -64,7 +71,7 @@ const OSList = ({ orders, loading, onView, onEdit, onPrint }) => {
                         </tr>
                     )) : (
                         <TableEmptyState
-                            colSpan={7}
+                            colSpan={8}
                             icon={Clock}
                             message="Nenhuma ordem de serviço encontrada."
                         />

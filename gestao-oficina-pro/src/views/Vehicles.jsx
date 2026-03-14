@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Plus, Search, Car, History, Pencil, Trash2, Loader, X, Clock, User, Hash, Calendar, Layers, Disc, Activity, AlignLeft } from 'lucide-react';
 import api from '../services/api';
 import Modal from '../components/Modal';
+import ConfirmModal from '../components/ConfirmModal';
 import toast from 'react-hot-toast';
 import { StatusBadge } from '../utils/statusStyles';
 import { formatMoney, formatDate } from '../utils/format';
@@ -37,6 +38,10 @@ const Vehicles = () => {
     const [historyVehicle, setHistoryVehicle] = useState(null);
     const [historyOrders, setHistoryOrders] = useState([]);
     const [historyLoading, setHistoryLoading] = useState(false);
+
+    // Delete Modal
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [vehicleToDelete, setVehicleToDelete] = useState(null);
 
     useEffect(() => {
         fetchVehicles();
@@ -107,14 +112,24 @@ const Vehicles = () => {
         }
     };
 
-    const handleDelete = async (vehicle) => {
-        if (!window.confirm(`Remover o veículo ${vehicle.plate} (${vehicle.model})?`)) return;
+    const openDeleteConfirmation = (vehicle) => {
+        setVehicleToDelete(vehicle);
+        setIsDeleteModalOpen(true);
+    };
+
+    const handleDelete = async () => {
+        if (!vehicleToDelete) return;
         try {
-            await api.delete(`/vehicles/${vehicle.id}`);
-            toast.success('Veículo removido.');
+            setIsSubmitting(true);
+            await api.delete(`/vehicles/${vehicleToDelete.id}`);
+            toast.success('Veículo removido com sucesso!');
+            setIsDeleteModalOpen(false);
+            setVehicleToDelete(null);
             fetchVehicles();
         } catch (err) {
             toast.error('Erro ao remover veículo.');
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -282,7 +297,7 @@ const Vehicles = () => {
                                                 <button
                                                     className="btn-icon btn-del"
                                                     title="Remover"
-                                                    onClick={() => handleDelete(v)}
+                                                    onClick={() => openDeleteConfirmation(v)}
                                                 >
                                                     <Trash2 size={15} />
                                                 </button>
@@ -301,143 +316,159 @@ const Vehicles = () => {
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
                 title={editingVehicle ? `Editar Veículo — ${editingVehicle.plate}` : 'Cadastrar Novo Veículo'}
-            >
-                <form onSubmit={handleSubmit}>
-                    <div className="form-group">
-                        <label className="form-label">Proprietário (Cliente) *</label>
-                        <div className="form-input-wrapper">
-                            <User className="input-icon" size={18} />
-                            <select
-                                className="form-control form-control-with-icon"
-                                required
-                                value={formData.client_id}
-                                onChange={(e) => setFormData({ ...formData, client_id: e.target.value })}
-                                disabled={!!editingVehicle}
-                            >
-                                <option value="">Selecione o cliente...</option>
-                                {clients.map(c => (
-                                    <option key={c.id} value={c.id}>{c.name}</option>
-                                ))}
-                            </select>
-                        </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="form-group">
-                            <label className="form-label">Placa *</label>
-                            <div className="form-input-wrapper">
-                                <Hash className="input-icon" size={18} />
-                                <input
-                                    type="text"
-                                    className="form-control form-control-with-icon"
-                                    placeholder="ABC-1234 ou ABC1D23"
-                                    required
-                                    value={formData.plate}
-                                    onChange={(e) => setFormData({ ...formData, plate: e.target.value.toUpperCase() })}
-                                    maxLength={8}
-                                />
-                            </div>
-                        </div>
-                        <div className="form-group">
-                            <label className="form-label">Ano</label>
-                            <div className="form-input-wrapper">
-                                <Calendar className="input-icon" size={18} />
-                                <input
-                                    type="number"
-                                    className="form-control form-control-with-icon"
-                                    placeholder="Ex: 2020"
-                                    min="1960"
-                                    max="2030"
-                                    value={formData.year}
-                                    onChange={(e) => setFormData({ ...formData, year: e.target.value })}
-                                />
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="form-group">
-                            <label className="form-label">Marca *</label>
-                            <div className="form-input-wrapper">
-                                <Car className="input-icon" size={18} />
-                                <select
-                                    className="form-control form-control-with-icon"
-                                    required
-                                    value={formData.brand}
-                                    onChange={(e) => setFormData({ ...formData, brand: e.target.value })}
-                                >
-                                    <option value="">Selecione...</option>
-                                    {BRANDS.map(b => <option key={b} value={b}>{b}</option>)}
-                                </select>
-                            </div>
-                        </div>
-                        <div className="form-group">
-                            <label className="form-label">Modelo *</label>
-                            <div className="form-input-wrapper">
-                                <Layers className="input-icon" size={18} />
-                                <input
-                                    type="text"
-                                    className="form-control form-control-with-icon"
-                                    placeholder="Ex: Gol, Civic, Corolla..."
-                                    required
-                                    value={formData.model}
-                                    onChange={(e) => setFormData({ ...formData, model: e.target.value })}
-                                />
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="form-group">
-                            <label className="form-label">Cor</label>
-                            <div className="form-input-wrapper">
-                                <Disc className="input-icon" size={18} />
-                                <input
-                                    type="text"
-                                    className="form-control form-control-with-icon"
-                                    placeholder="Ex: Prata"
-                                    value={formData.color}
-                                    onChange={(e) => setFormData({ ...formData, color: e.target.value })}
-                                />
-                            </div>
-                        </div>
-                        <div className="form-group">
-                            <label className="form-label">KM no Cadastro</label>
-                            <div className="form-input-wrapper">
-                                <Activity className="input-icon" size={18} />
-                                <input
-                                    type="number"
-                                    className="form-control form-control-with-icon"
-                                    placeholder="Ex: 45000"
-                                    min="0"
-                                    value={formData.km_cad}
-                                    onChange={(e) => setFormData({ ...formData, km_cad: e.target.value })}
-                                />
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="form-group">
-                        <label className="form-label">Observações</label>
-                        <div className="form-input-wrapper items-start">
-                            <AlignLeft className="input-icon mt-3" size={18} />
-                            <textarea
-                                className="form-control form-control-with-icon"
-                                rows="2"
-                                placeholder="Observações sobre o veículo..."
-                                value={formData.notes}
-                                onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                            />
-                        </div>
-                    </div>
-
-                    <div className="flex justify-end gap-3 mt-6 pt-4" style={{ borderTop: '1px solid var(--border-color)' }}>
+                size="large"
+                footer={(
+                    <div className="flex justify-end gap-3 w-full">
                         <button type="button" className="btn btn-secondary" onClick={() => setIsModalOpen(false)}>
                             Cancelar
                         </button>
-                        <button type="submit" className="btn btn-primary" disabled={isSubmitting}>
+                        <button type="submit" form="vehicle-form" className="btn btn-primary" disabled={isSubmitting}>
                             {isSubmitting ? <Loader className="animate-spin" size={16} /> : (editingVehicle ? 'Salvar Alterações' : 'Cadastrar Veículo')}
                         </button>
+                    </div>
+                )}
+            >
+                <form id="vehicle-form" onSubmit={handleSubmit}>
+                    <div className="space-y-4">
+                        <div className="flex items-center gap-2 mb-3">
+                            <Car className="text-primary-color" size={20} />
+                            <h3 className="font-bold text-lg">1. Informações do Veículo</h3>
+                        </div>
+
+                        <div className="form-group">
+                            <label className="form-label">Proprietário (Cliente) *</label>
+                            <div className="form-input-wrapper">
+                                <User className="input-icon" size={18} />
+                                <select
+                                    className="form-control form-control-with-icon"
+                                    required
+                                    value={formData.client_id}
+                                    onChange={(e) => setFormData({ ...formData, client_id: e.target.value })}
+                                    disabled={!!editingVehicle}
+                                >
+                                    <option value="">Selecione o cliente...</option>
+                                    {clients.map(c => (
+                                        <option key={c.id} value={c.id}>{c.name}</option>
+                                    ))}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                            <div className="form-group">
+                                <label className="form-label">Placa *</label>
+                                <div className="form-input-wrapper">
+                                    <Hash className="input-icon" size={18} />
+                                    <input
+                                        type="text"
+                                        className="form-control form-control-with-icon"
+                                        placeholder="ABC-1234 ou ABC1D23"
+                                        required
+                                        value={formData.plate}
+                                        onChange={(e) => setFormData({ ...formData, plate: e.target.value.toUpperCase() })}
+                                        maxLength={8}
+                                    />
+                                </div>
+                            </div>
+                            <div className="form-group">
+                                <label className="form-label">Ano</label>
+                                <div className="form-input-wrapper">
+                                    <Calendar className="input-icon" size={18} />
+                                    <input
+                                        type="number"
+                                        className="form-control form-control-with-icon"
+                                        placeholder="Ex: 2020"
+                                        min="1960"
+                                        max="2030"
+                                        value={formData.year}
+                                        onChange={(e) => setFormData({ ...formData, year: e.target.value })}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                            <div className="form-group">
+                                <label className="form-label">Marca *</label>
+                                <div className="form-input-wrapper">
+                                    <Car className="input-icon" size={18} />
+                                    <select
+                                        className="form-control form-control-with-icon"
+                                        required
+                                        value={formData.brand}
+                                        onChange={(e) => setFormData({ ...formData, brand: e.target.value })}
+                                    >
+                                        <option value="">Selecione...</option>
+                                        {BRANDS.map(b => <option key={b} value={b}>{b}</option>)}
+                                    </select>
+                                </div>
+                            </div>
+                            <div className="form-group">
+                                <label className="form-label">Modelo *</label>
+                                <div className="form-input-wrapper">
+                                    <Layers className="input-icon" size={18} />
+                                    <input
+                                        type="text"
+                                        className="form-control form-control-with-icon"
+                                        placeholder="Ex: Gol, Civic, Corolla..."
+                                        required
+                                        value={formData.model}
+                                        onChange={(e) => setFormData({ ...formData, model: e.target.value })}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="space-y-4 mt-8">
+                        <div className="flex items-center gap-2 mb-3">
+                            <Activity className="text-primary-color" size={20} />
+                            <h3 className="font-bold text-lg">2. Detalhes e Observações</h3>
+                        </div>
+
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                            <div className="form-group">
+                                <label className="form-label">Cor</label>
+                                <div className="form-input-wrapper">
+                                    <Disc className="input-icon" size={18} />
+                                    <input
+                                        type="text"
+                                        className="form-control form-control-with-icon"
+                                        placeholder="Ex: Prata"
+                                        value={formData.color}
+                                        onChange={(e) => setFormData({ ...formData, color: e.target.value })}
+                                    />
+                                </div>
+                            </div>
+                            <div className="form-group">
+                                <label className="form-label">KM no Cadastro</label>
+                                <div className="form-input-wrapper">
+                                    <Activity className="input-icon" size={18} />
+                                    <input
+                                        type="number"
+                                        className="form-control form-control-with-icon"
+                                        placeholder="Ex: 45000"
+                                        min="0"
+                                        value={formData.km_cad}
+                                        onChange={(e) => setFormData({ ...formData, km_cad: e.target.value })}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="form-group">
+                            <label className="form-label">Observações</label>
+                            <div className="form-input-wrapper items-start">
+                                <AlignLeft className="input-icon mt-3" size={18} />
+                                <textarea
+                                    className="form-control form-control-with-icon"
+                                    rows="3"
+                                    placeholder="Observações adicionais sobre o estado do veículo ou histórico..."
+                                    value={formData.notes}
+                                    onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                                />
+                            </div>
+                        </div>
                     </div>
                 </form>
             </Modal>
@@ -455,6 +486,17 @@ const Vehicles = () => {
                     vehicleName={historyVehicle ? `${historyVehicle.model} (${historyVehicle.plate})` : ''}
                 />
             </Modal>
+
+            {/* Modal de Confirmação de Exclusão */}
+            <ConfirmModal
+                isOpen={isDeleteModalOpen}
+                onClose={() => setIsDeleteModalOpen(false)}
+                onConfirm={handleDelete}
+                title="Excluir Veículo"
+                message="Deseja remover permanentemente este veículo?"
+                itemName={vehicleToDelete ? `${vehicleToDelete.brand} ${vehicleToDelete.model} (${vehicleToDelete.plate})` : ''}
+                isLoading={isSubmitting}
+            />
         </div>
     );
 };

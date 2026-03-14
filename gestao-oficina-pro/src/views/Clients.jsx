@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Plus, Search, Users, Loader, X, User, Car, Calendar, Activity, Wrench, UserCog, Info, DollarSign, Package, Percent } from 'lucide-react';
+import { Plus, Search, Users, Loader, X, User, Car, Calendar, Activity, Wrench, UserCog, Info, DollarSign, Package, Percent, CheckCircle } from 'lucide-react';
 import api from '../services/api';
 import Modal from '../components/Modal';
+import ConfirmModal from '../components/ConfirmModal';
 import toast from 'react-hot-toast';
 import { useSettings } from '../context/SettingsContext';
 import { formatMoney } from '../utils/format';
@@ -12,6 +13,7 @@ import ClientForm from './clients/ClientForm';
 import ClientDetails from './clients/ClientDetails';
 import VehicleForm from './clients/VehicleForm';
 import VehicleHistory from './clients/VehicleHistory';
+import OSForm from './service-orders/OSForm';
 
 import './Clients.css';
 
@@ -41,10 +43,13 @@ const Clients = () => {
     // View Client State
     const [isViewModalOpen, setIsViewModalOpen] = useState(false);
 
+    // Delete Modal State
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [clientToDelete, setClientToDelete] = useState(null);
+
     // OS Modal State
     const { settings } = useSettings();
     const [isOSModalOpen, setIsOSModalOpen] = useState(false);
-    const [osActiveTab, setOsActiveTab] = useState('orcamento');
     const [mechanics, setMechanics] = useState([]);
     const [vehiclesForOS, setVehiclesForOS] = useState([]);
     const [osFormData, setOsFormData] = useState({
@@ -125,16 +130,26 @@ const Clients = () => {
         }
     };
 
-    const handleDeleteClient = async (id) => {
-        if (window.confirm('Tem certeza que deseja excluir este cliente? Essa ação não pode ser desfeita e removerá veículos e OS associados se houver cascata.')) {
-            try {
-                await api.delete(`/clients/${id}`);
-                toast.success('Cliente excluído com sucesso!');
-                fetchClients();
-            } catch (err) {
-                console.error('Error deleting client:', err);
-                toast.error('Erro ao excluir cliente. Verifique as dependências.');
-            }
+    const openDeleteConfirmation = (client) => {
+        setClientToDelete(client);
+        setIsDeleteModalOpen(true);
+    };
+
+    const handleDeleteClient = async () => {
+        if (!clientToDelete) return;
+
+        try {
+            setIsSubmitting(true);
+            await api.delete(`/clients/${clientToDelete.id}`);
+            toast.success('Cliente excluído com sucesso!');
+            setIsDeleteModalOpen(false);
+            setClientToDelete(null);
+            fetchClients();
+        } catch (err) {
+            console.error('Error deleting client:', err);
+            toast.error('Erro ao excluir cliente. Verifique as dependências.');
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -187,10 +202,12 @@ const Clients = () => {
     };
 
     const handleOpenOSModal = async (client, vehicle) => {
-        setOsActiveTab('orcamento');
         setOsFormData({
             client_id: client.id,
+            client_name: client.name,
             vehicle_id: vehicle.id,
+            vehicle_model: vehicle.model,
+            plate: vehicle.plate,
             mechanic_id: '',
             mechanic_name: '',
             problem_reported: '',
@@ -205,7 +222,19 @@ const Clients = () => {
         });
         setVehiclesForOS(client.vehicles || [vehicle]);
         setIsOSModalOpen(true);
-        fetchMechanics();
+        
+        // Fetch mechanics if not already fetched
+        if (mechanics.length === 0) {
+            fetchMechanics();
+        }
+    };
+
+    const handleFormChange = (updates) => {
+        if (updates.cancel) {
+            setIsOSModalOpen(false);
+            return;
+        }
+        setOsFormData(prev => ({ ...prev, ...updates }));
     };
 
     const handleCreateOS = async (e) => {
@@ -286,35 +315,84 @@ const Clients = () => {
                     loading={loading}
                     onView={handleViewClient}
                     onEdit={handleEditClient}
-                    onDelete={handleDeleteClient}
+                    onDelete={openDeleteConfirmation}
                 />
             </div>
 
             {/* Modals */}
-            <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Novo Cliente">
-                <ClientForm
-                    formData={formData}
-                    onChange={(e) => setFormData({ ...formData, [e.target.name]: e.target.value })}
-                    onSubmit={handleCreateClient}
-                    isSubmitting={isSubmitting}
-                    title="Novo Cliente"
-                />
+            <Modal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                title="Novo Cliente"
+                size="large"
+                footer={(
+                    <div className="flex justify-end gap-3 w-full">
+                        <button type="button" className="btn btn-secondary" onClick={() => setIsModalOpen(false)}>Cancelar</button>
+                        <button type="submit" form="new-client-form" className="btn btn-primary" disabled={isSubmitting}>
+                            {isSubmitting ? 'Salvando...' : 'Cadastrar Cliente'}
+                        </button>
+                    </div>
+                )}
+            >
+                <form id="new-client-form" onSubmit={handleCreateClient}>
+                    <ClientForm
+                        formData={formData}
+                        onChange={(e) => setFormData({ ...formData, [e.target.name]: e.target.value })}
+                        isSubmitting={isSubmitting}
+                    />
+                </form>
             </Modal>
 
-            <Modal isOpen={isEditModalOpen} onClose={() => setIsEditModalOpen(false)} title="Editar Cliente">
-                <ClientForm
-                    formData={editFormData}
-                    onChange={(e) => setEditFormData({ ...editFormData, [e.target.name]: e.target.value })}
-                    onSubmit={handleUpdateClient}
-                    isSubmitting={isSubmitting}
-                    title="Editar Cliente"
-                />
+            <Modal
+                isOpen={isEditModalOpen}
+                onClose={() => setIsEditModalOpen(false)}
+                title="Editar Cliente"
+                size="large"
+                footer={(
+                    <div className="flex justify-end gap-3 w-full">
+                        <button type="button" className="btn btn-secondary" onClick={() => setIsEditModalOpen(false)}>Cancelar</button>
+                        <button type="submit" form="edit-client-form" className="btn btn-primary" disabled={isSubmitting}>
+                            {isSubmitting ? 'Salvando...' : 'Salvar Alterações'}
+                        </button>
+                    </div>
+                )}
+            >
+                <form id="edit-client-form" onSubmit={handleUpdateClient}>
+                    <ClientForm
+                        formData={editFormData}
+                        onChange={(e) => setEditFormData({ ...editFormData, [e.target.name]: e.target.value })}
+                        isSubmitting={isSubmitting}
+                    />
+                </form>
             </Modal>
 
-            <Modal isOpen={isViewModalOpen} onClose={() => setIsViewModalOpen(false)} title="Detalhes do Cliente" size="large">
+            <Modal 
+                isOpen={isViewModalOpen} 
+                onClose={() => setIsViewModalOpen(false)} 
+                title="Detalhes do Cliente" 
+                size="large"
+                footer={(
+                    <div className="flex justify-end gap-3 w-full">
+                        <button 
+                            type="button" 
+                            className="btn btn-secondary px-6" 
+                            onClick={() => setIsViewModalOpen(false)}
+                        >
+                            Fechar
+                        </button>
+                        <button 
+                            className="btn btn-primary flex items-center gap-2 px-8" 
+                            onClick={() => {
+                                handleOpenVehicleModal(selectedClient);
+                            }}
+                        >
+                            <Plus size={18} /> Vincular Novo Veículo
+                        </button>
+                    </div>
+                )}
+            >
                 <ClientDetails
                     client={selectedClient}
-                    onAddVehicle={handleOpenVehicleModal}
                     onViewHistory={(v) => {
                         setIsViewModalOpen(false);
                         handleOpenVehicleHistory(v);
@@ -323,13 +401,27 @@ const Clients = () => {
                 />
             </Modal>
 
-            <Modal isOpen={isVehicleModalOpen} onClose={() => setIsVehicleModalOpen(false)} title="Vincular Novo Veículo">
-                <VehicleForm
-                    formData={vehicleFormData}
-                    onChange={(e) => setVehicleFormData({ ...vehicleFormData, [e.target.name]: e.target.value })}
-                    onSubmit={handleCreateVehicle}
-                    isSubmitting={isSubmitting}
-                />
+            <Modal
+                isOpen={isVehicleModalOpen}
+                onClose={() => setIsVehicleModalOpen(false)}
+                title="Vincular Novo Veículo"
+                size="large"
+                footer={(
+                    <div className="flex justify-end gap-3 w-full">
+                        <button type="button" className="btn btn-secondary" onClick={() => setIsVehicleModalOpen(false)}>Cancelar</button>
+                        <button type="submit" form="vehicle-form" className="btn btn-primary" disabled={isSubmitting}>
+                            {isSubmitting ? 'Gravando...' : 'Vincular Veículo'}
+                        </button>
+                    </div>
+                )}
+            >
+                <form id="vehicle-form" onSubmit={handleCreateVehicle}>
+                    <VehicleForm
+                        formData={vehicleFormData}
+                        onChange={(e) => setVehicleFormData({ ...vehicleFormData, [e.target.name]: e.target.value })}
+                        isSubmitting={isSubmitting}
+                    />
+                </form>
             </Modal>
 
             <Modal
@@ -345,211 +437,61 @@ const Clients = () => {
             </Modal>
 
             {/* Modal Nova OS Integrado */}
-            <Modal isOpen={isOSModalOpen} onClose={() => setIsOSModalOpen(false)} title="Abrir Nova Ordem de Serviço">
-                <form onSubmit={handleCreateOS}>
-                    {/* Tabs Nav */}
-                    <div className="tab-container mb-4">
-                        <button type="button" className={`tab-button ${osActiveTab === 'orcamento' ? 'active' : ''}`} onClick={() => setOsActiveTab('orcamento')}>1. Cadastro</button>
-                        <button type="button" className={`tab-button ${osActiveTab === 'servicos' ? 'active' : ''}`} onClick={() => setOsActiveTab('servicos')}>2. Serviço</button>
-                        <button type="button" className={`tab-button ${osActiveTab === 'financeiro' ? 'active' : ''}`} onClick={() => setOsActiveTab('financeiro')}>3. Fechamento</button>
-                    </div>
-
-                    {osActiveTab === 'orcamento' && (
-                        <div className="space-y-4">
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="form-group">
-                                    <label className="form-label">Cliente *</label>
-                                    <div className="form-input-wrapper">
-                                        <User className="input-icon" size={18} />
-                                        <input
-                                            type="text"
-                                            className="form-control form-control-with-icon bg-slate-50 cursor-not-allowed"
-                                            value={selectedClient?.name || ''}
-                                            readOnly
-                                        />
-                                    </div>
-                                </div>
-                                <div className="form-group">
-                                    <label className="form-label">Veículo do Cliente *</label>
-                                    <div className="form-input-wrapper">
-                                        <Car className="input-icon" size={18} />
-                                        <select
-                                            className="form-control form-control-with-icon"
-                                            required
-                                            value={osFormData.vehicle_id}
-                                            onChange={(e) => setOsFormData({ ...osFormData, vehicle_id: e.target.value })}
-                                        >
-                                            <option value="">Selecione...</option>
-                                            {vehiclesForOS.map(v => (
-                                                <option key={v.id} value={v.id}>{v.model} ({v.plate})</option>
-                                            ))}
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="form-group">
-                                <label className="form-label">Data Prevista de Entrega</label>
-                                <div className="form-input-wrapper">
-                                    <Calendar className="input-icon" size={18} />
-                                    <input
-                                        type="date"
-                                        className="form-control form-control-with-icon"
-                                        value={osFormData.expected_delivery_date}
-                                        onChange={(e) => setOsFormData({ ...osFormData, expected_delivery_date: e.target.value })}
-                                    />
-                                </div>
-                            </div>
-                            <div className="form-group">
-                                <label className="form-label">KM na Entrada do Veículo</label>
-                                <div className="form-input-wrapper">
-                                    <Activity className="input-icon" size={18} />
-                                    <input
-                                        type="number"
-                                        min="0"
-                                        className="form-control form-control-with-icon"
-                                        placeholder="Ex: 45000"
-                                        value={osFormData.vehicle_km || ''}
-                                        onChange={(e) => setOsFormData({ ...osFormData, vehicle_km: e.target.value })}
-                                    />
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
-                    {osActiveTab === 'servicos' && (
-                        <div className="space-y-4">
-                            <div className="form-group">
-                                <label className="form-label">Serviço Solicitado / Problema *</label>
-                                <div className="form-input-wrapper items-start">
-                                    <Wrench className="input-icon mt-3" size={18} />
-                                    <textarea
-                                        className="form-control form-control-with-icon"
-                                        rows="4"
-                                        placeholder="Descreva o que o cliente relatou..."
-                                        required
-                                        value={osFormData.problem_reported}
-                                        onChange={(e) => setOsFormData({ ...osFormData, problem_reported: e.target.value })}
-                                    ></textarea>
-                                </div>
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="form-group">
-                                    <label className="form-label">Mecânico Responsável</label>
-                                    <div className="form-input-wrapper">
-                                        <UserCog className="input-icon" size={18} />
-                                        <select
-                                            className="form-control form-control-with-icon"
-                                            value={osFormData.mechanic_id}
-                                            onChange={(e) => {
-                                                const mech = mechanics.find(m => String(m.id) === e.target.value);
-                                                setOsFormData({ ...osFormData, mechanic_id: e.target.value, mechanic_name: mech ? mech.name : '' });
-                                            }}
-                                        >
-                                            <option value="">Selecione...</option>
-                                            {mechanics.map(m => (
-                                                <option key={m.id} value={m.id}>{m.name}{m.specialty ? ` — ${m.specialty}` : ''}</option>
-                                            ))}
-                                        </select>
-                                    </div>
-                                </div>
-                                <div className="form-group">
-                                    <label className="form-label">Status Inicial</label>
-                                    <div className="form-input-wrapper">
-                                        <Info className="input-icon" size={18} />
-                                        <select
-                                            className="form-control form-control-with-icon"
-                                            value={osFormData.status}
-                                            onChange={(e) => setOsFormData({ ...osFormData, status: e.target.value })}
-                                        >
-                                            <option value="Aberto">Aberto (Orçamento)</option>
-                                            <option value="Em andamento">Em Andamento</option>
-                                            <option value="Aguardando Peça">Aguardando Peça</option>
-                                            <option value="Finalizado">Finalizado</option>
-                                            <option value="Entregue">Entregue</option>
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
-                    {osActiveTab === 'financeiro' && (
-                        <div className="space-y-4">
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="form-group">
-                                    <label className="form-label">Custo Mão de Obra (R$)</label>
-                                    <div className="form-input-wrapper">
-                                        <DollarSign className="input-icon" size={18} />
-                                        <input
-                                            type="number"
-                                            step="0.01"
-                                            className="form-control form-control-with-icon"
-                                            value={osFormData.labor_cost}
-                                            onChange={(e) => setOsFormData({ ...osFormData, labor_cost: e.target.value })}
-                                        />
-                                    </div>
-                                </div>
-                                <div className="form-group">
-                                    <label className="form-label">Custo de Peças (R$)</label>
-                                    <div className="form-input-wrapper">
-                                        <Package className="input-icon" size={18} />
-                                        <input
-                                            type="number"
-                                            step="0.01"
-                                            className="form-control form-control-with-icon"
-                                            value={osFormData.parts_cost}
-                                            onChange={(e) => setOsFormData({ ...osFormData, parts_cost: e.target.value })}
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="form-group">
-                                    <label className="form-label">Desconto Autorizado (R$)</label>
-                                    <div className="form-input-wrapper">
-                                        <Percent className="input-icon" size={18} />
-                                        <input
-                                            type="number"
-                                            step="0.01"
-                                            className="form-control form-control-with-icon"
-                                            value={osFormData.discount}
-                                            onChange={(e) => setOsFormData({ ...osFormData, discount: e.target.value })}
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="flex justify-between items-center bg-slate-50 p-4 rounded-xl mt-4 border border-slate-100">
-                                <span className="font-bold text-slate-700">Total Estimado:</span>
-                                <span className="text-xl font-bold text-primary-color">
-                                    {formatMoney(Number(osFormData.labor_cost) + Number(osFormData.parts_cost) - Number(osFormData.discount))}
-                                </span>
-                            </div>
-                        </div>
-                    )}
-
-                    <div className="flex justify-end gap-3 mt-8 pt-4 border-t border-color">
-                        {osActiveTab !== 'orcamento' && (
-                            <button type="button" className="btn btn-secondary" onClick={() => setOsActiveTab(osActiveTab === 'financeiro' ? 'servicos' : 'orcamento')}>
-                                Voltar
-                            </button>
-                        )}
-                        <button type="button" className="btn btn-secondary" onClick={() => setIsOSModalOpen(false)}>
-                            Cancelar
+            <Modal
+                isOpen={isOSModalOpen}
+                onClose={() => setIsOSModalOpen(false)}
+                title="Abrir Nova Ordem de Serviço"
+                size="large"
+                footer={(
+                    <div className="flex justify-end gap-3 w-full">
+                        <button 
+                            type="button" 
+                            className="btn btn-secondary px-8" 
+                            onClick={() => setIsOSModalOpen(false)}
+                        >
+                            Descartar
                         </button>
-                        {osActiveTab !== 'financeiro' ? (
-                            <button type="button" className="btn btn-primary" onClick={() => setOsActiveTab(osActiveTab === 'orcamento' ? 'servicos' : 'financeiro')}>
-                                Próximo
-                            </button>
-                        ) : (
-                            <button type="submit" className="btn btn-primary" disabled={isSubmitting}>
-                                {isSubmitting ? <Loader className="animate-spin" size={16} /> : 'Abrir Ordem de Serviço'}
-                            </button>
-                        )}
+                        <button 
+                            type="submit" 
+                            form="os-form"
+                            className="btn btn-primary px-10 shadow-lg shadow-primary-color/20" 
+                            disabled={isSubmitting || !osFormData.vehicle_id}
+                        >
+                            {isSubmitting ? (
+                                <Loader size={20} className="animate-spin" />
+                            ) : (
+                                <>
+                                    <CheckCircle size={18} className="mr-2" />
+                                    Confirmar e Abrir OS
+                                </>
+                            )}
+                        </button>
                     </div>
-                </form>
+                )}
+            >
+                <OSForm
+                    formData={osFormData}
+                    onChange={handleFormChange}
+                    onSubmit={handleCreateOS}
+                    isSubmitting={isSubmitting}
+                    clients={clients}
+                    vehicles={vehiclesForOS}
+                    mechanics={mechanics}
+                    onClientChange={() => {}} // Disabled in this context as client is fixed
+                    isEdit={true} // Using isEdit mode to show static client/vehicle info
+                />
             </Modal>
+
+            {/* Modal de Confirmação de Exclusão */}
+            <ConfirmModal
+                isOpen={isDeleteModalOpen}
+                onClose={() => setIsDeleteModalOpen(false)}
+                onConfirm={handleDeleteClient}
+                title="Excluir Cliente"
+                message="Deseja excluir permanentemente este cliente?"
+                itemName={clientToDelete?.name}
+                isLoading={isSubmitting}
+            />
         </div>
     );
 };

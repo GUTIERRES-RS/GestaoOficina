@@ -2,7 +2,7 @@ import React from 'react';
 import { X } from 'lucide-react';
 import './Modal.css';
 
-const Modal = ({ isOpen, onClose, title, children, size }) => {
+const Modal = ({ isOpen, onClose, title, children, footer, size }) => {
     if (!isOpen) return null;
 
     return (
@@ -17,6 +17,11 @@ const Modal = ({ isOpen, onClose, title, children, size }) => {
                 <div className="modal-body">
                     {children}
                 </div>
+                {footer && (
+                    <div className="modal-footer">
+                        {footer}
+                    </div>
+                )}
             </div>
         </div>
     );

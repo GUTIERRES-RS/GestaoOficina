@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Plus, Search, Filter, Calendar, Wrench, X } from 'lucide-react';
+import { Plus, Search, Filter, Calendar, Wrench, X, Loader, CheckCircle } from 'lucide-react';
 import api from '../services/api';
 import Modal from '../components/Modal';
 import toast from 'react-hot-toast';
@@ -9,7 +9,6 @@ import { getPeriodDates, PERIODS } from '../utils/date';
 // Modular Components
 import OSList from './service-orders/OSList';
 import OSForm from './service-orders/OSForm';
-import OSDetails from './service-orders/OSDetails';
 import OSPrint from './service-orders/OSPrint';
 
 const ServiceOrders = () => {
@@ -31,10 +30,8 @@ const ServiceOrders = () => {
     const [mechanics, setMechanics] = useState([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const [isViewModalOpen, setIsViewModalOpen] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [selectedOS, setSelectedOS] = useState(null);
-    const [activeTab, setActiveTab] = useState('orcamento');
 
     const [formData, setFormData] = useState({
         client_id: '',
@@ -100,7 +97,6 @@ const ServiceOrders = () => {
 
     const handleOpenModal = async () => {
         setIsModalOpen(true);
-        setActiveTab('orcamento');
         setFormData({
             client_id: '', vehicle_id: '', mechanic_id: '', mechanic_name: '', problem_reported: '', service_provided: '',
             status: 'Aberto', expected_delivery_date: '', labor_cost: 0, parts_cost: 0, discount: 0,
@@ -154,14 +150,8 @@ const ServiceOrders = () => {
         }
     };
 
-    const handleViewOS = (os) => {
-        setSelectedOS(os);
-        setIsViewModalOpen(true);
-    };
-
     const handleEditOS = async (os) => {
         setSelectedOS(os);
-        setActiveTab('orcamento');
         try {
             const res = await api.get('/mechanics');
             setMechanics(res.data.filter(m => m.status === 'Ativo'));
@@ -299,13 +289,43 @@ const ServiceOrders = () => {
                 <OSList
                     orders={filteredOrders}
                     loading={loading}
-                    onView={handleViewOS}
                     onEdit={handleEditOS}
                     onPrint={handlePrintOS}
                 />
             </div>
 
-            <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Abrir Nova Ordem de Serviço">
+            <Modal 
+                isOpen={isModalOpen} 
+                onClose={() => setIsModalOpen(false)} 
+                title="Abrir Nova Ordem de Serviço" 
+                size="large"
+                footer={(
+                    <div className="flex justify-end gap-3 w-full">
+                        <button 
+                            type="button" 
+                            className="btn btn-secondary px-8" 
+                            onClick={() => setIsModalOpen(false)}
+                        >
+                            Descartar
+                        </button>
+                        <button 
+                            type="submit" 
+                            form="os-form"
+                            className="btn btn-primary px-10 shadow-lg shadow-primary-color/20" 
+                            disabled={isSubmitting || !formData.vehicle_id}
+                        >
+                            {isSubmitting ? (
+                                <Loader size={20} className="animate-spin" />
+                            ) : (
+                                <>
+                                    <CheckCircle size={18} className="mr-2" />
+                                    Confirmar e Abrir OS
+                                </>
+                            )}
+                        </button>
+                    </div>
+                )}
+            >
                 <OSForm
                     formData={formData}
                     onChange={handleFormChange}
@@ -315,27 +335,51 @@ const ServiceOrders = () => {
                     vehicles={vehicles}
                     mechanics={mechanics}
                     onClientChange={handleClientChange}
-                    activeTab={activeTab}
-                    setActiveTab={setActiveTab}
                 />
             </Modal>
 
-            <Modal isOpen={isEditModalOpen} onClose={() => setIsEditModalOpen(false)} title={`Editar OS #${selectedOS?.id}`}>
+            <Modal 
+                isOpen={isEditModalOpen} 
+                onClose={() => setIsEditModalOpen(false)} 
+                title={`Editar OS #${selectedOS?.id}`} 
+                size="large"
+                footer={(
+                    <div className="flex justify-end gap-3 w-full">
+                        <button 
+                            type="button" 
+                            className="btn btn-secondary px-8" 
+                            onClick={() => setIsEditModalOpen(false)}
+                        >
+                            Descartar
+                        </button>
+                        <button 
+                            type="submit" 
+                            form="os-form"
+                            className="btn btn-primary px-10 shadow-lg shadow-primary-color/20" 
+                            disabled={isSubmitting}
+                        >
+                            {isSubmitting ? (
+                                <Loader size={20} className="animate-spin" />
+                            ) : (
+                                <>
+                                    <CheckCircle size={18} className="mr-2" />
+                                    Salvar Alterações
+                                </>
+                            )}
+                        </button>
+                    </div>
+                )}
+            >
                 <OSForm
                     formData={editFormData}
                     onChange={handleFormChange}
                     onSubmit={handleUpdateOS}
                     isSubmitting={isSubmitting}
                     mechanics={mechanics}
-                    activeTab={activeTab}
-                    setActiveTab={setActiveTab}
                     isEdit={true}
                 />
             </Modal>
 
-            <Modal isOpen={isViewModalOpen} onClose={() => setIsViewModalOpen(false)} title={`Detalhes da OS #${selectedOS?.id}`}>
-                <OSDetails os={selectedOS} onPrint={handlePrintOS} />
-            </Modal>
 
             <div className="print-only-container">
                 <OSPrint os={selectedOS} settings={settings} />

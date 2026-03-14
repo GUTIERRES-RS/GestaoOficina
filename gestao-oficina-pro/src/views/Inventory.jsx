@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Plus, Search, Filter, ArrowUpCircle, ArrowDownCircle, Package, X, AlignLeft, Loader, Trash2 } from 'lucide-react';
 import api from '../services/api';
 import Modal from '../components/Modal';
+import ConfirmModal from '../components/ConfirmModal';
 import toast from 'react-hot-toast';
 import { formatMoney } from '../utils/format';
 
@@ -288,14 +289,28 @@ const Inventory = () => {
             )}
 
             {/* Modal Nova/Editar Peça */}
-            <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={isEditMode ? "Editar Peça" : "Cadastrar Nova Peça"}>
-                <PartForm
-                    formData={formData}
-                    onChange={handleFormChange}
-                    onSubmit={handleCreateItem}
-                    isSubmitting={isSubmitting}
-                    isEditMode={isEditMode}
-                />
+            <Modal 
+                isOpen={isModalOpen} 
+                onClose={() => setIsModalOpen(false)} 
+                title={isEditMode ? "Editar Peça" : "Cadastrar Nova Peça"}
+                size="large"
+                footer={(
+                    <div className="flex justify-end gap-3 w-full">
+                        <button type="button" className="btn btn-secondary" onClick={() => setIsModalOpen(false)}>Cancelar</button>
+                        <button type="submit" form="part-form" className="btn btn-primary" disabled={isSubmitting}>
+                            {isSubmitting ? 'Salvando...' : isEditMode ? 'Salvar Alterações' : 'Cadastrar Peça'}
+                        </button>
+                    </div>
+                )}
+            >
+                <form id="part-form" onSubmit={handleCreateItem}>
+                    <PartForm
+                        formData={formData}
+                        onChange={handleFormChange}
+                        isSubmitting={isSubmitting}
+                        isEditMode={isEditMode}
+                    />
+                </form>
             </Modal>
 
             {/* Modal Ajuste de Estoque */}
@@ -303,6 +318,14 @@ const Inventory = () => {
                 isOpen={isAdjustmentModalOpen} 
                 onClose={() => setIsAdjustmentModalOpen(false)} 
                 title={adjustmentType === 'entrada' ? "Entrada de Estoque" : "Saída de Estoque"}
+                footer={(
+                    <div className="flex justify-end gap-3 w-full">
+                        <button type="button" className="btn btn-secondary" onClick={() => setIsAdjustmentModalOpen(false)}>Cancelar</button>
+                        <button type="submit" form="adjustment-form" className="btn btn-primary" disabled={isSubmitting}>
+                            {isSubmitting ? 'Processando...' : adjustmentType === 'entrada' ? 'Confirmar Entrada' : 'Confirmar Saída'}
+                        </button>
+                    </div>
+                )}
             >
                 <StockAdjustmentForm
                     item={activeItem}
@@ -314,39 +337,15 @@ const Inventory = () => {
             </Modal>
 
             {/* Modal de Confirmação de Exclusão */}
-            <Modal 
-                isOpen={isDeleteModalOpen} 
-                onClose={() => setIsDeleteModalOpen(false)} 
-                title="Confirmar Exclusão"
-                size="sm"
-            >
-                <div className="text-center py-4">
-                    <div className="flex justify-center mb-4 text-danger">
-                        <Trash2 size={48} />
-                    </div>
-                    <h3 className="text-lg font-bold mb-2">Excluir Peça?</h3>
-                    <p className="text-secondary mb-6">
-                        Tem certeza que deseja excluir <strong>{activeItem?.name}</strong>? 
-                        Esta ação não pode ser desfeita.
-                    </p>
-                    <div className="flex justify-center gap-3">
-                        <button 
-                            className="btn btn-secondary" 
-                            onClick={() => setIsDeleteModalOpen(false)}
-                            disabled={isSubmitting}
-                        >
-                            Cancelar
-                        </button>
-                        <button 
-                            className="btn btn-danger" 
-                            onClick={handleConfirmDelete}
-                            disabled={isSubmitting}
-                        >
-                            {isSubmitting ? <Loader className="animate-spin" size={18} /> : 'Sim, Excluir'}
-                        </button>
-                    </div>
-                </div>
-            </Modal>
+            <ConfirmModal
+                isOpen={isDeleteModalOpen}
+                onClose={() => setIsDeleteModalOpen(false)}
+                onConfirm={handleConfirmDelete}
+                title="Excluir Peça"
+                message="Deseja remover permanentemente esta peça do estoque?"
+                itemName={activeItem ? `${activeItem.name} (${activeItem.code || 'S/C'})` : ''}
+                isLoading={isSubmitting}
+            />
         </div>
     );
 };
@@ -364,58 +363,71 @@ const StockAdjustmentForm = ({ item, type, onSubmit, isSubmitting, onCancel }) =
     if (!item) return null;
 
     const newTotal = type === 'entrada' 
-        ? item.stock_quantity + (parseInt(quantity) || 0)
-        : item.stock_quantity - (parseInt(quantity) || 0);
+        ? (item.stock_quantity || 0) + (parseInt(quantity) || 0)
+        : (item.stock_quantity || 0) - (parseInt(quantity) || 0);
 
     return (
-        <form onSubmit={handleSubmit}>
-            <div className="mb-4 p-3 rounded-md" style={{ background: 'var(--bg-tertiary)' }}>
-                <p className="text-sm font-medium mb-1">{item.name}</p>
-                <div className="flex justify-between text-xs text-secondary">
-                    <span>Estoque Atual: <strong>{item.stock_quantity} un</strong></span>
-                    <span>Novo Total: <strong className={newTotal < 0 ? 'text-danger' : 'text-success'}>{newTotal} un</strong></span>
+        <form id="adjustment-form" onSubmit={handleSubmit} className="space-y-6">
+            <div className="p-4 rounded-xl border border-color bg-tertiary">
+                <div className="flex items-center gap-3 mb-3">
+                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary-color">
+                        <Package size={20} />
+                    </div>
+                    <div>
+                        <p className="font-bold text-lg leading-tight">{item.name}</p>
+                        <p className="text-xs text-secondary mt-1">Código: {item.code || '—'}</p>
+                    </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4 mt-4 pt-4 border-t border-color">
+                    <div className="text-center">
+                        <p className="text-xs text-secondary uppercase font-bold tracking-wider">Atual</p>
+                        <p className="text-2xl font-black">{item.stock_quantity || 0}</p>
+                    </div>
+                    <div className="text-center">
+                        <p className="text-xs text-secondary uppercase font-bold tracking-wider">Novo Total</p>
+                        <p className={`text-2xl font-black ${newTotal < 0 ? 'text-danger-color' : 'text-green-500'}`}>{newTotal}</p>
+                    </div>
                 </div>
             </div>
 
-            <div className="form-group mb-4">
-                <label className="form-label">Quantidade *</label>
-                <div className="form-input-wrapper">
-                    <Package className="input-icon" size={18} />
-                    <input
-                        type="number"
-                        min="1"
-                        className="form-control form-control-with-icon"
-                        placeholder="0"
-                        required
-                        value={quantity}
-                        onChange={(e) => setQuantity(e.target.value)}
-                        autoFocus
-                    />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="form-group">
+                    <label className="form-label">Quantidade *</label>
+                    <div className="form-input-wrapper">
+                        <Package className="input-icon" size={18} />
+                        <input
+                            type="number"
+                            min="1"
+                            className="form-control form-control-with-icon"
+                            placeholder="0"
+                            required
+                            value={quantity}
+                            onChange={(e) => setQuantity(e.target.value)}
+                            autoFocus
+                        />
+                    </div>
+                </div>
+                <div className="form-group">
+                    <label className="form-label">Motivo / Observação</label>
+                    <div className="form-input-wrapper">
+                        <AlignLeft className="input-icon" size={18} />
+                        <input
+                            type="text"
+                            className="form-control form-control-with-icon"
+                            placeholder="Ex: Compra, Devolução..."
+                            value={reason}
+                            onChange={(e) => setReason(e.target.value)}
+                        />
+                    </div>
                 </div>
             </div>
-
-            <div className="form-group mb-6">
-                <label className="form-label">Motivo / Observação</label>
-                <div className="form-input-wrapper">
-                    <AlignLeft className="input-icon" size={18} />
-                    <input
-                        type="text"
-                        className="form-control form-control-with-icon"
-                        placeholder="Ex: Compra de fornecedor, Devolução..."
-                        value={reason}
-                        onChange={(e) => setReason(e.target.value)}
-                    />
+            
+            {type === 'saida' && newTotal < 0 && (
+                <div className="info-alert info-warning">
+                    <AlertTriangle size={20} />
+                    <p><strong>Atenção:</strong> Esta saída deixará o estoque negativo.</p>
                 </div>
-            </div>
-
-            <div className="flex justify-end gap-3 pt-4 border-t border-color">
-                <button type="button" className="btn btn-secondary" onClick={onCancel}>
-                    Cancelar
-                </button>
-                <button type="submit" className={`btn ${type === 'entrada' ? 'btn-success' : 'btn-danger'}`} disabled={isSubmitting || (type === 'saida' && newTotal < 0)}>
-                    {isSubmitting ? <Loader className="animate-spin" size={16} /> : `Confirmar ${type === 'entrada' ? 'Entrada' : 'Saída'}`}
-                </button>
-            </div>
+            )}
         </form>
     );
 };

@@ -14,6 +14,8 @@
   --text-secondary: #475569;
   /* Slate 600 */
   --text-tertiary: #94a3b8;
+  --emerald-500: #10b981;
+  --rose-500: #f43f5e;
   /* Slate 400 */
 
   --accent-color: #2563eb;
@@ -413,6 +415,61 @@ button {
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
+.form-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-icon {
+  position: absolute;
+  left: 1rem;
+  color: var(--accent-color);
+  opacity: 0.9;
+  pointer-events: none;
+  transition: all var(--transition-fast);
+}
+
+.form-control:disabled + .input-icon {
+  opacity: 0.6;
+}
+
+
+.form-control-with-icon {
+  padding-left: 2.75rem !important;
+}
+
+.form-control:focus + .input-icon {
+  color: var(--accent-color);
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+.filter-label svg {
+  color: var(--accent-color);
+  opacity: 0.8;
+}
+
+/* Calendar picker indicator styling */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  filter: invert(var(--calendar-icon-invert, 0.5));
+  opacity: 0.6;
+  transition: opacity var(--transition-fast);
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+}
+
+/* Theme specific invert values */
+[data-theme='dark'] {
+  --calendar-icon-invert: 1;
+}
+[data-theme='light'] {
+  --calendar-icon-invert: 0.2;
+}
+
 /* Status Badges */
 .badge {
   display: inline-flex;
@@ -741,6 +798,52 @@ button {
   box-shadow: var(--shadow-sm);
 }
 
+/* profile-info-card / Global Profile Card Pattern */
+.profile-info-card {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 2rem;
+    background-color: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-premium);
+    margin-top: 1.5rem;
+    margin-bottom: 1.5rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.profile-info-card::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 6px;
+    background-color: var(--accent-color);
+}
+
+.avatar-initials {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent-color), var(--accent-hover));
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    font-weight: 700;
+    box-shadow: 0 8px 16px rgba(37, 99, 235, 0.25);
+}
+
+.profile-details h4 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+}
+
 
 /* ------ Data Tables ------ */
 .data-table-card {
@@ -947,4 +1050,52 @@ button {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
+}
+
+/* Searchable Select Styles */
+.searchable-select-container {
+  position: relative;
+  width: 100%;
+}
+
+.searchable-select-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  margin-top: 0.25rem;
+  max-height: 200px;
+  overflow-y: auto;
+  box-shadow: var(--shadow-lg);
+  display: block;
+}
+
+.searchable-select-option {
+  padding: 0.625rem 0.875rem;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+  color: var(--text-primary);
+}
+
+.searchable-select-option:hover {
+  background-color: var(--bg-primary);
+  color: var(--accent-color);
+}
+
+.searchable-select-option.selected {
+  background-color: rgba(59, 130, 246, 0.1);
+  color: var(--accent-color);
+  font-weight: 500;
+}
+
+.searchable-select-empty {
+  padding: 0.75rem;
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
 }

@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import api from '../services/api';
 import Modal from '../components/Modal';
+import ConfirmModal from '../components/ConfirmModal';
 import TableEmptyState from '../components/TableEmptyState';
 import toast from 'react-hot-toast';
 import { formatMoney, formatDate } from '../utils/format';
@@ -42,7 +43,7 @@ const Finances = () => {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [modalType, setModalType] = useState('income'); // 'income' | 'expense'
     const [formData, setFormData] = useState({ description: '', category: '', amount: '', date: '', status: 'pendente', payment_method: '' });
-    const [itemToDelete, setItemToDelete] = useState(null);
+    const [itemToDelete, setItemToDelete] = useState(null); // This will now store the whole object if possible, or just ID
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const fetchFinancialData = useCallback(async () => {
@@ -102,7 +103,7 @@ const Finances = () => {
 
         try {
             setIsSubmitting(true);
-            await api.delete(`/finances/${itemToDelete}`);
+            await api.delete(`/finances/${itemToDelete.id}`);
             toast.success('Transação excluída com sucesso!');
             fetchFinancialData();
             setIsDeleteModalOpen(false);
@@ -344,7 +345,10 @@ const Finances = () => {
                                                 </button>
                                                 <button
                                                     className="btn-icon text-danger"
-                                                    onClick={() => handleDelete(item.id)}
+                                                    onClick={() => {
+                                                        setItemToDelete(item);
+                                                        setIsDeleteModalOpen(true);
+                                                    }}
                                                     title="Excluir"
                                                 >
                                                     <Trash2 size={15} />
@@ -369,160 +373,158 @@ const Finances = () => {
             <Modal
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
-                title={modalType === 'income' ? 'Lançar Receita Nova' : 'Lançar Despesa Nova'}
+                title={formData.id ? 'Editar Lançamento' : (modalType === 'income' ? 'Lançar Nova Receita' : 'Lançar Nova Despesa')}
+                size="large"
+                footer={(
+                    <div className="flex justify-end gap-3 w-full">
+                        <button type="button" className="btn btn-secondary" onClick={() => setIsModalOpen(false)}>Cancelar</button>
+                        <button type="submit" form="transaction-form" className="btn btn-primary" disabled={isSubmitting}>
+                            {isSubmitting ? 'Salvando...' : formData.id ? 'Salvar Alterações' : `Salvar ${modalType === 'income' ? 'Receita' : 'Despesa'}`}
+                        </button>
+                    </div>
+                )}
             >
-                <form onSubmit={handleCreateTransaction}>
-                    <div className="form-group">
-                        <label className="form-label">Descrição *</label>
-                        <div className="form-input-wrapper">
-                            <FileText className="input-icon" size={18} />
-                            <input
-                                type="text"
-                                className="form-control form-control-with-icon"
-                                placeholder={modalType === 'income' ? 'Ex: Recebimento Serviço...' : 'Ex: Compra de Óleo...'}
-                                required
-                                value={formData.description}
-                                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                            />
-                        </div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="form-group">
-                            <label className="form-label">Valor (R$) *</label>
-                            <div className="form-input-wrapper">
-                                <DollarSign className="input-icon" size={18} />
-                                <input
-                                    type="number"
-                                    step="0.01"
-                                    className="form-control form-control-with-icon"
-                                    placeholder="0.00"
-                                    required
-                                    value={formData.amount}
-                                    onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
-                                />
+                <form id="transaction-form" onSubmit={handleCreateTransaction}>
+                    <div className="space-y-6">
+                        <div>
+                            <div className="flex items-center gap-2 mb-4">
+                                <FileText className="text-primary-color" size={20} />
+                                <h3 className="font-bold text-lg">1. Dados da Transação</h3>
                             </div>
-                        </div>
-                        <div className="form-group">
-                            <label className="form-label">Data</label>
-                            <div className="form-input-wrapper">
-                                <Calendar className="input-icon" size={18} />
-                                <input
-                                    type="date"
-                                    className="form-control form-control-with-icon"
-                                    value={formData.date}
-                                    onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                                />
+                            
+                            <div className="form-group mb-4">
+                                <label className="form-label">Descrição *</label>
+                                <div className="form-input-wrapper">
+                                    <FileText className="input-icon" size={18} />
+                                    <input
+                                        type="text"
+                                        className="form-control form-control-with-icon"
+                                        placeholder={modalType === 'income' ? 'Ex: Recebimento Serviço...' : 'Ex: Compra de Óleo...'}
+                                        required
+                                        value={formData.description}
+                                        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                                    />
+                                </div>
                             </div>
-                        </div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4 mb-6">
-                        <div className="form-group">
-                            <label className="form-label">Categoria *</label>
-                            <div className="form-input-wrapper">
-                                <Layers className="input-icon" size={18} />
-                                <select
-                                    className="form-control form-control-with-icon"
-                                    required
-                                    value={formData.category}
-                                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                                >
-                                    <option value="">Selecione...</option>
-                                    {modalType === 'income' ? (
-                                        <>
-                                            <option value="Serviços">Mão de Obra / Serviços</option>
-                                            <option value="Serviço/OS">Serviço/OS</option>
-                                            <option value="Venda de Peças">Venda de Peças</option>
-                                            <option value="Outros">Outras Entradas</option>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <option value="Estoque">Reposição Estoque</option>
-                                            <option value="Despesas Fixas">Aluguel, Luz, etc</option>
-                                            <option value="Impostos">Impostos</option>
-                                            <option value="Folha Pagamento">Pagamento Equipe</option>
-                                            <option value="Outros">Outras Despesas</option>
-                                        </>
-                                    )}
-                                </select>
-                            </div>
-                        </div>
-                        <div className="form-group">
-                            <label className="form-label">Status do Pagamento</label>
-                            <div className="form-input-wrapper">
-                                <Activity className="input-icon" size={18} />
-                                <select
-                                    className="form-control form-control-with-icon"
-                                    value={formData.status}
-                                    onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                                >
-                                    <option value="pago">{STATUS_LABELS.pago}</option>
-                                    <option value="pendente">{STATUS_LABELS.pendente}</option>
-                                    <option value="cancelado">{STATUS_LABELS.cancelado}</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
 
-                    <div className="grid grid-cols-2 gap-4 mb-6">
-                        <div className="form-group">
-                            <label className="form-label">Meio de Pagamento</label>
-                            <div className="form-input-wrapper">
-                                <CreditCard className="input-icon" size={18} />
-                                <select
-                                    className="form-control form-control-with-icon"
-                                    value={formData.payment_method}
-                                    onChange={(e) => setFormData({ ...formData, payment_method: e.target.value })}
-                                >
-                                    <option value="">Não informado</option>
-                                    <option value="Dinheiro">Dinheiro</option>
-                                    <option value="PIX">PIX</option>
-                                    <option value="Cartão de Crédito">Cartão de Crédito</option>
-                                    <option value="Cartão de Débito">Cartão de Débito</option>
-                                    <option value="Boleto">Boleto</option>
-                                </select>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                <div className="form-group">
+                                    <label className="form-label">Valor (R$) *</label>
+                                    <div className="form-input-wrapper">
+                                        <DollarSign className="input-icon" size={18} />
+                                        <input
+                                            type="number"
+                                            step="0.01"
+                                            className="form-control form-control-with-icon"
+                                            placeholder="0.00"
+                                            required
+                                            value={formData.amount}
+                                            onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
+                                        />
+                                    </div>
+                                </div>
+                                <div className="form-group">
+                                    <label className="form-label">Data do Lançamento</label>
+                                    <div className="form-input-wrapper">
+                                        <Calendar className="input-icon" size={18} />
+                                        <input
+                                            type="date"
+                                            className="form-control form-control-with-icon"
+                                            value={formData.date}
+                                            onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="form-group">
+                                <label className="form-label">Categoria *</label>
+                                <div className="form-input-wrapper">
+                                    <Layers className="input-icon" size={18} />
+                                    <select
+                                        className="form-control form-control-with-icon"
+                                        required
+                                        value={formData.category}
+                                        onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                                    >
+                                        <option value="">Selecione...</option>
+                                        {modalType === 'income' ? (
+                                            <>
+                                                <option value="Serviços">Mão de Obra / Serviços</option>
+                                                <option value="Serviço/OS">Serviço/OS</option>
+                                                <option value="Venda de Peças">Venda de Peças</option>
+                                                <option value="Outros">Outras Entradas</option>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <option value="Estoque">Reposição Estoque</option>
+                                                <option value="Despesas Fixas">Aluguel, Luz, etc</option>
+                                                <option value="Impostos">Impostos</option>
+                                                <option value="Folha Pagamento">Pagamento Equipe</option>
+                                                <option value="Outros">Outras Despesas</option>
+                                            </>
+                                        )}
+                                    </select>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-color">
-                        <button type="button" className="btn btn-secondary" onClick={() => setIsModalOpen(false)}>
-                            Cancelar
-                        </button>
-                        <button type="submit" className={`btn ${modalType === 'income' ? 'btn-success' : 'btn-danger'}`} disabled={isSubmitting}>
-                            {isSubmitting ? <Loader className="animate-spin" size={16} /> : `Salvar ${modalType === 'income' ? 'Receita' : 'Despesa'}`}
-                        </button>
+
+                        <div>
+                            <div className="flex items-center gap-2 mb-4 pt-4 border-t border-color">
+                                <CreditCard className="text-primary-color" size={20} />
+                                <h3 className="font-bold text-lg">2. Pagamento e Status</h3>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="form-group">
+                                    <label className="form-label">Meio de Pagamento</label>
+                                    <div className="form-input-wrapper">
+                                        <CreditCard className="input-icon" size={18} />
+                                        <select
+                                            className="form-control form-control-with-icon"
+                                            value={formData.payment_method}
+                                            onChange={(e) => setFormData({ ...formData, payment_method: e.target.value })}
+                                        >
+                                            <option value="">Não informado</option>
+                                            <option value="Dinheiro">Dinheiro</option>
+                                            <option value="PIX">PIX</option>
+                                            <option value="Cartão de Crédito">Cartão de Crédito</option>
+                                            <option value="Cartão de Débito">Cartão de Débito</option>
+                                            <option value="Boleto">Boleto</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div className="form-group">
+                                    <label className="form-label">Status Atual</label>
+                                    <div className="form-input-wrapper">
+                                        <Activity className="input-icon" size={18} />
+                                        <select
+                                            className="form-control form-control-with-icon"
+                                            value={formData.status}
+                                            onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                                        >
+                                            <option value="pago">{STATUS_LABELS.pago}</option>
+                                            <option value="pendente">{STATUS_LABELS.pendente}</option>
+                                            <option value="cancelado">{STATUS_LABELS.cancelado}</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </form>
             </Modal>
 
             {/* Modal Confirmação de Exclusão */}
-            <Modal
+            <ConfirmModal
                 isOpen={isDeleteModalOpen}
                 onClose={() => setIsDeleteModalOpen(false)}
-                title="Confirmar Exclusão"
-            >
-                <div className="py-4">
-                    <p className="text-secondary mb-6">
-                        Tem certeza que deseja excluir esta transação? Esta ação não poderá ser desfeita.
-                    </p>
-                    <div className="flex justify-end gap-3 pt-4 border-t border-color">
-                        <button
-                            type="button"
-                            className="btn btn-secondary"
-                            onClick={() => setIsDeleteModalOpen(false)}
-                        >
-                            Cancelar
-                        </button>
-                        <button
-                            type="button"
-                            className="btn btn-danger"
-                            onClick={confirmDelete}
-                            disabled={isSubmitting}
-                        >
-                            {isSubmitting ? <Loader className="animate-spin" size={16} /> : 'Excluir'}
-                        </button>
-                    </div>
-                </div>
-            </Modal>
+                onConfirm={confirmDelete}
+                title="Excluir Lançamento"
+                message="Deseja excluir permanentemente este lançamento financeiro?"
+                itemName={itemToDelete?.description}
+                isLoading={isSubmitting}
+            />
         </div>
     );
 };

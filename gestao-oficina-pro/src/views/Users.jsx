@@ -3,6 +3,8 @@ import {
     Plus, Pencil, Trash2, Search, X,
     ShieldCheck, User, ShieldAlert, KeyRound, Info, Mail
 } from 'lucide-react';
+import Modal from '../components/Modal';
+import ConfirmModal from '../components/ConfirmModal';
 import EmptyState from '../components/EmptyState';
 import toast from 'react-hot-toast';
 import api from '../services/api';
@@ -107,9 +109,11 @@ export default function Users() {
         }
     };
 
-    const handleDelete = async (id) => {
+    const handleDelete = async () => {
+        if (!deleteConfirm) return;
+        setSaving(true);
         try {
-            await api.delete(`/users/${id}`);
+            await api.delete(`/users/${deleteConfirm.id}`);
             toast.success('Usuário removido com sucesso!');
             setDeleteConfirm(null);
             fetchUsers();
@@ -117,6 +121,8 @@ export default function Users() {
             if (error.response?.data?.message) {
                 toast.error(error.response.data.message);
             }
+        } finally {
+            setSaving(false);
         }
     };
 
@@ -128,7 +134,6 @@ export default function Users() {
 
     return (
         <div className="users-page">
-            {/* Header */}
             <div className="page-header">
                 <div>
                     <h1 className="page-title"><ShieldCheck size={24} /> Gestão de Usuários</h1>
@@ -142,7 +147,6 @@ export default function Users() {
             </div>
 
             <div className="page-body">
-                {/* Stats Row */}
                 <div className="users-stats">
                     <div className="stat-card stat-blue">
                         <div className="stat-value">{stats.total}</div>
@@ -158,7 +162,6 @@ export default function Users() {
                     </div>
                 </div>
 
-                {/* Filters */}
                 <div className="users-filters card">
                     <div className="search-box">
                         <Search size={16} className="search-icon" />
@@ -184,7 +187,6 @@ export default function Users() {
                     </div>
                 </div>
 
-                {/* Table */}
                 <div className="data-table-card mt-6">
                     <div className="card-header">
                         <h2 className="text-lg font-bold text-primary-color">Controle de Acessos</h2>
@@ -249,14 +251,28 @@ export default function Users() {
             </div>
 
             {/* Form Modal */}
-            {showModal && (
-                <div className="modal-overlay" onClick={closeModal}>
-                    <div className="modal-box modal-small" onClick={e => e.stopPropagation()}>
-                        <div className="modal-header">
-                            <h2>{editingId ? 'Editar Usuário' : 'Novo Usuário'}</h2>
-                            <button className="modal-close" onClick={closeModal}><X size={20} /></button>
+            <Modal
+                isOpen={showModal}
+                onClose={closeModal}
+                title={editingId ? 'Editar Usuário' : 'Cadastrar Novo Usuário'}
+                size="large"
+                footer={(
+                    <div className="flex justify-end gap-3 w-full">
+                        <button type="button" className="btn btn-secondary" onClick={closeModal}>Cancelar</button>
+                        <button type="submit" form="user-form" className="btn btn-primary" disabled={saving}>
+                            {saving ? 'Registrando...' : editingId ? 'Salvar Alterações' : 'Criar Acesso'}
+                        </button>
+                    </div>
+                )}
+            >
+                <form id="user-form" onSubmit={handleSave} className="space-y-6">
+                    <div>
+                        <div className="flex items-center gap-2 mb-4">
+                            <User className="text-primary-color" size={20} />
+                            <h3 className="font-bold text-lg">1. Identificação</h3>
                         </div>
-                        <form onSubmit={handleSave} className="modal-form">
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="form-group">
                                 <label className="form-label">Nome Completo *</label>
                                 <div className="form-input-wrapper">
@@ -273,17 +289,17 @@ export default function Users() {
                                         className="form-control form-control-with-icon" placeholder="joao@oficina.com" required />
                                 </div>
                             </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div className="flex items-center gap-2 mb-4 pt-4 border-t border-color">
+                            <KeyRound className="text-primary-color" size={20} />
+                            <h3 className="font-bold text-lg">2. Segurança e Acesso</h3>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="form-group">
-                                <label className="form-label">Nova Senha {editingId && <span className="text-muted text-xs font-normal" style={{marginLeft: '4px'}}>(Opcional)</span>}</label>
-                                <div className="form-input-wrapper">
-                                    <KeyRound className="input-icon" size={18} />
-                                    <input name="password" type="password" value={form.password} onChange={handleChange}
-                                        className="form-control form-control-with-icon" placeholder={editingId ? "Deixe em branco para manter a atual" : "Digite uma senha"} 
-                                        required={!editingId} 
-                                    />
-                                </div>
-                            </div>
-                            <div className="form-group mb-6">
                                 <label className="form-label">Perfil de Acesso *</label>
                                 <div className="form-input-wrapper">
                                     <ShieldCheck className="input-icon" size={18} />
@@ -293,47 +309,41 @@ export default function Users() {
                                     </select>
                                 </div>
                             </div>
-
-                            {form.role === 'admin' && (
-                                <div className="info-alert">
-                                    <ShieldAlert size={20} />
-                                    <p>
-                                        <strong>Atenção:</strong> Administradores têm acesso irrestrito a todas as funções, configurações e painéis financeiros do sistema.
-                                    </p>
+                            <div className="form-group">
+                                <label className="form-label">Senha {editingId && <span className="text-muted text-xs font-normal">(Opcional)</span>}</label>
+                                <div className="form-input-wrapper">
+                                    <KeyRound className="input-icon" size={18} />
+                                    <input name="password" type="password" value={form.password} onChange={handleChange}
+                                        className="form-control form-control-with-icon" placeholder={editingId ? "Manter atual" : "Digite uma senha"} 
+                                        required={!editingId} 
+                                    />
                                 </div>
-                            )}
-
-                            <div className="modal-footer">
-                                <button type="button" className="btn btn-secondary" onClick={closeModal}>Cancelar</button>
-                                <button type="submit" className="btn btn-primary" disabled={saving}>
-                                    {saving ? 'Registrando...' : editingId ? 'Salvar Configurações' : 'Criar Acesso'}
-                                </button>
                             </div>
-                        </form>
-                    </div>
-                </div>
-            )}
+                        </div>
 
-            {/* Delete Confirm Modal */}
-            {deleteConfirm && (
-                <div className="modal-overlay" onClick={() => setDeleteConfirm(null)}>
-                    <div className="modal-box modal-small" onClick={e => e.stopPropagation()}>
-                        <div className="modal-header">
-                            <h2>Revogar Acesso</h2>
-                            <button className="modal-close" onClick={() => setDeleteConfirm(null)}><X size={20} /></button>
-                        </div>
-                        <div className="delete-body">
-                            <Trash2 size={40} className="delete-icon" />
-                            <p>Deseja excluir o usuário <strong>{deleteConfirm.name} ({deleteConfirm.email})</strong>?</p>
-                            <p className="delete-warning">Esta ação é irreversível e bloqueará o acesso desta pessoa no sistema imediatamente.</p>
-                        </div>
-                        <div className="modal-footer">
-                            <button className="btn btn-secondary" onClick={() => setDeleteConfirm(null)}>Cancelar</button>
-                            <button className="btn btn-danger" onClick={() => handleDelete(deleteConfirm.id)}>Concordo, Excluir</button>
-                        </div>
+                        {form.role === 'admin' && (
+                            <div className="info-alert mt-4">
+                                <ShieldAlert size={20} />
+                                <p>
+                                    <strong>Atenção:</strong> Administradores têm acesso irrestrito a todas as funções, configurações e painéis financeiros do sistema.
+                                </p>
+                            </div>
+                        )}
                     </div>
-                </div>
-            )}
+                </form>
+            </Modal>
+
+             {/* Delete Confirm Modal */}
+            <ConfirmModal
+                isOpen={!!deleteConfirm}
+                onClose={() => setDeleteConfirm(null)}
+                onConfirm={handleDelete}
+                title="Revogar Acesso"
+                message={`Deseja realmente excluir o acesso de ${deleteConfirm?.name}?`}
+                itemName={deleteConfirm?.email}
+                isLoading={saving}
+                confirmText="Sim, Revogar Acesso"
+            />
         </div>
     );
 }
