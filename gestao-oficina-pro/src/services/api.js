@@ -49,7 +49,9 @@ api.interceptors.response.use(
         if (error.code === 'ECONNABORTED') {
             toast.error('O servidor demorou muito para responder.');
         } else if (!error.response) {
-            toast.error('Não foi possível conectar ao servidor. Verifique sua conexão.');
+            // Se não houver resposta, provavelmente é problema de conexão (servidor offline)
+            // Dispara um evento customizado que o ConnectionProvider irá escutar
+            window.dispatchEvent(new CustomEvent('api-connection-failed'));
         } else {
             // Mostra o erro vindo da API
             toast.error(message);
