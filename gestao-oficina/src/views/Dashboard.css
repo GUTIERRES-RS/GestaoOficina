@@ -60,8 +60,11 @@
 }
 
 .h-64 {
-    height: 16rem;
-    /* 256px */
+    height: 16rem; /* 256px */
+    position: relative;
+    width: 100%;
+    overflow: visible;
+    display: block;
 }
 
 .h-full {
