@@ -131,6 +131,34 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Global Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-tertiary);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--border-color);
+  border-radius: 4px;
+  border: 2px solid var(--bg-tertiary);
+  transition: background-color var(--transition-fast);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--text-tertiary);
+}
+
+/* Firefox scrollbar support */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-color) var(--bg-tertiary);
+}
+
 h1,
 h2,
 h3,

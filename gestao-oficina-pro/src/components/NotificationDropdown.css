@@ -58,14 +58,6 @@
     overflow-y: auto;
 }
 
-.dropdown-content::-webkit-scrollbar {
-    width: 6px;
-}
-
-.dropdown-content::-webkit-scrollbar-thumb {
-    background-color: var(--border-color);
-    border-radius: 3px;
-}
 
 .notification-section {
     padding: 0.75rem 0;
