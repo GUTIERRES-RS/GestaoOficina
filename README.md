@@ -1,4 +1,4 @@
-# 🛠️ Gestão de Oficina Pro
+# 🛠️ Gestão de Oficina
 
 Sistema administrativo completo e moderno para gestão de oficinas mecânicas, focado em alta produtividade, controle financeiro rigoroso e gestão inteligente de inventário.
 

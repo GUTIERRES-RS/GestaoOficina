@@ -41,7 +41,7 @@ console.log('Mounting routes...');
 // Public routes
 app.use('/api/auth', authRoutes);
 app.get('/api/health', (req, res) => {
-    res.json({ status: 'ok', message: 'API Gestão Oficina Pro rodando perfeitamente!' });
+    res.json({ status: 'ok', message: 'API Gestão Oficina rodando perfeitamente!' });
 });
 app.use('/api/settings/public', publicSettingsRoutes);
 // Protected routes

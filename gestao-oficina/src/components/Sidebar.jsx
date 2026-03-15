@@ -53,7 +53,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
                                 <LogoIcon size={20} color="white" />
                             </div>
                         )}
-                        <span className="logo-text">Gestão Oficina <br /><span style={{ fontSize: '0.75rem', fontWeight: '400', color: 'var(--text-secondary)' }}>Pro</span></span>
+                        <span className="logo-text">Gestão Oficina <br /><span style={{ fontSize: '0.75rem', fontWeight: '400', color: 'var(--text-secondary)' }}>Versão - 1.0</span></span>
                     </div>
                     <button className="close-btn mobile-only" onClick={() => setIsOpen(false)}>
                         <X size={24} />
