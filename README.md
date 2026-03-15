@@ -56,21 +56,21 @@ cd GestaoOficina
 ```
 
 ### 2. Configurar o Banco de Dados
-- Importe o arquivo SQL localizado em `gestao-oficina-pro-api/database/init.sql` para o seu servidor MySQL.
-- Configure as credenciais no arquivo `.env` dentro da pasta `gestao-oficina-pro-api`.
+- Importe o arquivo SQL localizado em `gestao-oficina-api/database/init.sql` para o seu servidor MySQL.
+- Configure as credenciais no arquivo `.env` dentro da pasta `gestao-oficina-api`.
 
 ### 3. Instalação e Execução
 
 **Backend:**
 ```bash
-cd gestao-oficina-pro-api
+cd gestao-oficina-api
 npm install
 npm start
 ```
 
 **Frontend:**
 ```bash
-cd gestao-oficina-pro
+cd gestao-oficina
 npm install
 npm run dev
 ```
