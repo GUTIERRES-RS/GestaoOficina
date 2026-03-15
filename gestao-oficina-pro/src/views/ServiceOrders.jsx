@@ -162,17 +162,24 @@ const ServiceOrders = () => {
         }
     };
 
-    const handleCreateOS = async (e) => {
-        e.preventDefault();
+    const handleCreateOS = async (e, parts = []) => {
         try {
             setIsSubmitting(true);
             const total_cost = Number(formData.labor_cost) + Number(formData.parts_cost) - Number(formData.discount);
-            await api.post('/os', { ...formData, total_cost });
+            
+            // Abordagem Transacional: enviamos as peças junto com a OS
+            await api.post('/os', { 
+                ...formData, 
+                total_cost,
+                parts 
+            });
+
             toast.success('Ordem de Serviço aberta com sucesso!');
             setIsModalOpen(false);
             fetchOrders();
-        } catch {
-            toast.error('Erro ao abrir OS.');
+        } catch (err) {
+            console.error(err);
+            toast.error(err.response?.data?.message || 'Erro ao abrir OS.');
         } finally {
             setIsSubmitting(false);
         }
@@ -194,17 +201,16 @@ const ServiceOrders = () => {
         setIsEditModalOpen(true);
     };
 
-    const handleUpdateOS = async (e) => {
-        e.preventDefault();
+    const handleUpdateOS = async (e, parts) => {
         try {
             setIsSubmitting(true);
             const total_cost = Number(editFormData.labor_cost) + Number(editFormData.parts_cost) - Number(editFormData.discount);
-            await api.put(`/os/${selectedOS.id}`, { ...editFormData, total_cost });
+            await api.put(`/os/${selectedOS.id}`, { ...editFormData, total_cost, parts });
             toast.success('Ordem de Serviço atualizada com sucesso!');
             setIsEditModalOpen(false);
             fetchOrders();
-        } catch {
-            toast.error('Erro ao atualizar OS.');
+        } catch (err) {
+            toast.error(err.response?.data?.message || 'Erro ao atualizar OS.');
         } finally {
             setIsSubmitting(false);
         }
@@ -222,12 +228,37 @@ const ServiceOrders = () => {
         if (updates.cancel) {
             setIsModalOpen(false);
             setIsEditModalOpen(false);
+            // Resetar estados locais ao cancelar
+            setFormData({
+                client_id: '', vehicle_id: '', mechanic_id: '', mechanic_name: '',
+                problem_reported: '', service_provided: '', status: 'Aberto',
+                expected_delivery_date: '', labor_cost: 0, parts_cost: 0, discount: 0,
+                invoice_number: '', payment_status: 'pendente', payment_method: '',
+                vehicle_km: ''
+            });
+            setEditFormData({
+                status: '', mechanic_id: '', mechanic_name: '', problem_reported: '',
+                service_provided: '', labor_cost: 0, parts_cost: 0, expected_delivery_date: '',
+                discount: 0, invoice_number: '', payment_status: 'pendente',
+                payment_method: '', vehicle_km: ''
+            });
+            fetchOrders();
             return;
         }
+
+        const updateState = (prev) => {
+            const next = { ...prev, ...updates };
+            // Recalcular total_cost se algum campo de valor mudar
+            if ('labor_cost' in updates || 'parts_cost' in updates || 'discount' in updates) {
+                next.total_cost = Number(next.labor_cost || 0) + Number(next.parts_cost || 0) - Number(next.discount || 0);
+            }
+            return next;
+        };
+
         if (isEditModalOpen) {
-            setEditFormData(prev => ({ ...prev, ...updates }));
+            setEditFormData(updateState);
         } else {
-            setFormData(prev => ({ ...prev, ...updates }));
+            setFormData(updateState);
         }
     };
 
@@ -328,7 +359,7 @@ const ServiceOrders = () => {
 
             <Modal 
                 isOpen={isModalOpen} 
-                onClose={() => setIsModalOpen(false)} 
+                onClose={() => handleFormChange({ cancel: true })} 
                 title="Abrir Nova Ordem de Serviço" 
                 size="large"
                 footer={(
@@ -336,7 +367,7 @@ const ServiceOrders = () => {
                         <button 
                             type="button" 
                             className="btn btn-secondary px-8" 
-                            onClick={() => setIsModalOpen(false)}
+                            onClick={() => handleFormChange({ cancel: true })}
                         >
                             Descartar
                         </button>
@@ -372,7 +403,7 @@ const ServiceOrders = () => {
 
             <Modal 
                 isOpen={isEditModalOpen} 
-                onClose={() => setIsEditModalOpen(false)} 
+                onClose={() => handleFormChange({ cancel: true })} 
                 title={`Editar OS #${selectedOS?.id}`} 
                 size="large"
                 footer={(
@@ -380,7 +411,7 @@ const ServiceOrders = () => {
                         <button 
                             type="button" 
                             className="btn btn-secondary px-8" 
-                            onClick={() => setIsEditModalOpen(false)}
+                            onClick={() => handleFormChange({ cancel: true })}
                         >
                             Descartar
                         </button>

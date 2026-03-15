@@ -238,21 +238,44 @@ const Clients = () => {
     const handleFormChange = (updates) => {
         if (updates.cancel) {
             setIsOSModalOpen(false);
+            setOsFormData({
+                client_id: '', vehicle_id: '', mechanic_id: '', mechanic_name: '',
+                problem_reported: '', service_provided: '', status: 'Aberto',
+                expected_delivery_date: '', labor_cost: 0, parts_cost: 0, discount: 0,
+                invoice_number: '', vehicle_km: ''
+            });
             return;
         }
-        setOsFormData(prev => ({ ...prev, ...updates }));
+        
+        setOsFormData(prev => {
+            const next = { ...prev, ...updates };
+            // Recalcular total_cost se algum campo de valor mudar
+            if ('labor_cost' in updates || 'parts_cost' in updates || 'discount' in updates) {
+                next.total_cost = Number(next.labor_cost || 0) + Number(next.parts_cost || 0) - Number(next.discount || 0);
+            }
+            return next;
+        });
     };
 
-    const handleCreateOS = async (e) => {
-        e.preventDefault();
+    const handleCreateOS = async (e, parts = []) => {
         try {
             _setIsSubmitting(true);
             const total_cost = Number(osFormData.labor_cost) + Number(osFormData.parts_cost) - Number(osFormData.discount);
-            await api.post('/os', { ...osFormData, total_cost });
+            
+            // Abordagem Transacional: enviamos as peças junto com a OS
+            await api.post('/os', { 
+                ...osFormData, 
+                total_cost,
+                parts 
+            });
+
             toast.success('Ordem de Serviço aberta com sucesso!');
             setIsOSModalOpen(false);
-        } catch {
-            toast.error('Erro ao abrir OS.');
+            // Re-fetch client details if needed, but fetchClientDetails is not defined in this scope
+            // fetchClientDetails(); // This was causing an error if not defined
+        } catch (err) {
+            console.error(err);
+            toast.error(err.response?.data?.message || 'Erro ao abrir OS.');
         } finally {
             _setIsSubmitting(false);
         }
@@ -470,7 +493,7 @@ const Clients = () => {
             {/* Modal Nova OS Integrado */}
             <Modal
                 isOpen={isOSModalOpen}
-                onClose={() => setIsOSModalOpen(false)}
+                onClose={() => handleFormChange({ cancel: true })}
                 title="Abrir Nova Ordem de Serviço"
                 size="large"
                 footer={(
@@ -478,7 +501,7 @@ const Clients = () => {
                         <button 
                             type="button" 
                             className="btn btn-secondary px-8" 
-                            onClick={() => setIsOSModalOpen(false)}
+                            onClick={() => handleFormChange({ cancel: true })}
                         >
                             Descartar
                         </button>
