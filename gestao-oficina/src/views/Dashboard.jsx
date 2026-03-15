@@ -51,6 +51,14 @@ const Dashboard = () => {
 
     // Filter State
     const [period, setPeriod] = useState('year');
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setMounted(true);
+        }, 300);
+        return () => clearTimeout(timer);
+    }, []);
     const [customStart, setCustomStart] = useState('');
     const [customEnd, setCustomEnd] = useState('');
 
@@ -209,13 +217,13 @@ const Dashboard = () => {
                         <p className="text-sm text-secondary">Base: Receitas Pagas (Financeiro)</p>
                     </div>
                     <div className="h-64 w-full relative">
-                        {loading ? (
+                        {loading || !mounted ? (
                             <div className="flex justify-center items-center h-full">
                                 <Loader className="animate-spin" size={24} style={{ color: 'var(--accent-color)' }} />
                             </div>
                         ) : (
-                            <ResponsiveContainer width="100%" height={250} aspect={1.7}>
-                                <BarChart data={stats?.revenue_chart || []} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                            <ResponsiveContainer width="100%" height={280}>
+                                <BarChart data={stats?.revenue_chart || []} margin={{ top: 10, right: 10, left: -20, bottom: 40 }}>
                                     <defs>
                                         <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
                                             <stop offset="5%" stopColor="var(--primary-color, #3b82f6)" stopOpacity={0.9} />
@@ -224,11 +232,14 @@ const Dashboard = () => {
                                     </defs>
                                     <XAxis
                                         dataKey="name"
-                                        fontSize={12}
+                                        fontSize={10}
                                         tickLine={false}
                                         axisLine={false}
                                         tick={{ fill: '#64748b', fontWeight: 500 }}
-                                        dy={10}
+                                        interval={0}
+                                        angle={-45}
+                                        textAnchor="end"
+                                        height={60}
                                     />
                                     <YAxis
                                         fontSize={12}
@@ -284,7 +295,7 @@ const Dashboard = () => {
                         )}
                     </div>
                     <div className="h-64 w-full relative">
-                        {loading ? (
+                        {loading || !mounted ? (
                             <div className="flex justify-center items-center h-full">
                                 <Loader className="animate-spin" size={24} style={{ color: 'var(--accent-color)' }} />
                             </div>
@@ -294,7 +305,7 @@ const Dashboard = () => {
                                 <p className="text-secondary text-sm">Nenhuma OS cadastrada</p>
                             </div>
                         ) : (
-                            <ResponsiveContainer width="100%" height={250} aspect={2}>
+                            <ResponsiveContainer width="100%" height={280}>
                                 <PieChart>
                                     <Pie
                                         data={stats.status_chart}
