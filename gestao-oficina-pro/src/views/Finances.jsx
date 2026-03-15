@@ -25,7 +25,7 @@ const STATUS_LABELS = {
 
 
 const Finances = () => {
-    const [activeTab, setActiveTab] = useState('todas'); // 'todas', 'receber', 'pagar'
+    const [activeTab, setActiveTab] = useState('todas'); // 'todas', 'income', 'expense'
     const [transactions, setTransactions] = useState([]);
     const [summary, setSummary] = useState({ balance: 0, income: 0, expense: 0 });
     const [loading, setLoading] = useState(true);
@@ -273,14 +273,14 @@ const Finances = () => {
                     Todas
                 </button>
                 <button
-                    className={`tab-button ${activeTab === 'receber' ? 'active success' : ''}`}
-                    onClick={() => setActiveTab('receber')}
+                    className={`tab-button ${activeTab === 'income' ? 'active success' : ''}`}
+                    onClick={() => setActiveTab('income')}
                 >
                     A Receber (Receitas)
                 </button>
                 <button
-                    className={`tab-button ${activeTab === 'pagar' ? 'active danger' : ''}`}
-                    onClick={() => setActiveTab('pagar')}
+                    className={`tab-button ${activeTab === 'expense' ? 'active danger' : ''}`}
+                    onClick={() => setActiveTab('expense')}
                 >
                     A Pagar (Despesas)
                 </button>

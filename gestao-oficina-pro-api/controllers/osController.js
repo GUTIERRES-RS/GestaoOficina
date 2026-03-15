@@ -146,11 +146,42 @@ const osController = {
 
             // 4. Finanças
             const valorTotal = Number(total_cost) || 0;
-            if (status === 'Entregue' && valorTotal > 0) {
-                await connection.query(
-                    "INSERT INTO transactions (type, category, amount, description, status, payment_date, os_id, payment_method) VALUES ('income', 'Serviço/OS', ?, ?, ?, CURDATE(), ?, ?)",
-                    [valorTotal, `OS #${osId} - Entregue`, 'pendente', osId, null]
-                );
+            if (status === 'Entregue') {
+                // Entrada (Faturamento)
+                if (valorTotal > 0) {
+                    await connection.query(
+                        "INSERT INTO transactions (type, category, amount, description, status, payment_date, os_id, payment_method) VALUES ('income', 'Serviço/OS', ?, ?, ?, CURDATE(), ?, ?)",
+                        [valorTotal, `OS #${osId} - Entregue`, 'pendente', osId, null]
+                    );
+                }
+
+                // Saída (Custo das Peças)
+                const [[costResult]] = await connection.query(`
+                    SELECT SUM(op.quantity * i.cost_price) as total_parts_cost
+                    FROM os_parts op
+                    JOIN inventory i ON op.part_id = i.id
+                    WHERE op.os_id = ?
+                `, [osId]);
+                const totalPartsCost = Number(costResult.total_parts_cost) || 0;
+
+                if (totalPartsCost > 0) {
+                    await connection.query(
+                        "INSERT INTO transactions (type, category, amount, description, status, payment_date, os_id) VALUES ('expense', 'Peças/Insumos', ?, ?, 'pago', CURDATE(), ?)",
+                        [totalPartsCost, `Custo de Peças - OS #${osId}`, osId]
+                    );
+                }
+
+                // C. Saída (Comissão do Mecânico se houver)
+                if (mechanic_id && Number(labor_cost) > 0) {
+                    const [[mech]] = await connection.query('SELECT commission_rate FROM mechanics WHERE id = ?', [mechanic_id]);
+                    if (mech && Number(mech.commission_rate) > 0) {
+                        const commissionAmount = (Number(labor_cost) * Number(mech.commission_rate)) / 100;
+                        await connection.query(
+                            "INSERT INTO transactions (type, category, amount, description, status, payment_date, os_id) VALUES ('expense', 'Comissão', ?, ?, 'pendente', CURDATE(), ?)",
+                            [commissionAmount, `Comissão OS #${osId} - ${mechanic_name || 'Mecânico'}`, osId]
+                        );
+                    }
+                }
             }
 
             await connection.commit();
@@ -269,17 +300,18 @@ const osController = {
                 ]
             );
 
-            // 4. Lógica de Finanças (Simplificada)
+            // 4. Lógica de Finanças
             const valorTotal = Number(total_cost) || 0;
             const isEntregue = status === 'Entregue';
             const wasEntregue = currentOS.status === 'Entregue';
 
             if (isEntregue) {
-                const [[transaction]] = await connection.query("SELECT id FROM transactions WHERE os_id = ?", [id]);
-                if (transaction) {
+                // A. Sincronizar Entrada (Faturamento)
+                const [[incomeTran]] = await connection.query("SELECT id FROM transactions WHERE os_id = ? AND type = 'income'", [id]);
+                if (incomeTran) {
                     await connection.query(
                         "UPDATE transactions SET amount = ?, payment_method = ?, status = ?, description = ? WHERE id = ?",
-                        [valorTotal, payment_method || null, payment_status === 'pago' ? 'pago' : 'pendente', `OS #${id} - Entregue`, transaction.id]
+                        [valorTotal, payment_method || null, payment_status === 'pago' ? 'pago' : 'pendente', `OS #${id} - Entregue`, incomeTran.id]
                     );
                 } else if (valorTotal > 0) {
                     await connection.query(
@@ -287,7 +319,57 @@ const osController = {
                         [valorTotal, `OS #${id} - Entregue`, 'pendente', id, null]
                     );
                 }
+
+                // B. Sincronizar Saída (Custo das Peças)
+                const [[costResult]] = await connection.query(`
+                    SELECT SUM(op.quantity * i.cost_price) as total_parts_cost
+                    FROM os_parts op
+                    JOIN inventory i ON op.part_id = i.id
+                    WHERE op.os_id = ?
+                `, [id]);
+                const totalPartsCost = Number(costResult.total_parts_cost) || 0;
+
+                const [[expenseTran]] = await connection.query("SELECT id FROM transactions WHERE os_id = ? AND type = 'expense'", [id]);
+                if (expenseTran) {
+                    await connection.query(
+                        "UPDATE transactions SET amount = ?, description = ? WHERE id = ?",
+                        [totalPartsCost, `Custo de Peças - OS #${id}`, expenseTran.id]
+                    );
+                } else if (totalPartsCost > 0) {
+                    await connection.query(
+                        "INSERT INTO transactions (type, category, amount, description, status, payment_date, os_id) VALUES ('expense', 'Peças/Insumos', ?, ?, 'pago', CURDATE(), ?)",
+                        [totalPartsCost, `Custo de Peças - OS #${id}`, id]
+                    );
+                }
+
+                // C. Sincronizar Saída (Comissão do Mecânico se houver)
+                if (mechanic_id && Number(labor_cost) > 0) {
+                    const [[mech]] = await connection.query('SELECT commission_rate FROM mechanics WHERE id = ?', [mechanic_id]);
+                    if (mech && Number(mech.commission_rate) > 0) {
+                        const commissionAmount = (Number(labor_cost) * Number(mech.commission_rate)) / 100;
+                        const [[commTran]] = await connection.query("SELECT id FROM transactions WHERE os_id = ? AND category = 'Comissão'", [id]);
+                        
+                        if (commTran) {
+                            await connection.query(
+                                "UPDATE transactions SET amount = ?, description = ? WHERE id = ?",
+                                [commissionAmount, `Comissão OS #${id} - ${mechanic_name || 'Mecânico'}`, commTran.id]
+                            );
+                        } else {
+                            await connection.query(
+                                "INSERT INTO transactions (type, category, amount, description, status, payment_date, os_id) VALUES ('expense', 'Comissão', ?, ?, 'pendente', CURDATE(), ?)",
+                                [commissionAmount, `Comissão OS #${id} - ${mechanic_name || 'Mecânico'}`, id]
+                            );
+                        }
+                    } else {
+                        // Se não tem comissão ou mecânico, remove se existir lançamento
+                        await connection.query("DELETE FROM transactions WHERE os_id = ? AND category = 'Comissão'", [id]);
+                    }
+                } else {
+                    // Remove se a mão de obra zerou ou mecânico foi removido
+                    await connection.query("DELETE FROM transactions WHERE os_id = ? AND category = 'Comissão'", [id]);
+                }
             } else if (wasEntregue) {
+                // Se saiu de "Entregue", remove todos os lançamentos financeiros daquela OS
                 await connection.query("DELETE FROM transactions WHERE os_id = ?", [id]);
             }
 
