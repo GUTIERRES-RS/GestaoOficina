@@ -15,7 +15,7 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip as RechartsTooltip, ResponsiveCont
 import api from '../services/api';
 import { Link } from 'react-router-dom';
 import './Dashboard.css';
-import { StatusBadge } from '../utils/statusStyles';
+import { StatusBadge, getStatusStyle } from '../utils/statusStyles';
 import TableEmptyState from '../components/TableEmptyState';
 import { formatMoney, formatDate } from '../utils/format';
 import { getPeriodDates, PERIODS } from '../utils/date';
@@ -308,18 +308,7 @@ const Dashboard = () => {
                                         cornerRadius={4}
                                     >
                                         {stats.status_chart.map((entry, index) => {
-                                            const statusColors = {
-                                                'Aberto': '#f59e0b',
-                                                'Em Andamento': '#3b82f6',
-                                                'Em andamento': '#3b82f6',
-                                                'Aguardando Peça': '#8b5cf6',
-                                                'Finalizado': '#10b981',
-                                                'Entregue': '#64748b',
-                                                'Cancelado': '#ef4444',
-                                                'Orçamento': '#a855f7',
-                                            };
-                                            const fallback = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#64748b'];
-                                            const color = statusColors[entry.name] || fallback[index % fallback.length];
+                                            const color = getStatusStyle(entry.name).border.split(' ')[2];
                                             return <Cell key={`cell-${index}`} fill={color} stroke="transparent" />;
                                         })}
                                     </Pie>
@@ -354,7 +343,19 @@ const Dashboard = () => {
                                                             <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: entry.color }}></div>
                                                             <span className="text-sm font-medium truncate text-secondary">{entry.value}</span>
                                                         </div>
-                                                        <span className="badge badge-warning">
+                                                        <span 
+                                                            className="badge" 
+                                                            style={{ 
+                                                                ...getStatusStyle(entry.value),
+                                                                fontSize: '0.65rem',
+                                                                fontWeight: '700',
+                                                                padding: '0.1rem 0.5rem',
+                                                                borderRadius: '999px',
+                                                                border: 'none', // Limpar borda para o dashboard ficar mais "clean"
+                                                                minWidth: '24px',
+                                                                textAlign: 'center'
+                                                            }}
+                                                        >
                                                             {entry.payload.value}
                                                         </span>
                                                     </div>
