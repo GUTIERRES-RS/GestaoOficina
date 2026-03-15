@@ -14,7 +14,7 @@ export const ConnectionProvider = ({ children }) => {
         };
 
         window.addEventListener('api-connection-failed', handleFailure);
-        
+
         // Verificação inicial de conexão
         checkConnection();
 
@@ -27,7 +27,7 @@ export const ConnectionProvider = ({ children }) => {
         setChecking(true);
         try {
             // Tenta uma rota simples de health check
-            await axios.get('http://localhost:3000/api/health', { timeout: 3000 });
+            await axios.get(`http://${window.location.hostname}:3000/api/health`, { timeout: 3000 });
             setIsConnected(true);
         } catch (error) {
             if (!error.response) {
