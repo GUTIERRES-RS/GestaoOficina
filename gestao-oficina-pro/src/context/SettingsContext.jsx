@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import api from '../services/api';
+import { useAuth } from './AuthContext';
 
 const SettingsContext = createContext();
 
@@ -12,31 +13,65 @@ export const useSettings = () => {
 };
 
 export const SettingsProvider = ({ children }) => {
-    const [settings, setSettings] = useState({
-        workshop_name: '',
-        workshop_phone: '',
-        workshop_email: '',
-        workshop_address: '',
-        workshop_document: '',
-        theme: 'dark',
-        currency: 'BRL',
-        logo_url: null,
-        whatsapp: '',
-        review_days: 30,
-        next_os_number: 1,
-        items_per_page: null
+    const auth = useAuth();
+    const signed = auth?.signed;
+
+    const [settings, setSettings] = useState(() => {
+        const savedTheme = localStorage.getItem('@GestaoOficinaPro:theme');
+        return {
+            workshop_name: '',
+            workshop_phone: '',
+            workshop_email: '',
+            workshop_address: '',
+            workshop_document: '',
+            theme: savedTheme || 'dark',
+            currency: 'BRL',
+            logo_url: null,
+            whatsapp: '',
+            review_days: 30,
+            next_os_number: 1,
+            items_per_page: null
+        };
     });
     const [loading, setLoading] = useState(true);
 
     const fetchSettings = async () => {
         try {
             setLoading(true);
-            const res = await api.get('/settings');
+            const token = localStorage.getItem('@GestaoOficinaPro:token');
+            
+            let res;
+            if (token) {
+                // Tenta buscar configurações completas se tiver token
+                res = await api.get('/settings');
+            } else {
+                // Caso contrário, busca apenas o que é público (logo e tema)
+                res = await api.get('/settings/public');
+            }
+
             if (res.data) {
                 setSettings(prev => ({ ...prev, ...res.data }));
+                if (res.data.theme) {
+                    localStorage.setItem('@GestaoOficinaPro:theme', res.data.theme);
+                }
             }
         } catch (error) {
-            console.error('Error fetching settings in context:', error);
+            // Se falhou ao buscar as completas por 401, tenta as públicas
+            if (error.response?.status === 401) {
+                try {
+                    const publicRes = await api.get('/settings/public');
+                    if (publicRes.data) {
+                        setSettings(prev => ({ ...prev, ...publicRes.data }));
+                        if (publicRes.data.theme) {
+                            localStorage.setItem('@GestaoOficinaPro:theme', publicRes.data.theme);
+                        }
+                    }
+                } catch (publicError) {
+                    console.error('Error fetching public settings:', publicError);
+                }
+            } else {
+                console.error('Error fetching settings in context:', error);
+            }
         } finally {
             setLoading(false);
         }
@@ -44,11 +79,12 @@ export const SettingsProvider = ({ children }) => {
 
     useEffect(() => {
         fetchSettings();
-    }, []);
+    }, [signed]);
 
     useEffect(() => {
         if (settings.theme) {
             document.documentElement.setAttribute('data-theme', settings.theme);
+            localStorage.setItem('@GestaoOficinaPro:theme', settings.theme);
         }
     }, [settings.theme]);
 
@@ -68,6 +104,9 @@ export const SettingsProvider = ({ children }) => {
 
     const updateSettingsState = (newSettings) => {
         setSettings(newSettings);
+        if (newSettings.theme) {
+            localStorage.setItem('@GestaoOficinaPro:theme', newSettings.theme);
+        }
     };
 
     return (

@@ -18,6 +18,16 @@ const settingsController = {
             res.status(500).json({ error: 'Erro ao buscar configurações' });
         }
     },
+    
+    getPublic: async (req, res) => {
+        try {
+            const [rows] = await pool.query('SELECT workshop_name, logo_url, theme FROM settings WHERE id = 1');
+            res.json(rows[0] || {});
+        } catch (error) {
+            console.error('Error fetching public settings:', error);
+            res.status(500).json({ error: 'Erro ao buscar configurações públicas' });
+        }
+    },
 
     update: async (req, res) => {
         try {

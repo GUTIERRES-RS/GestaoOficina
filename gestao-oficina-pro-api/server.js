@@ -43,6 +43,7 @@ app.use('/api/auth', authRoutes);
 app.get('/api/health', (req, res) => {
     res.json({ status: 'ok', message: 'API Gestão Oficina Pro rodando perfeitamente!' });
 });
+app.use('/api/settings/public', publicSettingsRoutes);
 // Protected routes
 app.use(authMiddleware);
 
@@ -53,8 +54,6 @@ app.use('/api/finances', financeRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/vehicles', vehicleRoutes);
 app.use('/api/settings', settingsRoutes);
-app.use('/api/mechanics', mechanicRoutes);
-app.use('/api/users', userRoutes);
 app.use('/api/mechanics', mechanicRoutes);
 app.use('/api/users', userRoutes);
 console.log('Routes mounted: clients, os, inventory, finances, dashboard, vehicles, settings, mechanics, users');

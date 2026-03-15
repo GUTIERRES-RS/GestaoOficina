@@ -6,6 +6,7 @@ const ConnectionContext = createContext({});
 export const ConnectionProvider = ({ children }) => {
     const [isConnected, setIsConnected] = useState(true);
     const [checking, setChecking] = useState(false);
+    const [isInitialCheck, setIsInitialCheck] = useState(true);
 
     useEffect(() => {
         const handleFailure = () => {
@@ -13,6 +14,9 @@ export const ConnectionProvider = ({ children }) => {
         };
 
         window.addEventListener('api-connection-failed', handleFailure);
+        
+        // Verificação inicial de conexão
+        checkConnection();
 
         return () => {
             window.removeEventListener('api-connection-failed', handleFailure);
@@ -34,6 +38,7 @@ export const ConnectionProvider = ({ children }) => {
             }
         } finally {
             setChecking(false);
+            setIsInitialCheck(false);
         }
     };
 
@@ -42,7 +47,7 @@ export const ConnectionProvider = ({ children }) => {
     };
 
     return (
-        <ConnectionContext.Provider value={{ isConnected, checking, checkConnection, setConnectionFailed }}>
+        <ConnectionContext.Provider value={{ isConnected, checking, isInitialCheck, checkConnection, setConnectionFailed }}>
             {children}
         </ConnectionContext.Provider>
     );

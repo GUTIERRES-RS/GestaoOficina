@@ -32,6 +32,12 @@ api.interceptors.response.use(
         if (error.response?.status === 401) {
             // Se não for a rota de login, redireciona
             if (!error.config.url.includes('/auth/login')) {
+                // Se já estiver na página de login, não redireciona nem mostra toast de erro
+                // (pode ser uma requisição de fundo como busca de settings que falhou por falta de token)
+                if (window.location.pathname === '/login') {
+                    return Promise.reject(error);
+                }
+
                 localStorage.removeItem('@GestaoOficinaPro:token');
                 localStorage.removeItem('@GestaoOficinaPro:user');
                 
@@ -49,11 +55,13 @@ api.interceptors.response.use(
         if (error.code === 'ECONNABORTED') {
             toast.error('O servidor demorou muito para responder.');
         } else if (!error.response) {
-            // Se não houver resposta, provavelmente é problema de conexão (servidor offline)
-            // Dispara um evento customizado que o ConnectionProvider irá escutar
-            window.dispatchEvent(new CustomEvent('api-connection-failed'));
-        } else {
-            // Mostra o erro vindo da API
+            // Se não houver resposta (e não for erro de cancelamento do axios)
+            // provavelmente é problema de conexão (servidor offline)
+            if (error.code !== 'ERR_CANCELED') {
+                window.dispatchEvent(new CustomEvent('api-connection-failed'));
+            }
+        } else if (error.response.status !== 401) {
+            // Só mostra erro genérico se não for 401 (que já é tratado acima)
             toast.error(message);
         }
 

@@ -8,7 +8,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import './Settings.css';
 
 const Settings = () => {
-    const { settings: globalSettings, updateSettingsState } = useSettings();
+    const { settings: globalSettings, updateSettingsState, loading } = useSettings();
     const { user, updateAuthUser } = useAuth();
     const location = useLocation();
     const navigate = useNavigate();
@@ -109,6 +109,16 @@ const Settings = () => {
         }
     };
 
+    if (loading) {
+        return (
+            <div className="flex h-64 w-full items-center justify-center">
+                <div className="flex flex-col items-center gap-4">
+                    <Loader className="animate-spin text-primary" size={40} />
+                    <span className="text-secondary font-medium">Carregando configurações...</span>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="settings-container animation-fade-in">
