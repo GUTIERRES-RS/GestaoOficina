@@ -101,6 +101,41 @@ const financeController = {
         }
     },
 
+    // Obter Lembretes (Pendentes e Vencidos)
+    getReminders: async (req, res) => {
+        try {
+            // Busca transações pendentes
+            const [rows] = await db.query(
+                `SELECT * FROM transactions 
+                 WHERE status = 'pendente' 
+                 ORDER BY payment_date ASC`
+            );
+
+            const today = new Date().toISOString().split('T')[0];
+            
+            const overdue = rows.filter(t => {
+                if (!t.payment_date) return false;
+                const dateStr = new Date(t.payment_date).toISOString().split('T')[0];
+                return dateStr < today;
+            });
+            
+            const pending = rows.filter(t => {
+                if (!t.payment_date) return true;
+                const dateStr = new Date(t.payment_date).toISOString().split('T')[0];
+                return dateStr >= today;
+            });
+
+            res.json({
+                total: rows.length,
+                pending: pending,
+                overdue: overdue
+            });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: 'Erro ao buscar lembretes de pagamento' });
+        }
+    },
+
     // Excluir transação
     delete: async (req, res) => {
         try {

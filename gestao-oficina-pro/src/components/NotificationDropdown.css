@@ -1,0 +1,218 @@
+.notification-dropdown {
+    position: absolute;
+    top: calc(100% + 12px);
+    right: -10px;
+    width: 320px;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-premium);
+    border: 1px solid var(--border-color);
+    z-index: 1000;
+    overflow: hidden;
+    animation: slideDownFade 0.2s ease-out;
+}
+
+@keyframes slideDownFade {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Arrow pointer */
+.notification-dropdown::before {
+    content: '';
+    position: absolute;
+    top: -6px;
+    right: 22px;
+    width: 12px;
+    height: 12px;
+    background: var(--bg-secondary);
+    border-left: 1px solid var(--border-color);
+    border-top: 1px solid var(--border-color);
+    transform: rotate(45deg);
+}
+
+.dropdown-header {
+    padding: 1.25rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.dropdown-header h3 {
+    margin: 0;
+    font-size: 0.9375rem;
+    color: var(--text-primary);
+    font-weight: 700;
+}
+
+.dropdown-content {
+    max-height: 420px;
+    overflow-y: auto;
+}
+
+.dropdown-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.dropdown-content::-webkit-scrollbar-thumb {
+    background-color: var(--border-color);
+    border-radius: 3px;
+}
+
+.notification-section {
+    padding: 0.75rem 0;
+}
+
+.notification-section:not(:last-child) {
+    border-bottom: 1px solid var(--bg-tertiary);
+}
+
+.section-title {
+    padding: 1rem 1.25rem 0.5rem;
+    margin: 0;
+    font-size: 0.9375rem;
+    text-transform: none;
+    letter-spacing: normal;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.section-title.overdue {
+    color: var(--danger-color);
+}
+
+.section-title.pending {
+    color: var(--accent-color);
+}
+
+.notification-item {
+    display: flex;
+    align-items: flex-start;
+    padding: 1rem 1.25rem;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    border-bottom: 1px solid var(--bg-tertiary);
+}
+
+.notification-item:last-child {
+    border-bottom: none;
+}
+
+.notification-item:hover {
+    background-color: var(--bg-primary);
+}
+
+.notification-item.overdue:hover {
+    background-color: var(--danger-light);
+}
+
+.item-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1rem;
+    flex-shrink: 0;
+    transition: transform var(--transition-fast);
+}
+
+.notification-item:hover .item-icon {
+    transform: scale(1.05);
+}
+
+.notification-item .item-icon {
+    background-color: var(--accent-light);
+    color: var(--accent-color);
+}
+
+.notification-item.overdue .item-icon {
+    background-color: var(--danger-light);
+    color: var(--danger-color);
+}
+
+.item-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.item-desc {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--text-primary);
+    font-weight: 600;
+    line-height: 1.25;
+    margin-bottom: 0.25rem;
+}
+
+.item-amount {
+    display: block;
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.item-date {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--text-tertiary);
+    margin-top: 0.125rem;
+}
+
+.item-arrow {
+    color: var(--text-tertiary);
+    margin-left: 0.75rem;
+    align-self: center;
+    opacity: 0.5;
+    transition: transform var(--transition-fast), opacity var(--transition-fast);
+}
+
+.notification-item:hover .item-arrow {
+    opacity: 1;
+    transform: translateX(2px);
+    color: var(--accent-color);
+}
+
+.empty-notifications {
+    padding: 3rem 1.5rem;
+    text-align: center;
+}
+
+.empty-notifications p {
+    color: var(--text-tertiary);
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.dropdown-footer {
+    padding: 1rem 1.25rem;
+    background: var(--bg-primary);
+    border-top: 1px solid var(--border-color);
+    text-align: center;
+}
+
+.dropdown-footer button {
+    background: none;
+    border: none;
+    color: var(--accent-color);
+    font-size: 0.875rem;
+    font-weight: 600;
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-md);
+    transition: all var(--transition-fast);
+    width: 100%;
+}
+
+.dropdown-footer button:hover {
+    background-color: var(--accent-light);
+    color: var(--accent-hover);
+}
