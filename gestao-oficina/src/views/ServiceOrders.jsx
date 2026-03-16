@@ -216,11 +216,17 @@ const ServiceOrders = () => {
         }
     };
 
-    const handlePrintOS = (os) => {
-        setSelectedOS(os);
-        setTimeout(() => {
-            window.print();
-        }, 500);
+    const handlePrintOS = async (os) => {
+        try {
+            const res = await api.get(`/os/${os.id}/parts`);
+            setSelectedOS({ ...os, parts: res.data });
+            setTimeout(() => {
+                window.print();
+            }, 500);
+        } catch (error) {
+            console.error('Error fetching parts for print', error);
+            toast.error('Erro ao carregar detalhes para impressão.');
+        }
     };
 
 

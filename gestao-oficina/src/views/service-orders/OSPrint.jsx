@@ -4,6 +4,8 @@ import { formatDate, formatMoney } from '../../utils/format';
 const OSPrint = ({ os, settings }) => {
     if (!os) return null;
 
+    const parts = os.parts || [];
+
     return (
         <div className="print-document" style={{ backgroundColor: '#ffffff', color: '#000000', padding: '10px', minHeight: '100%' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '2px solid #333', paddingBottom: '20px', marginBottom: '20px' }}>
@@ -28,12 +30,12 @@ const OSPrint = ({ os, settings }) => {
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px', marginBottom: '30px' }}>
                 <div>
-                    <h3 style={{ fontSize: '14px', borderBottom: '1px solid #ddd', paddingBottom: '5px' }}>CLIENTE</h3>
+                    <h3 style={{ fontSize: '14px', borderBottom: '1px solid #ddd', paddingBottom: '5px', marginBottom: '10px', color: '#333' }}>CLIENTE</h3>
                     <p><strong>Nome:</strong> {os.client_name}</p>
                     {os.client_document && <p><strong>CPF/CNPJ:</strong> {os.client_document}</p>}
                 </div>
                 <div>
-                    <h3 style={{ fontSize: '14px', borderBottom: '1px solid #ddd', paddingBottom: '5px' }}>VEÍCULO</h3>
+                    <h3 style={{ fontSize: '14px', borderBottom: '1px solid #ddd', paddingBottom: '5px', marginBottom: '10px', color: '#333' }}>VEÍCULO</h3>
                     <p><strong>Fabricante:</strong> {os.brand || '--'}</p>
                     <p><strong>Modelo:</strong> {os.vehicle_model}</p>
                     <p><strong>Placa:</strong> {os.plate}</p>
@@ -42,19 +44,47 @@ const OSPrint = ({ os, settings }) => {
             </div>
 
             <div style={{ marginBottom: '30px' }}>
-                <h3 style={{ fontSize: '14px', borderBottom: '1px solid #ddd', paddingBottom: '5px' }}>SERVIÇO SOLICITADO / PROBLEMA</h3>
-                <p style={{ padding: '10px', background: '#f9f9f9', whiteSpace: 'pre-wrap' }}>{os.problem_reported}</p>
+                <h3 style={{ fontSize: '14px', borderBottom: '1px solid #ddd', paddingBottom: '5px', marginBottom: '10px', color: '#333' }}>SERVIÇO SOLICITADO / PROBLEMA</h3>
+                <p style={{ padding: '10px', background: '#f9f9f9', whiteSpace: 'pre-wrap', borderRadius: '4px', border: '1px solid #eee' }}>{os.problem_reported}</p>
             </div>
 
             {os.service_provided && (
                 <div style={{ marginBottom: '30px' }}>
-                    <h3 style={{ fontSize: '14px', borderBottom: '1px solid #ddd', paddingBottom: '5px' }}>SERVIÇO EXECUTADO</h3>
-                    <p style={{ padding: '10px', background: '#f9f9f9', whiteSpace: 'pre-wrap' }}>{os.service_provided}</p>
+                    <h3 style={{ fontSize: '14px', borderBottom: '1px solid #ddd', paddingBottom: '5px', marginBottom: '10px', color: '#333' }}>SERVIÇO EXECUTADO</h3>
+                    <p style={{ padding: '10px', background: '#f9f9f9', whiteSpace: 'pre-wrap', borderRadius: '4px', border: '1px solid #eee' }}>{os.service_provided}</p>
+                </div>
+            )}
+
+            {parts.length > 0 && (
+                <div style={{ marginBottom: '30px' }}>
+                    <h3 style={{ fontSize: '14px', borderBottom: '1px solid #ddd', paddingBottom: '5px', marginBottom: '10px', color: '#333' }}>PEÇAS E MATERIAIS</h3>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '5px' }}>
+                        <thead>
+                            <tr style={{ textAlign: 'left', borderBottom: '1px solid #eee' }}>
+                                <th style={{ padding: '8px 4px', fontSize: '12px' }}>Cód.</th>
+                                <th style={{ padding: '8px 4px', fontSize: '12px' }}>Descrição</th>
+                                <th style={{ padding: '8px 4px', fontSize: '12px', textAlign: 'center' }}>Qtd.</th>
+                                <th style={{ padding: '8px 4px', fontSize: '12px', textAlign: 'right' }}>Unitário</th>
+                                <th style={{ padding: '8px 4px', fontSize: '12px', textAlign: 'right' }}>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {parts.map((part, index) => (
+                                <tr key={index} style={{ borderBottom: '1px solid #f9f9f9' }}>
+                                    <td style={{ padding: '8px 4px', fontSize: '12px', color: '#666' }}>{part.part_code || '--'}</td>
+                                    <td style={{ padding: '8px 4px', fontSize: '12px' }}>{part.part_name}</td>
+                                    <td style={{ padding: '8px 4px', fontSize: '12px', textAlign: 'center' }}>{part.quantity}</td>
+                                    <td style={{ padding: '8px 4px', fontSize: '12px', textAlign: 'right' }}>{formatMoney(part.unit_price)}</td>
+                                    <td style={{ padding: '8px 4px', fontSize: '12px', textAlign: 'right', fontWeight: 'bold' }}>{formatMoney(part.total_price)}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
                 </div>
             )}
 
             <div style={{ marginTop: '50px', borderTop: '2px solid #333', paddingTop: '20px' }}>
-                <h3 style={{ fontSize: '14px', marginBottom: '15px' }}>RESUMO DE VALORES</h3>
+                <h3 style={{ fontSize: '14px', marginBottom: '15px', color: '#333' }}>RESUMO DE VALORES</h3>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
                     <span>Mão de Obra:</span>
                     <span>{formatMoney(os.labor_cost)}</span>
@@ -63,6 +93,12 @@ const OSPrint = ({ os, settings }) => {
                     <span>Peças/Materiais:</span>
                     <span>{formatMoney(os.parts_cost)}</span>
                 </div>
+                {os.discount > 0 && (
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px', color: '#d32f2f' }}>
+                        <span>Desconto:</span>
+                        <span>- {formatMoney(os.discount)}</span>
+                    </div>
+                )}
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '15px', paddingTop: '10px', borderTop: '1px solid #ddd', fontSize: '18px', fontWeight: 'bold' }}>
                     <span>TOTAL:</span>
                     <span>{formatMoney(os.total_cost)}</span>
