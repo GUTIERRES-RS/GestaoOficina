@@ -93,15 +93,15 @@ const mechanicController = {
         try {
             const { start_date, end_date, mechanic_id } = req.query;
 
-            let whereClauses = ["so.status NOT IN ('Cancelado')"];
+            let whereClauses = ["so.status NOT IN ('Cancelado')", "so.expected_delivery_date IS NOT NULL"];
             const params = [];
 
             if (start_date) {
-                whereClauses.push('DATE(so.created_at) >= ?');
+                whereClauses.push('DATE(so.expected_delivery_date) >= ?');
                 params.push(start_date);
             }
             if (end_date) {
-                whereClauses.push('DATE(so.created_at) <= ?');
+                whereClauses.push('DATE(so.expected_delivery_date) <= ?');
                 params.push(end_date);
             }
             if (mechanic_id) {
@@ -142,22 +142,22 @@ const mechanicController = {
             const { id } = req.params;
             const { start_date, end_date } = req.query;
 
-            let whereClauses = ['so.mechanic_id = ?', "so.status NOT IN ('Cancelado')"];
+            let whereClauses = ['so.mechanic_id = ?', "so.status NOT IN ('Cancelado')", "so.expected_delivery_date IS NOT NULL"];
             const params = [id];
 
-            if (start_date) { whereClauses.push('DATE(so.created_at) >= ?'); params.push(start_date); }
-            if (end_date)   { whereClauses.push('DATE(so.created_at) <= ?'); params.push(end_date);   }
+            if (start_date) { whereClauses.push('DATE(so.expected_delivery_date) >= ?'); params.push(start_date); }
+            if (end_date)   { whereClauses.push('DATE(so.expected_delivery_date) <= ?'); params.push(end_date);   }
 
             const query = `
-                SELECT so.id, so.status, so.labor_cost, so.total_cost, so.created_at,
-                       c.name AS client_name, v.plate, v.model,
+                SELECT so.id, so.status, so.labor_cost, so.total_cost, so.created_at, so.expected_delivery_date,
+                       c.name AS client_name, v.plate, v.brand, v.model,
                        ROUND(so.labor_cost * m.commission_rate / 100, 2) AS commission_value
                 FROM service_orders so
                 JOIN clients c ON c.id = so.client_id
                 JOIN vehicles v ON v.id = so.vehicle_id
                 JOIN mechanics m ON m.id = so.mechanic_id
                 WHERE ${whereClauses.join(' AND ')}
-                ORDER BY so.created_at DESC
+                ORDER BY so.expected_delivery_date DESC
             `;
 
             const [rows] = await db.query(query, params);

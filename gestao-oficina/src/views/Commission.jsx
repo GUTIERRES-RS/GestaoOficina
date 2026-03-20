@@ -9,7 +9,7 @@ import Pagination from '../components/Pagination';
 import { useSettings } from '../context/SettingsContext';
 import api from '../services/api';
 import { StatusBadge } from '../utils/statusStyles';
-import { formatMoney, formatPercent } from '../utils/format';
+import { formatMoney, formatPercent, formatDate } from '../utils/format';
 import { getPeriodDates, PERIODS } from '../utils/date';
 import './Commission.css';
 
@@ -191,7 +191,7 @@ export default function Commission() {
                                         <th>Taxa</th>
                                         <th>O.S. Realizadas</th>
                                         <th>Mão de Obra</th>
-                                        <th>Comissão Devida</th>
+                                        <th>Comissão Prevista</th>
                                         <th>% do Total</th>
                                     </tr>
                                 </thead>
@@ -266,8 +266,8 @@ export default function Commission() {
                                                                                         <tr key={os.id}>
                                                                                             <td>#{os.id}</td>
                                                                                             <td>{os.client_name}</td>
-                                                                                            <td>{os.plate} {os.model}</td>
-                                                                                            <td>{new Date(os.created_at).toLocaleDateString('pt-BR')}</td>
+                                                                                            <td>{os.brand} {os.plate} {os.model}</td>
+                                                                                            <td>{os.expected_delivery_date ? formatDate(os.expected_delivery_date) : '-'}</td>
                                                                                             <td><StatusBadge status={os.status} /></td>
                                                                                             <td>{formatMoney(os.labor_cost)}</td>
                                                                                             <td className="commission-detail-val">{formatMoney(os.commission_value)}</td>

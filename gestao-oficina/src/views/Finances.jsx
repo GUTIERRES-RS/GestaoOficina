@@ -35,6 +35,7 @@ const Finances = () => {
     const [period, setPeriod] = useState('month');
     const [customStart, setCustomStart] = useState('');
     const [customEnd, setCustomEnd] = useState('');
+    const [paymentStatusFilter, setPaymentStatusFilter] = useState('todos');
 
     const getDateRange = useCallback(() => {
         if (period === 'custom') return { start: customStart, end: customEnd };
@@ -81,21 +82,23 @@ const Finances = () => {
     }, [fetchFinancialData]);
 
     const filteredTransactions = transactions.filter(t => {
-        if (activeTab === 'todas') return true;
-        if (activeTab === 'income') return t.type === 'income';
-        if (activeTab === 'expense') return t.type === 'expense';
-
-        const today = new Date().toISOString().split('T')[0];
-        const tDate = t.payment_date ? t.payment_date.split('T')[0] : '';
-
-        if (activeTab === 'vencidas') {
-            return t.status === 'pendente' && tDate < today;
-        }
-        if (activeTab === 'avencer') {
-            return t.status === 'pendente' && tDate >= today;
+        let typeMatches = false;
+        if (activeTab === 'todas') typeMatches = true;
+        else if (activeTab === 'income') typeMatches = t.type === 'income';
+        else if (activeTab === 'expense') typeMatches = t.type === 'expense';
+        else {
+            const today = new Date().toISOString().split('T')[0];
+            const tDate = t.payment_date ? t.payment_date.split('T')[0] : '';
+            if (activeTab === 'vencidas') typeMatches = t.status === 'pendente' && tDate < today;
+            if (activeTab === 'avencer') typeMatches = t.status === 'pendente' && tDate >= today;
         }
 
-        return t.type === activeTab;
+        let paymentMatches = false;
+        if (paymentStatusFilter === 'todos') paymentMatches = true;
+        else if (paymentStatusFilter === 'pago') paymentMatches = t.status === 'pago';
+        else if (paymentStatusFilter === 'pendente') paymentMatches = t.status === 'pendente';
+
+        return typeMatches && paymentMatches;
     });
 
     // Pagination Logic
@@ -112,7 +115,7 @@ const Finances = () => {
     // Reset to first page when tab or period changes
     useEffect(() => {
         setCurrentPage(1);
-    }, [activeTab, period, customStart, customEnd]);
+    }, [activeTab, period, customStart, customEnd, paymentStatusFilter]);
 
     const handleOpenModal = (type) => {
         setModalType(type);
@@ -351,6 +354,28 @@ const Finances = () => {
                     onClick={() => setActiveTab('avencer')}
                 >
                     A Vencer
+                </button>
+            </div>
+
+            {/* Payment Status Filter */}
+            <div className="tab-container mb-6 overflow-x-auto">
+                <button
+                    className={`tab-button ${paymentStatusFilter === 'todos' ? 'active' : ''}`}
+                    onClick={() => setPaymentStatusFilter('todos')}
+                >
+                    Todos
+                </button>
+                <button
+                    className={`tab-button ${paymentStatusFilter === 'pago' ? 'active success' : ''}`}
+                    onClick={() => setPaymentStatusFilter('pago')}
+                >
+                    Pago
+                </button>
+                <button
+                    className={`tab-button ${paymentStatusFilter === 'pendente' ? 'active warning' : ''}`}
+                    onClick={() => setPaymentStatusFilter('pendente')}
+                >
+                    Pendente
                 </button>
             </div>
 

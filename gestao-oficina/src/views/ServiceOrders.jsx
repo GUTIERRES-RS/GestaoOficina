@@ -23,6 +23,9 @@ const ServiceOrders = () => {
     const [customStart, setCustomStart] = useState('');
     const [customEnd, setCustomEnd] = useState('');
 
+    // Status Filter State
+    const [statusFilter, setStatusFilter] = useState('Todas');
+
     // Modal State
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [clients, setClients] = useState([]);
@@ -105,7 +108,10 @@ const ServiceOrders = () => {
             os.client_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             os.id?.toString().includes(searchTerm) ||
             os.plate?.toLowerCase().includes(searchTerm.toLowerCase());
-        return matchesSearch;
+        
+        const matchesStatus = statusFilter === 'Todas' || os.status === statusFilter;
+        
+        return matchesSearch && matchesStatus;
     });
 
     // Pagination Logic
@@ -119,10 +125,10 @@ const ServiceOrders = () => {
         setCurrentPage(page);
     };
 
-    // Reset to first page when search changes
+    // Reset to first page when search or status changes
     useEffect(() => {
         setCurrentPage(1);
-    }, [searchTerm]);
+    }, [searchTerm, statusFilter]);
 
     const handleOpenModal = async () => {
         setIsModalOpen(true);
@@ -338,6 +344,52 @@ const ServiceOrders = () => {
                         </div>
                     )}
                 </div>
+            </div>
+
+            {/* Status Filter Tabs */}
+            <div className="tab-container mb-6 overflow-x-auto mt-4">
+                <button
+                    className={`tab-button ${statusFilter === 'Todas' ? 'active' : ''}`}
+                    onClick={() => setStatusFilter('Todas')}
+                >
+                    Todas
+                </button>
+                <button
+                    className={`tab-button ${statusFilter === 'Aberto' ? 'active' : ''}`}
+                    onClick={() => setStatusFilter('Aberto')}
+                >
+                    Aberto
+                </button>
+                <button
+                    className={`tab-button ${statusFilter === 'Em andamento' ? 'active' : ''}`}
+                    onClick={() => setStatusFilter('Em andamento')}
+                >
+                    Em Andamento
+                </button>
+                <button
+                    className={`tab-button ${statusFilter === 'Aguardando Peça' ? 'active' : ''}`}
+                    onClick={() => setStatusFilter('Aguardando Peça')}
+                >
+                    Aguardando Peça
+                </button>
+                <button
+                    className={`tab-button ${statusFilter === 'Finalizado' ? 'active' : ''}`}
+                    onClick={() => setStatusFilter('Finalizado')}
+                >
+                    Finalizado
+                </button>
+                <button
+                    className={`tab-button ${statusFilter === 'Entregue' ? 'active' : ''}`}
+                    onClick={() => setStatusFilter('Entregue')}
+                >
+                    Entregue
+                </button>
+                <button
+                    className={`tab-button ${statusFilter === 'Cancelado' ? 'active' : ''}`}
+                    onClick={() => setStatusFilter('Cancelado')}
+                >
+                    Cancelado
+                </button>
             </div>
 
             <div className="data-table-card mt-6">
