@@ -299,11 +299,6 @@ const Finances = () => {
 
             {/* Overview Summary Cards */}
             <div className="stats-grid mb-6">
-                <div className="stat-card stat-blue">
-                    <div className="stat-value">{loading ? '...' : formatMoney(summary.balance)}</div>
-                    <div className="stat-label">Saldo em Caixa</div>
-                </div>
-
                 <div className="stat-card stat-green">
                     <div className="stat-value text-success-text">{loading ? '...' : formatMoney(summary.income)}</div>
                     <div className="stat-label">Receitas Pagas</div>
@@ -312,6 +307,16 @@ const Finances = () => {
                 <div className="stat-card stat-red">
                     <div className="stat-value text-danger-text">{loading ? '...' : formatMoney(summary.expense)}</div>
                     <div className="stat-label">Despesas Pagas</div>
+                </div>
+
+                <div className="stat-card stat-blue">
+                    <div className="stat-value">{loading ? '...' : formatMoney(summary.balance)}</div>
+                    <div className="stat-label">Saldo em Caixa</div>
+                </div>
+
+                <div className="stat-card stat-green" style={{ opacity: 0.85 }}>
+                    <div className="stat-value text-success-text">{loading ? '...' : formatMoney((summary.income || 0) + (summary.pending_income || 0))}</div>
+                    <div className="stat-label">Faturamento Total</div>
                 </div>
             </div>
 

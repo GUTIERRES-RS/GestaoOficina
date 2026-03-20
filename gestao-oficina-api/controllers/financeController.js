@@ -48,11 +48,27 @@ const financeController = {
                 params
             );
 
+            // Faturamento Pendente
+            let pendingWhereClause = "WHERE status = 'pendente'";
+            let pendingParams = [];
+            if (start_date && end_date) {
+                pendingWhereClause += " AND payment_date BETWEEN ? AND ?";
+                pendingParams = [start_date, end_date];
+            } else {
+                pendingWhereClause += " AND MONTH(payment_date) = MONTH(CURRENT_DATE()) AND YEAR(payment_date) = YEAR(CURRENT_DATE())";
+            }
+
+            const [[{ total_pending_income }]] = await db.query(
+                `SELECT SUM(amount) as total_pending_income FROM transactions ${pendingWhereClause} AND type = 'income'`,
+                pendingParams
+            );
+
             const income = Number(total_income) || 0;
             const expense = Number(total_expense) || 0;
+            const pendingIncome = Number(total_pending_income) || 0;
             const balance = income - expense;
 
-            res.json({ balance, income, expense });
+            res.json({ balance, income, expense, pending_income: pendingIncome });
         } catch (error) {
             console.error(error);
             res.status(500).json({ message: 'Erro ao gerar resumo financeiro' });

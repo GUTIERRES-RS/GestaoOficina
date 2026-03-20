@@ -164,11 +164,11 @@ const Dashboard = () => {
             <div className="stats-grid mb-8">
                 <StatCard
                     title={
-                        period === 'month' ? "Faturamento do Mês" :
-                            period === 'lastmonth' ? "Faturamento (Mês Ant.)" :
-                                period === 'quarter' ? "Faturamento (Trimestre)" :
-                                    period === 'year' ? "Faturamento (Ano)" :
-                                        "Faturamento (Período)"
+                        period === 'month' ? "Receitas Pagas do Mês" :
+                            period === 'lastmonth' ? "Receitas Pagas (Mês Ant.)" :
+                                period === 'quarter' ? "Receitas Pagas (Trimestre)" :
+                                    period === 'year' ? "Receitas Pagas (Ano)" :
+                                        "Receitas Pagas (Período)"
                     }
                     value={stats ? formatMoney(stats.faturamento) : 'R$ 0,00'}
                     icon={<DollarSign size={20} />}
@@ -207,11 +207,11 @@ const Dashboard = () => {
                 <div className="card lg-col-span-2">
                     <div className="card-header">
                         <h2 className="text-lg font-bold">
-                            {period === 'custom' ? 'Faturamento por Período' :
-                                period === 'year' ? 'Faturamento Anual' :
-                                    period === 'quarter' ? 'Faturamento Trimestral' :
-                                        period === 'lastmonth' ? 'Faturamento do Mês Anterior' :
-                                            period === 'month' ? 'Faturamento Mensal' :
+                            {period === 'custom' ? 'Receitas Pagas por Período' :
+                                period === 'year' ? 'Receitas Pagas Anual' :
+                                    period === 'quarter' ? 'Receitas Pagas Trimestral' :
+                                        period === 'lastmonth' ? 'Receitas Pagas do Mês Anterior' :
+                                            period === 'month' ? 'Receitas Pagas Mensal' :
                                                 'Selecione um período'}
                         </h2>
                         <p className="text-sm text-secondary">Base: Receitas Pagas (Financeiro)</p>
@@ -250,7 +250,7 @@ const Dashboard = () => {
                                         dx={-10}
                                     />
                                     <RechartsTooltip
-                                        formatter={(value) => [formatMoney(value), 'Faturamento']}
+                                        formatter={(value) => [formatMoney(value), 'Receitas Pagas']}
                                         contentStyle={{
                                             background: 'var(--bg-secondary)',
                                             border: '1px solid var(--border-color)',
