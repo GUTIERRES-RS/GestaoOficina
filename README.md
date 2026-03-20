@@ -23,7 +23,8 @@ Sistema administrativo completo e moderno para gestão de oficinas mecânicas, f
 - **Histórico por Veículo**: Visualize rapidamente todos os serviços realizados em um veículo específico para diagnósticos mais precisos.
 
 ### 💰 Gestão Financeira & Lembretes
-- **Fluxo de Caixa**: Geração automática de contas a receber ao finalizar ordens de serviço.
+- **Lançamentos Parcelados**: Flexibilidade total para criar contas a receber ou pagar em até 48 parcelas mensais automáticas.
+- **Rastreabilidade**: Todas as parcelas geradas mantêm o vínculo com a Ordem de Serviço de origem (`os id`).
 - **Sistema de Alertas**: Campainha de notificações inteligente que monitora pagamentos pendentes e vencidos em tempo real.
 - **Relatórios**: Acompanhamento de faturamento mensal e produtividade diretamente no Dashboard.
 
@@ -80,7 +81,7 @@ npm run dev
 1. **Monitoramento**: Use o **Dashboard** para acompanhar o faturamento, estoque baixo e ordens de serviço em aberto.
 2. **Ordens de Serviço**: No menu "Serviços", crie ou edite O.S. Adicione peças e serviços. Use o modo **Rascunho** para testar orçamentos sem comprometer o estoque.
 3. **Gestão de Inventário**: Cadastre peças e monitore o estoque mínimo. O sistema dará baixa automática assim que a O.S. for salva.
-4. **Financeiro e Alertas**: Fique de olho na **Campainha de Notificações**. Ela mostrará um selo numérico sempre que houver pagamentos pendentes ou vencidos. Clique para ver os detalhes e navegar até a transação.
+4. **Financeiro e Alertas**: Fique de olho na **Campainha de Notificações**. Além dos alertas, utilize o **Meio de Pagamento: Parcelado** para dividir cobranças ou despesas em múltiplas parcelas com agendamento automático mensal.
 5. **Acesso em Rede**: Para acessar o sistema de um celular na oficina:
    - Verifique o IP do seu computador servidor (ex: `192.168.1.10`).
    - Digite no navegador do celular: `http://[IP-DO-SERVIDOR]:5173`.
