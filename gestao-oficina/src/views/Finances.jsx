@@ -82,6 +82,19 @@ const Finances = () => {
 
     const filteredTransactions = transactions.filter(t => {
         if (activeTab === 'todas') return true;
+        if (activeTab === 'income') return t.type === 'income';
+        if (activeTab === 'expense') return t.type === 'expense';
+
+        const today = new Date().toISOString().split('T')[0];
+        const tDate = t.payment_date ? t.payment_date.split('T')[0] : '';
+
+        if (activeTab === 'vencidas') {
+            return t.status === 'pendente' && tDate < today;
+        }
+        if (activeTab === 'avencer') {
+            return t.status === 'pendente' && tDate >= today;
+        }
+
         return t.type === activeTab;
     });
 
@@ -166,7 +179,7 @@ const Finances = () => {
             setIsSubmitting(true);
             const cleanAmount = formData.amount.toString().replace(',', '.');
             const amountValue = parseFloat(cleanAmount);
-            
+
             if (formData.payment_method === 'Parcelado' && (parseInt(formData.installments) || 0) > 1) {
                 const totalInstallments = parseInt(formData.installments) || 2;
                 const installmentValue = (amountValue / totalInstallments).toFixed(2);
@@ -175,7 +188,7 @@ const Finances = () => {
                 for (let i = 0; i < totalInstallments; i++) {
                     const installmentDate = new Date(baseDate);
                     installmentDate.setMonth(baseDate.getMonth() + i);
-                    
+
                     const data = {
                         description: `${formData.description} (${i + 1}/${totalInstallments})`,
                         category: formData.category,
@@ -303,7 +316,7 @@ const Finances = () => {
             </div>
 
             {/* Tabs Nav */}
-            <div className="tab-container mb-6">
+            <div className="tab-container mb-6 overflow-x-auto">
                 <button
                     className={`tab-button ${activeTab === 'todas' ? 'active' : ''}`}
                     onClick={() => setActiveTab('todas')}
@@ -314,13 +327,25 @@ const Finances = () => {
                     className={`tab-button ${activeTab === 'income' ? 'active success' : ''}`}
                     onClick={() => setActiveTab('income')}
                 >
-                    A Receber (Receitas)
+                    Receitas
                 </button>
                 <button
                     className={`tab-button ${activeTab === 'expense' ? 'active danger' : ''}`}
                     onClick={() => setActiveTab('expense')}
                 >
-                    A Pagar (Despesas)
+                    Despesas
+                </button>
+                <button
+                    className={`tab-button ${activeTab === 'vencidas' ? 'active danger' : ''}`}
+                    onClick={() => setActiveTab('vencidas')}
+                >
+                    Vencidas
+                </button>
+                <button
+                    className={`tab-button ${activeTab === 'avencer' ? 'active warning' : ''}`}
+                    onClick={() => setActiveTab('avencer')}
+                >
+                    A Vencer
                 </button>
             </div>
 
@@ -453,7 +478,7 @@ const Finances = () => {
                                 <FileText className="text-primary-color" size={20} />
                                 <h3 className="font-bold text-lg">1. Dados da Transação</h3>
                             </div>
-                            
+
                             <div className="form-group mb-4">
                                 <label className="form-label">Descrição *</label>
                                 <div className="form-input-wrapper">
