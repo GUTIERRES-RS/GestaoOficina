@@ -33,6 +33,7 @@ const OSPrint = ({ os, settings }) => {
                     <h3 style={{ fontSize: '14px', borderBottom: '1px solid #ddd', paddingBottom: '5px', marginBottom: '10px', color: '#333' }}>CLIENTE</h3>
                     <p><strong>Nome:</strong> {os.client_name}</p>
                     {os.client_document && <p><strong>CPF/CNPJ:</strong> {os.client_document}</p>}
+                    {os.client_phone && <p><strong>Telefone:</strong> {os.client_phone}</p>}
                 </div>
                 <div>
                     <h3 style={{ fontSize: '14px', borderBottom: '1px solid #ddd', paddingBottom: '5px', marginBottom: '10px', color: '#333' }}>VEÍCULO</h3>

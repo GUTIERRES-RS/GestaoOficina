@@ -8,7 +8,7 @@ const osController = {
         try {
             const { start_date, end_date } = req.query;
             let query = `
-                SELECT so.*, c.name as client_name, c.document as client_document, v.plate, v.brand, v.model as vehicle_model, v.km_cad as km 
+                SELECT so.*, c.name as client_name, c.document as client_document, c.phone as client_phone, v.plate, v.brand, v.model as vehicle_model, v.km_cad as km 
                 FROM service_orders so
                 JOIN clients c ON so.client_id = c.id
                 JOIN vehicles v ON so.vehicle_id = v.id

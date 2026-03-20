@@ -212,6 +212,7 @@ const Clients = () => {
             client_id: client.id,
             client_name: client.name,
             vehicle_id: vehicle.id,
+            brand: vehicle.brand,
             vehicle_model: vehicle.model,
             plate: vehicle.plate,
             mechanic_id: '',

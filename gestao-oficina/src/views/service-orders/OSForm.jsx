@@ -256,7 +256,7 @@ const OSForm = ({
                                 <div className="min-w-0">
                                     <p className="text-[11px] text-secondary uppercase font-bold tracking-wider leading-none mb-1.5">Veículo</p>
                                     <p className="text-base font-bold text-primary-color leading-tight truncate">
-                                        {formData.vehicle_model} <span className="text-secondary font-medium text-sm">({formData.plate})</span>
+                                        {formData.brand ? `${formData.brand} ` : ''}{formData.vehicle_model} <span className="text-secondary font-medium text-sm">({formData.plate})</span>
                                     </p>
                                 </div>
                             </div>
