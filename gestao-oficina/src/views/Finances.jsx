@@ -565,12 +565,12 @@ const Finances = () => {
                                             <Layers className="input-icon" size={18} />
                                             <input
                                                 type="number"
-                                                min="2"
+                                                min="1"
                                                 max="48"
                                                 className="form-control form-control-with-icon"
                                                 required
                                                 value={formData.installments}
-                                                onChange={(e) => setFormData({ ...formData, installments: parseInt(e.target.value) || 2 })}
+                                                onChange={(e) => setFormData({ ...formData, installments: parseInt(e.target.value) || 1 })}
                                             />
                                         </div>
                                     </div>
