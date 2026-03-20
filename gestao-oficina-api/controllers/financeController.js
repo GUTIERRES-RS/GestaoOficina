@@ -62,15 +62,15 @@ const financeController = {
     // Criar nova transação
     create: async (req, res) => {
         try {
-            const { type, category, amount, description, date, status, payment_method } = req.body;
+            const { type, category, amount, description, date, status, payment_method, os_id } = req.body;
 
             if (!type || !description || !amount) {
                 return res.status(400).json({ message: 'Tipo, descrição e valor são obrigatórios' });
             }
 
             const [result] = await db.query(
-                'INSERT INTO transactions (type, category, amount, description, payment_date, status, payment_method) VALUES (?, ?, ?, ?, ?, ?, ?)',
-                [type, category, amount, description, date || null, status || 'pendente', payment_method || null]
+                'INSERT INTO transactions (type, category, amount, description, payment_date, status, payment_method, os_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+                [type, category, amount, description, date || null, status || 'pendente', payment_method || null, os_id || null]
             );
             res.status(201).json({ id: result.insertId, message: 'Transação cadastrada com sucesso!' });
         } catch (error) {
@@ -83,11 +83,11 @@ const financeController = {
     update: async (req, res) => {
         try {
             const { id } = req.params;
-            const { type, category, amount, description, date, status, payment_method } = req.body;
+            const { type, category, amount, description, date, status, payment_method, os_id } = req.body;
 
             const [result] = await db.query(
-                'UPDATE transactions SET type = ?, category = ?, amount = ?, description = ?, payment_date = ?, status = ?, payment_method = ? WHERE id = ?',
-                [type, category, amount, description, date || null, status, payment_method || null, id]
+                'UPDATE transactions SET type = ?, category = ?, amount = ?, description = ?, payment_date = ?, status = ?, payment_method = ?, os_id = ? WHERE id = ?',
+                [type, category, amount, description, date || null, status, payment_method || null, os_id || null, id]
             );
 
             if (result.affectedRows === 0) {

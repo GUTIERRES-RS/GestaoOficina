@@ -45,7 +45,7 @@ const Finances = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [modalType, setModalType] = useState('income'); // 'income' | 'expense'
-    const [formData, setFormData] = useState({ description: '', category: '', amount: '', date: '', status: 'pendente', payment_method: '' });
+    const [formData, setFormData] = useState({ description: '', category: '', amount: '', date: '', status: 'pendente', payment_method: '', installments: 1, os_id: null });
     const [itemToDelete, setItemToDelete] = useState(null); // This will now store the whole object if possible, or just ID
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -103,7 +103,7 @@ const Finances = () => {
 
     const handleOpenModal = (type) => {
         setModalType(type);
-        setFormData({ id: null, description: '', category: '', amount: '', date: new Date().toISOString().split('T')[0], status: 'pago', payment_method: '' });
+        setFormData({ id: null, description: '', category: '', amount: '', date: new Date().toISOString().split('T')[0], status: 'pago', payment_method: '', installments: 1, os_id: null });
         setIsModalOpen(true);
     };
 
@@ -116,7 +116,9 @@ const Finances = () => {
             amount: transaction.amount,
             date: transaction.payment_date ? transaction.payment_date.split('T')[0] : '',
             status: transaction.status,
-            payment_method: transaction.payment_method || ''
+            payment_method: transaction.payment_method || '',
+            installments: 1,
+            os_id: transaction.os_id || null
         });
         setIsModalOpen(true);
     };
@@ -163,22 +165,58 @@ const Finances = () => {
         try {
             setIsSubmitting(true);
             const cleanAmount = formData.amount.toString().replace(',', '.');
-            const data = {
-                ...formData,
-                type: modalType,
-                amount: parseFloat(cleanAmount)
-            };
+            const amountValue = parseFloat(cleanAmount);
+            
+            if (formData.payment_method === 'Parcelado' && (parseInt(formData.installments) || 0) > 1) {
+                const totalInstallments = parseInt(formData.installments) || 2;
+                const installmentValue = (amountValue / totalInstallments).toFixed(2);
+                const baseDate = new Date(formData.date + 'T12:00:00');
 
-            if (formData.id) {
-                await api.put(`/finances/${formData.id}`, data);
-                toast.success('Transação atualizada com sucesso!');
+                for (let i = 0; i < totalInstallments; i++) {
+                    const installmentDate = new Date(baseDate);
+                    installmentDate.setMonth(baseDate.getMonth() + i);
+                    
+                    const data = {
+                        description: `${formData.description} (${i + 1}/${totalInstallments})`,
+                        category: formData.category,
+                        amount: parseFloat(installmentValue),
+                        date: installmentDate.toISOString().split('T')[0],
+                        status: formData.status,
+                        payment_method: 'Parcelado',
+                        type: modalType,
+                        os_id: formData.os_id
+                    };
+
+                    // Se for edição, a primeira parcela atualiza o registro atual, 
+                    // as demais criam novos registros.
+                    if (formData.id && i === 0) {
+                        await api.put(`/finances/${formData.id}`, data);
+                    } else {
+                        await api.post('/finances', data);
+                    }
+                }
+                toast.success(`${totalInstallments} parcelas processadas com sucesso!`);
             } else {
-                await api.post('/finances', data);
-                toast.success(`${modalType === 'income' ? 'Receita' : 'Despesa'} salva com sucesso!`);
+                const data = {
+                    ...formData,
+                    type: modalType,
+                    amount: amountValue
+                };
+                // Remove internal UI state
+                delete data.installments;
+
+                if (formData.id) {
+                    await api.put(`/finances/${formData.id}`, data);
+                    toast.success('Transação atualizada com sucesso!');
+                } else {
+                    await api.post('/finances', data);
+                    toast.success(`${modalType === 'income' ? 'Receita' : 'Despesa'} salva com sucesso!`);
+                }
             }
             setIsModalOpen(false);
             fetchFinancialData();
-        } catch {
+        } catch (err) {
+            console.error(err);
             toast.error('Erro ao salvar transação.');
         } finally {
             setIsSubmitting(false);
@@ -422,11 +460,12 @@ const Finances = () => {
                                     <FileText className="input-icon" size={18} />
                                     <input
                                         type="text"
-                                        className="form-control form-control-with-icon"
+                                        className={`form-control form-control-with-icon ${formData.payment_method === 'Parcelado' ? 'opacity-70 cursor-not-allowed' : ''}`}
                                         placeholder={modalType === 'income' ? 'Ex: Recebimento Serviço...' : 'Ex: Compra de Óleo...'}
                                         required
                                         value={formData.description}
                                         onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                                        readOnly={formData.payment_method === 'Parcelado'}
                                     />
                                 </div>
                             </div>
@@ -515,9 +554,27 @@ const Finances = () => {
                                             <option value="Cartão de Crédito">Cartão de Crédito</option>
                                             <option value="Cartão de Débito">Cartão de Débito</option>
                                             <option value="Boleto">Boleto</option>
+                                            <option value="Parcelado">Parcelado</option>
                                         </select>
                                     </div>
                                 </div>
+                                {formData.payment_method === 'Parcelado' && (
+                                    <div className="form-group">
+                                        <label className="form-label">Qtd. Parcelas</label>
+                                        <div className="form-input-wrapper">
+                                            <Layers className="input-icon" size={18} />
+                                            <input
+                                                type="number"
+                                                min="2"
+                                                max="48"
+                                                className="form-control form-control-with-icon"
+                                                required
+                                                value={formData.installments}
+                                                onChange={(e) => setFormData({ ...formData, installments: parseInt(e.target.value) || 2 })}
+                                            />
+                                        </div>
+                                    </div>
+                                )}
                                 <div className="form-group">
                                     <label className="form-label">Status Atual</label>
                                     <div className="form-input-wrapper">
