@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import {
     UserCog, Plus, Pencil, Trash2, Search, X, ChevronDown,
     Phone, IdCard, Star, Calendar, CheckCircle, XCircle,
-    User, Hash, Wrench, Percent, Activity, AlignLeft, Mail, ShieldCheck
+    User, Hash, Wrench, Percent, Activity, AlignLeft, Mail, ShieldCheck, MessageCircle
 } from 'lucide-react';
 import Modal from '../components/Modal';
 import ConfirmModal from '../components/ConfirmModal';
@@ -220,7 +220,7 @@ const Mechanics = () => { // Changed from function Mechanics() to const Mechanic
                                     <tr>
                                         <th>Mecânico</th>
                                         <th>Especialidade</th>
-                                        <th>Telefone</th>
+                                        <th>Telefone / WhatsApp</th>
                                         <th>Admissão</th>
                                         <th>Comissão</th>
                                         <th>Status</th>
@@ -244,7 +244,23 @@ const Mechanics = () => { // Changed from function Mechanics() to const Mechanic
                                                     ? <span className="specialty-badge">{m.specialty}</span>
                                                     : <span className="text-muted">—</span>}
                                             </td>
-                                            <td>{m.phone || <span className="text-muted">—</span>}</td>
+                                            <td>
+                                                <div className="flex items-center gap-2">
+                                                    <span>{m.phone || '-'}</span>
+                                                    {m.phone && (
+                                                        <a
+                                                            href={`https://wa.me/55${m.phone.replace(/\D/g, '')}`}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="btn-whatsapp"
+                                                            title="Abrir no WhatsApp"
+                                                            aria-label="Chamar no WhatsApp"
+                                                        >
+                                                            <MessageCircle size={16} />
+                                                        </a>
+                                                    )}
+                                                </div>
+                                            </td>
                                             <td>{m.hire_date
                                                 ? new Date(m.hire_date).toLocaleDateString('pt-BR')
                                                 : <span className="text-muted">—</span>}
