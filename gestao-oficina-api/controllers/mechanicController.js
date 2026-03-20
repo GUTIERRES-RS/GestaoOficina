@@ -92,24 +92,25 @@ const mechanicController = {
     getCommissionReport: async (req, res) => {
         try {
             const { start_date, end_date, mechanic_id } = req.query;
-
-            let whereClauses = ["so.status NOT IN ('Cancelado')", "so.expected_delivery_date IS NOT NULL"];
             const params = [];
 
+            // Build WHERE clause for filtering
+            let joinConditions = "so.status NOT IN ('Cancelado') AND so.expected_delivery_date IS NOT NULL";
+            
             if (start_date) {
-                whereClauses.push('DATE(so.expected_delivery_date) >= ?');
+                joinConditions += " AND DATE(so.expected_delivery_date) >= ?";
                 params.push(start_date);
             }
             if (end_date) {
-                whereClauses.push('DATE(so.expected_delivery_date) <= ?');
+                joinConditions += " AND DATE(so.expected_delivery_date) <= ?";
                 params.push(end_date);
             }
+
+            let whereClause = "";
             if (mechanic_id) {
-                whereClauses.push('m.id = ?');
+                whereClause = " WHERE m.id = ?";
                 params.push(mechanic_id);
             }
-
-            const whereSQL = whereClauses.length > 0 ? 'WHERE ' + whereClauses.join(' AND ') : '';
 
             const query = `
                 SELECT
@@ -117,13 +118,13 @@ const mechanicController = {
                     m.name AS mechanic_name,
                     m.commission_rate,
                     m.specialty,
-                    COUNT(so.id) AS total_os,
+                    COALESCE(COUNT(DISTINCT so.id), 0) AS total_os,
                     COALESCE(SUM(so.labor_cost), 0) AS total_labor,
                     COALESCE(SUM(so.total_cost), 0) AS total_revenue,
                     COALESCE(ROUND(SUM(so.labor_cost * m.commission_rate / 100), 2), 0) AS total_commission
                 FROM mechanics m
-                LEFT JOIN service_orders so ON so.mechanic_id = m.id
-                ${whereSQL}
+                LEFT JOIN service_orders so ON so.mechanic_id = m.id AND ${joinConditions}
+                ${whereClause}
                 GROUP BY m.id, m.name, m.commission_rate, m.specialty
                 ORDER BY total_commission DESC
             `;

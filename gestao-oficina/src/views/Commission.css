@@ -149,6 +149,7 @@
     width: 100%;
     border-collapse: collapse;
     font-size: 0.875rem;
+    min-width: 900px;
 }
 
 .commission-table th {
@@ -192,6 +193,8 @@
     align-items: center;
     gap: 0.65rem;
     font-weight: 600;
+    white-space: nowrap;
+    min-width: 180px;
 }
 
 .avatar-sm {

@@ -85,9 +85,13 @@ export default function Commission() {
     };
 
     // Reset to first page when search, period or custom dates change
+    // ALSO clear detail cache and collapse expanded items to prevent mixed data from different periods
     useEffect(() => {
         setCurrentPage(1);
-    }, [searchTerm, period, customStart, customEnd]);
+        setDetail({});           // Clear cached detail data
+        setExpandedId(null);     // Collapse any expanded rows
+        setDetailPages({});      // Reset detail pagination
+    }, [period, customStart, customEnd, searchTerm]);
 
     const totals = filteredReport.reduce((acc, m) => ({
         total_os: acc.total_os + (parseInt(m.total_os) || 0),
