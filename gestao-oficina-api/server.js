@@ -59,12 +59,33 @@ app.use('/api/users', userRoutes);
 console.log('Routes mounted: clients, os, inventory, finances, dashboard, vehicles, settings, mechanics, users');
 
 
+const https = require('https');
+
 // Error handling middleware
 app.use((err, req, res, next) => {
     console.error(err.stack);
     res.status(500).json({ error: 'Erro interno no servidor', message: err.message });
 });
 
-app.listen(PORT, '0.0.0.0', () => {
-    console.log(`🚀 Servidor rodando na porta ${PORT}`);
-});
+if (process.env.USE_HTTPS === 'true') {
+    try {
+        const privateKey = fs.readFileSync(process.env.SSL_KEY_PATH || '', 'utf8');
+        const certificate = fs.readFileSync(process.env.SSL_CERT_PATH || '', 'utf8');
+        const credentials = { key: privateKey, cert: certificate };
+
+        const httpsServer = https.createServer(credentials, app);
+        httpsServer.listen(PORT, '0.0.0.0', () => {
+            console.log(`🚀 Servidor HTTPS seguro rodando na porta ${PORT}`);
+        });
+    } catch (error) {
+        console.error('❌ Erro ao iniciar servidor HTTPS (verifique os certificados definidos no .env):', error.message);
+        console.log('Iniciando em modo HTTP como fallback de emergência...');
+        app.listen(PORT, '0.0.0.0', () => {
+             console.log(`🚀 Servidor HTTP rodando na porta ${PORT}`);
+        });
+    }
+} else {
+    app.listen(PORT, '0.0.0.0', () => {
+        console.log(`🚀 Servidor HTTP rodando na porta ${PORT}`);
+    });
+}

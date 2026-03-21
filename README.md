@@ -56,11 +56,24 @@ git clone https://github.com/GUTIERRES-RS/GestaoOficina.git
 cd GestaoOficina
 ```
 
-### 2. Configurar o Banco de Dados
+### 2. Configurar o Banco de Dados e Backend
 - Importe o arquivo SQL localizado em `gestao-oficina-api/database/init.sql` para o seu servidor MySQL.
-- Configure as credenciais no arquivo `.env` dentro da pasta `gestao-oficina-api`.
+- Configure as credenciais no arquivo `.env` dentro da pasta `gestao-oficina-api`. Utilize o arquivo `.env.example` como base.
+- **Suporte a HTTPS na API (Opcional):** Você pode habilitar o trafego HTTPS pelo Node configurando as opções abaixo no `.env`:
+  ```env
+  USE_HTTPS=true
+  SSL_KEY_PATH=caminho/para/seu/privkey.pem
+  SSL_CERT_PATH=caminho/para/seu/fullchain.pem
+  ```
 
-### 3. Instalação e Execução
+### 3. Configurar o Frontend
+- Dentro da pasta `gestao-oficina`, crie um arquivo `.env` (baseie-se no `.env.example`).
+- Informe o IP ou domínio onde a API do backend está hospedada:
+  ```env
+  VITE_API_URL=http://<IP-DO-BACKEND>:3000/api
+  ```
+
+### 4. Instalação e Execução
 
 **Backend:**
 ```bash
@@ -74,6 +87,8 @@ npm start
 cd gestao-oficina
 npm install
 npm run dev
+# ou para compilar e iniciar em modo preview (produção)
+# npm run build && npm run preview
 ```
 
 ## 📖 Guia de Operação
@@ -82,9 +97,9 @@ npm run dev
 2. **Ordens de Serviço**: No menu "Serviços", crie ou edite O.S. Adicione peças e serviços. Use o modo **Rascunho** para testar orçamentos sem comprometer o estoque.
 3. **Gestão de Inventário**: Cadastre peças e monitore o estoque mínimo. O sistema dará baixa automática assim que a O.S. for salva.
 4. **Financeiro e Alertas**: Fique de olho na **Campainha de Notificações**. Além dos alertas, utilize o **Meio de Pagamento: Parcelado** para dividir cobranças ou despesas em múltiplas parcelas com agendamento automático mensal.
-5. **Acesso em Rede**: Para acessar o sistema de um celular na oficina:
-   - Verifique o IP do seu computador servidor (ex: `192.168.1.10`).
-   - Digite no navegador do celular: `http://[IP-DO-SERVIDOR]:5173`.
+5. **Acesso em Rede (Servidores Separados)**: Para acessar o sistema de qualquer dispositivo ou servidor diferente:
+   - Configure a variável `VITE_API_URL` no `.env` do frontend para apontar para o IP do Servidor do Backend (ex: `http://192.168.1.10:3000/api`).
+   - Acesse a aplicação web pelo IP do servidor Frontend no navegador (ex: `http://[IP-DO-FRONTEND]:5173`).
 6. **Personalização**: Vá em "Configurações" para alterar o logo da oficina, nome da empresa e dados de perfil.
 
 ---

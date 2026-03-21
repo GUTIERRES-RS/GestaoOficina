@@ -27,7 +27,8 @@ export const ConnectionProvider = ({ children }) => {
         setChecking(true);
         try {
             // Tenta uma rota simples de health check
-            await axios.get(`http://${window.location.hostname}:3000/api/health`, { timeout: 3000 });
+            const baseUrl = import.meta.env.VITE_API_URL || `http://${window.location.hostname}:3000/api`;
+            await axios.get(`${baseUrl}/health`, { timeout: 3000 });
             setIsConnected(true);
         } catch (error) {
             if (!error.response) {
