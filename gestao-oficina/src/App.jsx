@@ -38,7 +38,7 @@ const AppContent = () => {
   }
 
   return (
-    <Router>
+    <Router basename={import.meta.env.VITE_BASE_URL}>
       <Routes>
         <Route path="/login" element={<Login />} />
 

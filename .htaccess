@@ -1,0 +1,9 @@
+RewriteEngine On
+RewriteBase /GestaoOficina/gestao-oficina/dist/
+
+RewriteRule ^index\.html$ - [L]
+
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+RewriteRule . /GestaoOficina/gestao-oficina/dist/index.html [L]

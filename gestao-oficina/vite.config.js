@@ -5,19 +5,29 @@ import basicSsl from '@vitejs/plugin-basic-ssl'
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
-  
+
   return {
     // diretorio do dist
-    // base: '/',
+    base: env.VITE_BASE_URL,
     plugins: [react(), basicSsl()],
     server: {
       host: env.VITE_HOST || '0.0.0.0',
       port: parseInt(env.VITE_PORT) || 5173,
+      hmr: {
+        host: env.VITE_HOSTNAME || '0.0.0.0',
+        protocol: 'wss',
+        port: 5173
+      },
       strictPort: true
     },
     preview: {
       host: env.VITE_HOST || true,
       port: parseInt(env.VITE_PORT) || 5173,
+      hmr: {
+        host: env.VITE_HOSTNAME || '0.0.0.0',
+        protocol: 'wss',
+        port: 5173
+      },
       strictPort: true
     }
   }
