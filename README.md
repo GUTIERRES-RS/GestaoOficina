@@ -47,8 +47,9 @@ Sistema administrativo completo e moderno para gestão de oficinas mecânicas, f
 ## ⚙️ Configuração do Ambiente
 
 ### Pré-requisitos
-- Node.js (v14 ou superior)
-- MySQL Server
+- Node.js (v24 ou superior)
+- npm (v11 ou superior)
+- MySQL Server (v8 ou superior)
 
 ### 1. Clonar o Repositório
 ```bash
