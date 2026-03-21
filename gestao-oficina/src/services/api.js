@@ -1,8 +1,9 @@
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
+const apiPort = import.meta.env.VITE_API_PORT || 3000;
 const api = axios.create({
-    baseURL: import.meta.env.VITE_API_URL || `http://${window.location.hostname}:3000/api`,
+    baseURL: import.meta.env.VITE_API_URL || `${window.location.protocol}//${window.location.hostname}:${apiPort}/api`,
     timeout: 10000,
 });
 

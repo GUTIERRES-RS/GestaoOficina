@@ -3,7 +3,7 @@ const express = require('express');
 const cors = require('cors');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const API_PORT = process.env.API_PORT || 3000;
 const fs = require('fs');
 const path = require('path');
 
@@ -74,18 +74,18 @@ if (process.env.USE_HTTPS === 'true') {
         const credentials = { key: privateKey, cert: certificate };
 
         const httpsServer = https.createServer(credentials, app);
-        httpsServer.listen(PORT, '0.0.0.0', () => {
-            console.log(`🚀 Servidor HTTPS seguro rodando na porta ${PORT}`);
+        httpsServer.listen(API_PORT, '0.0.0.0', () => {
+            console.log(`🚀 Servidor HTTPS seguro rodando na porta ${API_PORT}`);
         });
     } catch (error) {
         console.error('❌ Erro ao iniciar servidor HTTPS (verifique os certificados definidos no .env):', error.message);
         console.log('Iniciando em modo HTTP como fallback de emergência...');
-        app.listen(PORT, '0.0.0.0', () => {
-             console.log(`🚀 Servidor HTTP rodando na porta ${PORT}`);
+        app.listen(API_PORT, '0.0.0.0', () => {
+             console.log(`🚀 Servidor HTTP rodando na porta ${API_PORT}`);
         });
     }
 } else {
-    app.listen(PORT, '0.0.0.0', () => {
-        console.log(`🚀 Servidor HTTP rodando na porta ${PORT}`);
+    app.listen(API_PORT, '0.0.0.0', () => {
+        console.log(`🚀 Servidor HTTP rodando na porta ${API_PORT}`);
     });
 }

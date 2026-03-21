@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 
 const ConnectionContext = createContext({});
@@ -7,6 +7,7 @@ export const ConnectionProvider = ({ children }) => {
     const [isConnected, setIsConnected] = useState(true);
     const [checking, setChecking] = useState(false);
     const [isInitialCheck, setIsInitialCheck] = useState(true);
+    const checkingRef = useRef(false);
 
     useEffect(() => {
         const handleFailure = () => {
@@ -23,11 +24,26 @@ export const ConnectionProvider = ({ children }) => {
         };
     }, []);
 
+    // Polling de Auto-reconexão
+    useEffect(() => {
+        let interval;
+        if (!isConnected) {
+            // Se perdeu a conexão, checa a cada 5 segundos
+            interval = setInterval(() => {
+                checkConnection();
+            }, 5000);
+        }
+        return () => clearInterval(interval);
+    }, [isConnected]);
+
     const checkConnection = async () => {
+        if (checkingRef.current) return;
+        checkingRef.current = true;
         setChecking(true);
         try {
-            // Tenta uma rota simples de health check
-            const baseUrl = import.meta.env.VITE_API_URL || `http://${window.location.hostname}:3000/api`;
+            // Tenta uma rota simples de health check dinamicamente via baseURL flexível
+            const apiPort = import.meta.env.VITE_API_PORT || 3000;
+            const baseUrl = import.meta.env.VITE_API_URL || `${window.location.protocol}//${window.location.hostname}:${apiPort}/api`;
             await axios.get(`${baseUrl}/health`, { timeout: 3000 });
             setIsConnected(true);
         } catch (error) {
@@ -38,6 +54,7 @@ export const ConnectionProvider = ({ children }) => {
                 setIsConnected(true);
             }
         } finally {
+            checkingRef.current = false;
             setChecking(false);
             setIsInitialCheck(false);
         }
