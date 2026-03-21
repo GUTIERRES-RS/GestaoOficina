@@ -59,7 +59,9 @@ cd GestaoOficina
 ### 2. Configurar o Banco de Dados e Backend
 - Importe o arquivo SQL localizado em `gestao-oficina-api/database/init.sql` para o seu servidor MySQL.
 - Configure as credenciais no arquivo `.env` dentro da pasta `gestao-oficina-api`. Utilize o arquivo `.env.example` como base.
-- **Suporte a HTTPS na API (Opcional):** Você pode habilitar o trafego HTTPS pelo Node configurando as opções abaixo no `.env`:
+- **Suporte a HTTPS na API (Opcional):** Você pode habilitar o trafego HTTPS configurando `USE_HTTPS=true` no `.env`. Você exigirá par de chaves de segurança.
+   - **Gerar Certificados Locais Facilmente**: Dentro da pasta `gestao-oficina-api`, apenas rode `node generate-ssl.js`. Isso vai criar instantaneamente certificados autoassinados na pasta `/certs` com as chaves corretas e você já ficará protegido no IP de sua sub-rede!
+   - Alternativamente, insira o caminho dos seus certificados Let's Encrypt reais validando as rotas da sua nuvem:
   ```env
   USE_HTTPS=true
   SSL_KEY_PATH=caminho/para/seu/privkey.pem
