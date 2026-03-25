@@ -2,7 +2,7 @@
 echo Iniciando Gestão Oficina...
 
 :: BACKEND
-cd /d D:\GOOGLE\WORKs\gestao-oficina-api
+cd /d D:\GOOGLE\GestaoOficina\gestao-oficina-api
 echo Iniciando backend...
 start "BACKEND" cmd /k npm start
 
@@ -13,7 +13,7 @@ start "BACKEND" cmd /k npm start
 :: npm run preview	Simula produção	                    4173
 
 :: FRONTEND
-cd /d D:\GOOGLE\WORKs\gestao-oficina
+cd /d D:\GOOGLE\GestaoOficina\gestao-oficina
 
 echo Gerando build do frontend...
 call npm run build
