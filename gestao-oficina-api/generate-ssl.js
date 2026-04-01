@@ -53,8 +53,8 @@ const options = {
 
         const pems = await selfsigned.generate(attrs, options);
 
-        fs.writeFileSync(path.join(CERTS_DIR, 'privkey.pem'), pems.private);
-        fs.writeFileSync(path.join(CERTS_DIR, 'fullchain.pem'), pems.cert);
+        fs.writeFileSync(path.join(CERTS_DIR, 'privkey.key'), pems.private);
+        fs.writeFileSync(path.join(CERTS_DIR, 'fullchain.crt'), pems.cert);
 
         console.log('✅ Certificados autoassinados gerados com sucesso na pasta "certs"');
         console.log(`📌 Nome comum (CN): \t${SSL_IP}`);
