@@ -9,6 +9,13 @@ const logFormat = winston.format.combine(
   winston.format.json()
 );
 
+const consoleFormat = winston.format.combine(
+  winston.format.colorize(),
+  winston.format.printf(({ timestamp, level, message }) => {
+    return `[${timestamp}] ${level}: ${message}`;
+  })
+);
+
 const transport = new winston.transports.DailyRotateFile({
   filename: path.join(__dirname, '../logs/application-%DATE%.log'),
   datePattern: 'YYYY-MM-DD',
@@ -25,8 +32,8 @@ const logger = winston.createLogger({
     transport,
     new winston.transports.Console({
       format: winston.format.combine(
-        winston.format.colorize(),
-        winston.format.simple()
+        winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+        consoleFormat
       )
     })
   ]

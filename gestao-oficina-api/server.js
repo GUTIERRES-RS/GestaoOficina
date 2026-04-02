@@ -49,6 +49,12 @@ app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
 // Request Logging
 app.use((req, res, next) => {
+    // Silencia rotas de polling frequente para reduzir ruído no log do terminal
+    const noiseRoutes = ['/api/health', '/api/finances/reminders', '/api/dashboard/stats'];
+    if (noiseRoutes.some(route => req.url.startsWith(route))) {
+        return next();
+    }
+
     logger.info(`${req.method} ${req.url}`, {
         ip: req.ip,
         userAgent: req.headers['user-agent']

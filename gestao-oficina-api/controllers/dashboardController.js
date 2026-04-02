@@ -113,7 +113,7 @@ const dashboardController = {
             const [statusRows] = await db.query(statusChartQuery, dateParams);
             const status_chart = statusRows.map(row => ({ name: row.name, value: Number(row.value) }));
 
-            logger.info(`[DASHBOARD:STATS] Métricas geradas${hasDates ? ' para o período: ' + start_date + ' a ' + end_date : ''}`);
+            logger.debug(`[DASHBOARD:STATS] Métricas geradas${hasDates ? ' para o período: ' + start_date + ' a ' + end_date : ''}`);
             
             res.json({
                 success: true,
