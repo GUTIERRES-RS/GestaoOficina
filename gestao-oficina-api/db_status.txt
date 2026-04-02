@@ -1,0 +1,30 @@
+Table: clients
+id, uuid, name, phone, email, document, address, notes, created_at, updated_at
+
+Table: inventory
+id, uuid, code, name, category, description, stock_quantity, min_stock, cost_price, sale_price, supplier, created_at, updated_at
+
+Table: inventory_movements
+id, uuid, part_id, type, quantity, obs, created_at
+
+Table: mechanics
+id, uuid, name, phone, document, specialty, commission_rate, status, hire_date, notes, created_at
+
+Table: os_parts
+id, uuid, os_id, part_id, quantity, unit_price, total_price
+
+Table: service_orders
+id, uuid, client_id, vehicle_id, mechanic_id, mechanic_name, status, problem_reported, service_provided, labor_cost, parts_cost, discount, total_cost, invoice_number, vehicle_km, expected_delivery_date, created_at, updated_at
+
+Table: settings
+id, uuid, workshop_name, workshop_phone, whatsapp, workshop_email, logo_url, workshop_address, workshop_document, theme, currency, review_days, next_os_number, items_per_page, updated_at
+
+Table: transactions
+id, type, description, category, payment_method, amount, status, payment_date, os_id, created_at
+
+Table: users
+id, uuid, name, email, password, role, created_at, updated_at
+
+Table: vehicles
+id, uuid, client_id, plate, brand, model, year, color, created_at, km_cad, notes
+

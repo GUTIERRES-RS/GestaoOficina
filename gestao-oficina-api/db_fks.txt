@@ -1,0 +1,21 @@
+Table: clients
+
+Table: inventory
+
+Table: inventory_movements
+
+Table: mechanics
+
+Table: os_parts
+
+Table: service_orders
+
+Table: settings
+
+Table: transactions
+  FK: transactions_ibfk_1 (os_id) references service_orders(id)
+
+Table: users
+
+Table: vehicles
+

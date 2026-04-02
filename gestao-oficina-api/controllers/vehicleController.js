@@ -1,4 +1,6 @@
 const db = require('../config/database');
+const { v4: uuidv4 } = require('uuid');
+const logger = require('../services/logger');
 
 const vehicleController = {
 
@@ -30,7 +32,7 @@ const vehicleController = {
             `);
             res.json(rows);
         } catch (error) {
-            console.error(error);
+            logger.error(`FETCH VEHICLES ERROR: ${error.stack}`);
             res.status(500).json({ message: 'Erro ao buscar veículos' });
         }
     },
@@ -42,7 +44,7 @@ const vehicleController = {
             const [rows] = await db.query('SELECT * FROM vehicles WHERE client_id = ?', [clientId]);
             res.json(rows);
         } catch (error) {
-            console.error(error);
+            logger.error(`GET VEHICLES BY CLIENT ERROR: ${error.stack}`);
             res.status(500).json({ message: 'Erro ao buscar veículos do cliente' });
         }
     },
@@ -50,15 +52,13 @@ const vehicleController = {
     // Criar novo veículo
     create: async (req, res) => {
         try {
+            const vehicleId = uuidv4();
             const { client_id, plate, brand, model, year, color, km_cad, notes } = req.body;
 
-            if (!client_id || !plate || !brand || !model) {
-                return res.status(400).json({ message: 'Cliente, placa, marca e modelo são obrigatórios' });
-            }
-
-            const [result] = await db.query(
-                'INSERT INTO vehicles (client_id, plate, brand, model, year, color, km_cad, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+            await db.query(
+                'INSERT INTO vehicles (id, client_id, plate, brand, model, year, color, km_cad, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
                 [
+                    vehicleId,
                     client_id,
                     plate.trim().toUpperCase(),
                     brand.trim(),
@@ -69,12 +69,13 @@ const vehicleController = {
                     notes ? notes.trim() : null
                 ]
             );
-            res.status(201).json({ id: result.insertId, message: 'Veículo criado com sucesso!' });
+            logger.info(`Vehicle Created: ${vehicleId} for Client: ${client_id}`);
+            res.status(201).json({ id: vehicleId, message: 'Veículo criado com sucesso!' });
         } catch (error) {
             if (error.code === 'ER_DUP_ENTRY') {
                 return res.status(400).json({ message: 'Esta placa já está cadastrada' });
             }
-            console.error(error);
+            logger.error(`CREATE VEHICLE ERROR: ${error.stack}`);
             res.status(500).json({ message: 'Erro ao criar veículo' });
         }
     },
@@ -84,10 +85,6 @@ const vehicleController = {
         try {
             const { id } = req.params;
             const { plate, brand, model, year, color, km_cad, notes } = req.body;
-
-            if (!plate || !brand || !model) {
-                return res.status(400).json({ message: 'Placa, marca e modelo são obrigatórios' });
-            }
 
             const [result] = await db.query(
                 'UPDATE vehicles SET plate = ?, brand = ?, model = ?, year = ?, color = ?, km_cad = ?, notes = ? WHERE id = ?',
@@ -103,12 +100,13 @@ const vehicleController = {
                 ]
             );
             if (result.affectedRows === 0) return res.status(404).json({ message: 'Veículo não encontrado' });
+            logger.info(`Vehicle Updated: ${id}`);
             res.json({ message: 'Veículo atualizado com sucesso!' });
         } catch (error) {
             if (error.code === 'ER_DUP_ENTRY') {
                 return res.status(400).json({ message: 'Esta placa já pertence a outro veículo' });
             }
-            console.error(error);
+            logger.error(`UPDATE VEHICLE ERROR: ${error.stack}`);
             res.status(500).json({ message: 'Erro ao atualizar veículo' });
         }
     },
@@ -119,9 +117,10 @@ const vehicleController = {
             const { id } = req.params;
             const [result] = await db.query('DELETE FROM vehicles WHERE id = ?', [id]);
             if (result.affectedRows === 0) return res.status(404).json({ message: 'Veículo não encontrado' });
+            logger.info(`Vehicle Deleted: ${id}`);
             res.json({ message: 'Veículo removido com sucesso!' });
         } catch (error) {
-            console.error(error);
+            logger.error(`DELETE VEHICLE ERROR: ${error.stack}`);
             res.status(500).json({ message: 'Erro ao remover veículo' });
         }
     }

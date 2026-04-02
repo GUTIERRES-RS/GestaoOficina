@@ -1,4 +1,6 @@
 const db = require('../config/database');
+const { v4: uuidv4 } = require('uuid');
+const logger = require('../services/logger');
 
 const mechanicController = {
     // Listar todos os mecânicos
@@ -9,7 +11,7 @@ const mechanicController = {
             );
             res.json(rows);
         } catch (error) {
-            console.error(error);
+            logger.error(`FETCH MECHANICS ERROR: ${error.stack}`);
             res.status(500).json({ message: 'Erro ao buscar mecânicos' });
         }
     },
@@ -22,7 +24,7 @@ const mechanicController = {
             if (rows.length === 0) return res.status(404).json({ message: 'Mecânico não encontrado' });
             res.json(rows[0]);
         } catch (error) {
-            console.error(error);
+            logger.error(`GET MECHANIC ERROR: ${error.stack}`);
             res.status(500).json({ message: 'Erro ao buscar mecânico' });
         }
     },
@@ -30,13 +32,14 @@ const mechanicController = {
     // Criar mecânico
     create: async (req, res) => {
         try {
+            const mechanicId = uuidv4();
             const { name, phone, document, specialty, commission_rate, status, hire_date, notes } = req.body;
-            if (!name) return res.status(400).json({ message: 'Nome é obrigatório' });
 
-            const [result] = await db.query(
-                `INSERT INTO mechanics (name, phone, document, specialty, commission_rate, status, hire_date, notes)
-                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+            await db.query(
+                `INSERT INTO mechanics (id, name, phone, document, specialty, commission_rate, status, hire_date, notes)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
                 [
+                    mechanicId,
                     name.trim(),
                     phone || null,
                     document || null,
@@ -47,9 +50,10 @@ const mechanicController = {
                     notes || null
                 ]
             );
-            res.status(201).json({ id: result.insertId, message: 'Mecânico cadastrado com sucesso!' });
+            logger.info(`Mechanic Created: ${mechanicId} - ${name}`);
+            res.status(201).json({ id: mechanicId, message: 'Mecânico cadastrado com sucesso!' });
         } catch (error) {
-            console.error(error);
+            logger.error(`CREATE MECHANIC ERROR: ${error.stack}`);
             res.status(500).json({ message: 'Erro ao cadastrar mecânico' });
         }
     },
@@ -68,9 +72,10 @@ const mechanicController = {
             );
 
             if (result.affectedRows === 0) return res.status(404).json({ message: 'Mecânico não encontrado' });
+            logger.info(`Mechanic Updated: ${id}`);
             res.json({ message: 'Mecânico atualizado com sucesso!' });
         } catch (error) {
-            console.error(error);
+            logger.error(`UPDATE MECHANIC ERROR: ${error.stack}`);
             res.status(500).json({ message: 'Erro ao atualizar mecânico' });
         }
     },
@@ -81,9 +86,10 @@ const mechanicController = {
             const { id } = req.params;
             const [result] = await db.query('DELETE FROM mechanics WHERE id = ?', [id]);
             if (result.affectedRows === 0) return res.status(404).json({ message: 'Mecânico não encontrado' });
+            logger.info(`Mechanic Deleted: ${id}`);
             res.json({ message: 'Mecânico removido com sucesso!' });
         } catch (error) {
-            console.error(error);
+            logger.error(`DELETE MECHANIC ERROR: ${error.stack}`);
             res.status(500).json({ message: 'Erro ao remover mecânico' });
         }
     },
@@ -94,7 +100,6 @@ const mechanicController = {
             const { start_date, end_date, mechanic_id } = req.query;
             const params = [];
 
-            // Build WHERE clause for filtering
             let joinConditions = "so.status NOT IN ('Cancelado') AND so.expected_delivery_date IS NOT NULL";
             
             if (start_date) {
@@ -132,7 +137,7 @@ const mechanicController = {
             const [rows] = await db.query(query, params);
             res.json(rows);
         } catch (error) {
-            console.error(error);
+            logger.error(`COMMISSION REPORT ERROR: ${error.stack}`);
             res.status(500).json({ message: 'Erro ao gerar relatório de comissão' });
         }
     },
@@ -164,7 +169,7 @@ const mechanicController = {
             const [rows] = await db.query(query, params);
             res.json(rows);
         } catch (error) {
-            console.error(error);
+            logger.error(`GET MECHANIC OS LIST ERROR: ${error.stack}`);
             res.status(500).json({ message: 'Erro ao buscar OS do mecânico' });
         }
     }

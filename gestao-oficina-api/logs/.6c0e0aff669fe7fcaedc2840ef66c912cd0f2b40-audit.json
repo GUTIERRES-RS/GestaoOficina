@@ -1,0 +1,15 @@
+{
+    "keep": {
+        "days": true,
+        "amount": 14
+    },
+    "auditLog": "D:\\GOOGLE\\GestaoOficina\\gestao-oficina-api\\logs\\.6c0e0aff669fe7fcaedc2840ef66c912cd0f2b40-audit.json",
+    "files": [
+        {
+            "date": 1775099425077,
+            "name": "D:\\GOOGLE\\GestaoOficina\\gestao-oficina-api\\logs\\application-2026-04-02.log",
+            "hash": "b3a1f5737723bd5cec1ef0562919a1c14414e047f3bce568ec0793bf4bdfd31e"
+        }
+    ],
+    "hashType": "sha256"
+}

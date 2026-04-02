@@ -11,17 +11,17 @@ const logToFile = (message) => {
 const settingsController = {
     get: async (req, res) => {
         try {
-            const [rows] = await pool.query('SELECT * FROM settings WHERE id = 1');
+            const [rows] = await pool.query('SELECT * FROM settings WHERE id = "5ebeada3-2e42-11f1-b559-58cdc9707fb1"');
             res.json(rows[0] || {});
         } catch (error) {
             console.error('Error fetching settings:', error);
             res.status(500).json({ error: 'Erro ao buscar configurações' });
         }
     },
-    
+
     getPublic: async (req, res) => {
         try {
-            const [rows] = await pool.query('SELECT workshop_name, logo_url, theme FROM settings WHERE id = 1');
+            const [rows] = await pool.query('SELECT workshop_name, logo_url, theme FROM settings WHERE id = "5ebeada3-2e42-11f1-b559-58cdc9707fb1"');
             res.json(rows[0] || {});
         } catch (error) {
             console.error('Error fetching public settings:', error);
@@ -32,7 +32,7 @@ const settingsController = {
     update: async (req, res) => {
         try {
             // 1. Fetch current settings to have fallbacks
-            const [currentRows] = await pool.query('SELECT * FROM settings WHERE id = 1');
+            const [currentRows] = await pool.query('SELECT * FROM settings WHERE id = "5ebeada3-2e42-11f1-b559-58cdc9707fb1"');
             const current = currentRows[0] || {};
 
             const {
@@ -67,10 +67,10 @@ const settingsController = {
                 WHERE id = 1
             `;
 
-            const parsedItemsPerPage = items_per_page !== undefined && items_per_page !== null && items_per_page !== '' 
-                ? parseInt(items_per_page) 
+            const parsedItemsPerPage = items_per_page !== undefined && items_per_page !== null && items_per_page !== ''
+                ? parseInt(items_per_page)
                 : current.items_per_page;
-            
+
             const parsedReviewDays = review_days !== undefined && review_days !== null && review_days !== ''
                 ? parseInt(review_days)
                 : current.review_days;
@@ -93,7 +93,7 @@ const settingsController = {
                 !isNaN(parsedNextOs) ? parsedNextOs : (current.next_os_number || 1),
                 !isNaN(parsedItemsPerPage) ? parsedItemsPerPage : (current.items_per_page || 10)
             ];
-            
+
             await pool.query(updateQuery, values);
 
             res.json({ message: 'Configurações atualizadas com sucesso!' });

@@ -1,0 +1,132 @@
+Table: clients
+  id: int
+  uuid: char(36)
+  name: varchar(100)
+  phone: varchar(20)
+  email: varchar(100)
+  document: varchar(20)
+  address: varchar(255)
+  notes: text
+  created_at: timestamp
+  updated_at: timestamp
+
+Table: inventory
+  id: int
+  uuid: char(36)
+  code: varchar(50)
+  name: varchar(255)
+  category: varchar(50)
+  description: text
+  stock_quantity: int
+  min_stock: int
+  cost_price: decimal(10,2)
+  sale_price: decimal(10,2)
+  supplier: varchar(100)
+  created_at: timestamp
+  updated_at: timestamp
+
+Table: inventory_movements
+  id: int
+  uuid: char(36)
+  part_id: char(36)
+  type: enum('entrada','saida')
+  quantity: int
+  obs: text
+  created_at: timestamp
+
+Table: mechanics
+  id: int
+  uuid: char(36)
+  name: varchar(255)
+  phone: varchar(50)
+  document: varchar(50)
+  specialty: varchar(100)
+  commission_rate: decimal(5,2)
+  status: varchar(50)
+  hire_date: date
+  notes: text
+  created_at: timestamp
+
+Table: os_parts
+  id: int
+  uuid: char(36)
+  os_id: char(36)
+  part_id: char(36)
+  quantity: int
+  unit_price: decimal(10,2)
+  total_price: decimal(10,2)
+
+Table: service_orders
+  id: int
+  uuid: char(36)
+  client_id: char(36)
+  vehicle_id: char(36)
+  mechanic_id: char(36)
+  mechanic_name: varchar(100)
+  status: enum('Aberto','Orçamento','Aprovado','Em andamento','Aguardando Peça','Finalizado','Entregue','Cancelado')
+  problem_reported: text
+  service_provided: text
+  labor_cost: decimal(10,2)
+  parts_cost: decimal(10,2)
+  discount: decimal(10,2)
+  total_cost: decimal(10,2)
+  invoice_number: varchar(50)
+  vehicle_km: int
+  expected_delivery_date: date
+  created_at: timestamp
+  updated_at: timestamp
+
+Table: settings
+  id: int
+  uuid: char(36)
+  workshop_name: varchar(100)
+  workshop_phone: varchar(20)
+  whatsapp: varchar(30)
+  workshop_email: varchar(100)
+  logo_url: longtext
+  workshop_address: text
+  workshop_document: varchar(20)
+  theme: varchar(20)
+  currency: varchar(10)
+  review_days: int
+  next_os_number: int
+  items_per_page: int
+  updated_at: timestamp
+
+Table: transactions
+  id: int
+  uuid: char(36)
+  type: enum('income','expense')
+  description: varchar(255)
+  category: varchar(100)
+  payment_method: varchar(50)
+  amount: decimal(10,2)
+  status: enum('pendente','pago','cancelado')
+  payment_date: date
+  os_id: int
+  created_at: timestamp
+
+Table: users
+  id: int
+  uuid: char(36)
+  name: varchar(100)
+  email: varchar(100)
+  password: varchar(255)
+  role: enum('admin','user')
+  created_at: timestamp
+  updated_at: timestamp
+
+Table: vehicles
+  id: int
+  uuid: char(36)
+  client_id: char(36)
+  plate: varchar(10)
+  brand: varchar(50)
+  model: varchar(50)
+  year: varchar(10)
+  color: varchar(30)
+  created_at: timestamp
+  km_cad: int
+  notes: text
+  client_uuid: char(36)
+

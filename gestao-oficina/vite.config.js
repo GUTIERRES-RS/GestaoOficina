@@ -10,13 +10,22 @@ export default defineConfig(({ mode }) => {
     // diretorio do dist
     base: env.VITE_BASE_URL,
     plugins: [react(), basicSsl()],
+    optimizeDeps: {
+      include: [
+        'recharts',
+        'react-is',
+        'react-redux',
+        '@reduxjs/toolkit',
+        'immer',
+        'es-toolkit'
+      ],
+    },
     server: {
       host: env.VITE_HOST || '0.0.0.0',
       port: parseInt(env.VITE_PORT) || 5173,
       hmr: {
         host: env.VITE_HOSTNAME || '0.0.0.0',
-        protocol: 'wss',
-        port: 5173
+        protocol: 'wss'
       },
       strictPort: true
     },
@@ -26,7 +35,7 @@ export default defineConfig(({ mode }) => {
       hmr: {
         host: env.VITE_HOSTNAME || '0.0.0.0',
         protocol: 'wss',
-        port: 5173
+        port: parseInt(env.VITE_PORT) || 5173
       },
       strictPort: true
     }

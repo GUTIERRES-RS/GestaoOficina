@@ -38,10 +38,7 @@ const authMiddleware = (req, res, next) => {
             });
         }
 
-        req.userId = decoded.id;
-        req.userEmail = decoded.email;
-        req.userRole = decoded.role;
-        req.userName = decoded.name;
+        req.user = decoded;
         
         return next();
     });

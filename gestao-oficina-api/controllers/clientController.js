@@ -1,4 +1,6 @@
 const db = require('../config/database');
+const { v4: uuidv4 } = require('uuid');
+const logger = require('../services/logger');
 
 const clientController = {
     // Obter todos os clientes
@@ -20,7 +22,7 @@ const clientController = {
                 if (client.vehicles) {
                     parsedVehicles = client.vehicles.split('|').map(v => {
                         const [id, brand, model, plate, year, color, km_cad] = v.split('::');
-                        return { id: parseInt(id, 10), brand, model, plate, year, color, km_cad: km_cad ? parseInt(km_cad, 10) : null };
+                        return { id, brand, model, plate, year, color, km_cad: km_cad ? parseInt(km_cad, 10) : null };
                     });
                 }
                 return {
@@ -31,7 +33,7 @@ const clientController = {
 
             res.json(clients);
         } catch (error) {
-            console.error(error);
+            logger.error(`FETCH CLIENTS ERROR: ${error.stack}`);
             res.status(500).json({ message: 'Erro ao buscar clientes' });
         }
     },
@@ -44,7 +46,7 @@ const clientController = {
             if (rows.length === 0) return res.status(404).json({ message: 'Cliente não encontrado' });
             res.json(rows[0]);
         } catch (error) {
-            console.error(error);
+            logger.error(`GET CLIENT ERROR: ${error.stack}`);
             res.status(500).json({ message: 'Erro ao buscar cliente' });
         }
     },
@@ -52,16 +54,13 @@ const clientController = {
     // Criar novo cliente
     create: async (req, res) => {
         try {
+            const clientId = uuidv4();
             const { name, phone, email, document, address, notes } = req.body;
 
-            // Validação básica
-            if (!name || !phone) {
-                return res.status(400).json({ message: 'Nome e telefone são obrigatórios' });
-            }
-
-            const [result] = await db.query(
-                'INSERT INTO clients (name, phone, email, document, address, notes) VALUES (?, ?, ?, ?, ?, ?)',
+            await db.query(
+                'INSERT INTO clients (id, name, phone, email, document, address, notes) VALUES (?, ?, ?, ?, ?, ?, ?)',
                 [
+                    clientId,
                     name.trim(),
                     phone.trim(),
                     email ? email.trim() : null,
@@ -70,9 +69,10 @@ const clientController = {
                     notes ? notes.trim() : null
                 ]
             );
-            res.status(201).json({ id: result.insertId, message: 'Cliente criado com sucesso!' });
+            logger.info(`Client Created: ${clientId} - ${name}`);
+            res.status(201).json({ id: clientId, message: 'Cliente criado com sucesso!' });
         } catch (error) {
-            console.error(error);
+            logger.error(`CREATE CLIENT ERROR: ${error.stack}`);
             res.status(500).json({ message: 'Erro ao criar cliente' });
         }
     },
@@ -82,10 +82,6 @@ const clientController = {
         try {
             const { id } = req.params;
             const { name, phone, email, document, address, notes } = req.body;
-
-            if (!name || !phone) {
-                return res.status(400).json({ message: 'Nome e telefone são obrigatórios' });
-            }
 
             const [result] = await db.query(
                 'UPDATE clients SET name = ?, phone = ?, email = ?, document = ?, address = ?, notes = ? WHERE id = ?',
@@ -100,9 +96,10 @@ const clientController = {
                 ]
             );
             if (result.affectedRows === 0) return res.status(404).json({ message: 'Cliente não encontrado' });
+            logger.info(`Client Updated: ${id}`);
             res.json({ message: 'Cliente atualizado com sucesso!' });
         } catch (error) {
-            console.error(error);
+            logger.error(`UPDATE CLIENT ERROR: ${error.stack}`);
             res.status(500).json({ message: 'Erro ao atualizar cliente' });
         }
     },
@@ -114,26 +111,23 @@ const clientController = {
             await connection.beginTransaction();
             const { id } = req.params;
 
-            // 1. Deletar transações atreladas às OS deste cliente (opcional base dependendo da modelagem)
-            // Aqui assumimos que a tabela service_orders tem client_id
-
-            // 2. Deletar Ordens de Serviço vinculadas ao cliente
+            // 1. Deletar Ordens de Serviço vinculadas ao cliente (os_parts, inventory_movements via trigger or manual)
+            // Nota: No SQL antigo usamos ON DELETE CASCADE em algumas tabelas. 
+            // Para garantir integridade com UUID, limpamos explicitamente o que for crítico.
+            
             await connection.query('DELETE FROM service_orders WHERE client_id = ?', [id]);
-
-            // 3. Deletar Veículos vinculados ao cliente
             await connection.query('DELETE FROM vehicles WHERE client_id = ?', [id]);
-
-            // 4. Finalmente, deletar o cliente
             const [result] = await connection.query('DELETE FROM clients WHERE id = ?', [id]);
 
             await connection.commit();
 
             if (result.affectedRows === 0) return res.status(404).json({ message: 'Cliente não encontrado' });
+            logger.info(`Client Deleted: ${id}`);
             res.json({ message: 'Cliente e todos os seus registros excluídos com sucesso!' });
         } catch (error) {
             await connection.rollback();
-            console.error('Erro na Exclusão em Cascata do Cliente:', error);
-            res.status(500).json({ message: 'Erro ao deletar cliente. Verifique as dependências ativas.' });
+            logger.error(`DELETE CLIENT ERROR: ${error.stack}`);
+            res.status(500).json({ message: 'Erro ao deletar cliente.' });
         } finally {
             connection.release();
         }
