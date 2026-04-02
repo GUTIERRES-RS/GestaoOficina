@@ -1,5 +1,6 @@
 # Dependencies
-node_modules/
+gestao-oficina-api/node_modules/
+gestao-oficina/node_modules/
 
 # Logs
 gestao-oficina-api/logs/
