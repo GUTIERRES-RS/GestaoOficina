@@ -64,7 +64,7 @@ const settingsController = {
                 review_days = ?,
                 next_os_number = ?,
                 items_per_page = ?
-                WHERE id = 1
+                WHERE id = "5ebeada3-2e42-11f1-b559-58cdc9707fb1"
             `;
 
             const parsedItemsPerPage = items_per_page !== undefined && items_per_page !== null && items_per_page !== ''

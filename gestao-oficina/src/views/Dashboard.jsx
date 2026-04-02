@@ -343,20 +343,20 @@ const Dashboard = () => {
                                         wrapperStyle={{
                                             paddingLeft: '10px',
                                             top: '50%',
-                                            transform: 'translateY(-50%)',
+                                            transform: 'tranzincY(-50%)',
                                             width: '45%'
                                         }}
                                         content={({ payload }) => (
                                             <div className="flex flex-col gap-2 w-full pr-4">
                                                 {payload.map((entry, index) => (
-                                                    <div key={`item-${index}`} className="flex items-center justify-between px-3 py-1.5 rounded-md transition-all hover:bg-slate-50/5" style={{ backgroundColor: 'var(--bg-secondary)', borderLeft: `3px solid ${entry.color}` }}>
+                                                    <div key={`item-${index}`} className="flex items-center justify-between px-3 py-1.5 rounded-md transition-all hover:bg-zinc-50/5" style={{ backgroundColor: 'var(--bg-secondary)', borderLeft: `3px solid ${entry.color}` }}>
                                                         <div className="flex items-center gap-2 overflow-hidden mr-2">
                                                             <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: entry.color }}></div>
                                                             <span className="text-sm font-medium truncate text-secondary">{entry.value}</span>
                                                         </div>
-                                                        <span 
+                                                        <span
                                                             className={`status-badge ${getStatusClass(entry.value)}`}
-                                                            style={{ 
+                                                            style={{
                                                                 fontSize: '0.65rem',
                                                                 fontWeight: '700',
                                                                 padding: '0.1rem 0.5rem',

@@ -91,9 +91,9 @@ app.use('/api/users', userRoutes);
 // Error handling middleware
 app.use((err, req, res, next) => {
     logger.error(err.stack);
-    res.status(err.status || 500).json({ 
-        error: 'Erro interno no servidor', 
-        message: process.env.NODE_ENV === 'production' ? 'Algo deu errado.' : err.message 
+    res.status(err.status || 500).json({
+        error: 'Erro interno no servidor',
+        message: process.env.NODE_ENV === 'production' ? 'Algo deu errado.' : err.message
     });
 });
 
@@ -104,7 +104,7 @@ const startServer = async () => {
         try {
             const keyPath = process.env.SSL_KEY_PATH;
             const certPath = process.env.SSL_CERT_PATH;
-            
+
             if (keyPath && certPath && fs.existsSync(keyPath) && fs.existsSync(certPath)) {
                 const privateKey = fs.readFileSync(keyPath, 'utf8');
                 const certificate = fs.readFileSync(certPath, 'utf8');
