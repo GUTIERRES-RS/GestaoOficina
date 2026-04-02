@@ -205,7 +205,7 @@ const Settings = () => {
                                                     type="text"
                                                     name="workshop_name"
                                                     className="form-control form-control-with-icon"
-                                                    value={settings.workshop_name}
+                                                    value={settings.workshop_name || ''}
                                                     onChange={handleChange}
                                                     placeholder="Ex: Auto Mecânica Silva"
                                                 />
@@ -219,7 +219,7 @@ const Settings = () => {
                                                     type="text"
                                                     name="workshop_document"
                                                     className="form-control form-control-with-icon"
-                                                    value={settings.workshop_document}
+                                                    value={settings.workshop_document || ''}
                                                     onChange={handleChange}
                                                     placeholder="00.000.000/0000-00"
                                                 />
@@ -308,7 +308,7 @@ const Settings = () => {
                                                 name="workshop_address"
                                                 className="form-control form-control-with-icon"
                                                 rows="3"
-                                                value={settings.workshop_address}
+                                                value={settings.workshop_address || ''}
                                                 onChange={handleChange}
                                                 placeholder="Rua, Número, Bairro, Cidade - UF"
                                             ></textarea>
@@ -486,7 +486,7 @@ const Settings = () => {
                                                     type="number"
                                                     name="items_per_page"
                                                     className="form-control form-control-with-icon"
-                                                    value={settings.items_per_page}
+                                                    value={settings.items_per_page || ''}
                                                     onChange={handleChange}
                                                     placeholder="Padrão: 10"
                                                 />

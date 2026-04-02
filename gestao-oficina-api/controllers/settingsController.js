@@ -64,7 +64,7 @@ const settingsController = {
                 review_days = ?,
                 next_os_number = ?,
                 items_per_page = ?
-                WHERE id = "5ebeada3-2e42-11f1-b559-58cdc9707fb1"
+                WHERE id = ?
             `;
 
             const parsedItemsPerPage = items_per_page !== undefined && items_per_page !== null && items_per_page !== ''
@@ -79,6 +79,7 @@ const settingsController = {
                 ? parseInt(next_os_number)
                 : current.next_os_number;
 
+            const targetId = "5ebeada3-2e42-11f1-b559-58cdc9707fb1";
             const values = [
                 workshop_name !== undefined ? workshop_name : current.workshop_name,
                 workshop_phone !== undefined ? workshop_phone : current.workshop_phone,
@@ -91,7 +92,8 @@ const settingsController = {
                 whatsapp !== undefined ? whatsapp : current.whatsapp,
                 !isNaN(parsedReviewDays) ? parsedReviewDays : (current.review_days || 0),
                 !isNaN(parsedNextOs) ? parsedNextOs : (current.next_os_number || 1),
-                !isNaN(parsedItemsPerPage) ? parsedItemsPerPage : (current.items_per_page || 10)
+                !isNaN(parsedItemsPerPage) ? parsedItemsPerPage : (current.items_per_page || 10),
+                targetId
             ];
 
             await pool.query(updateQuery, values);
