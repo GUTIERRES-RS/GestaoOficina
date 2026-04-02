@@ -22,8 +22,8 @@ import { getPeriodDates, PERIODS } from '../utils/date';
 import Pagination from '../components/Pagination';
 import { useSettings } from '../context/SettingsContext';
 
-const StatCard = ({ title, value, icon, iconBgClass, iconColorClass, valueColorClass, loading }) => (
-    <div className="stat-card card">
+const StatCard = ({ title, value, icon, iconBgClass, iconColorClass, valueColorClass, colorClass, loading }) => (
+    <div className={`stat-card card ${colorClass || ''}`}>
         <div className="stat-header mb-4">
             <div>
                 <p className="stat-title text-sm text-secondary mb-2">{title}</p>
@@ -175,6 +175,7 @@ const Dashboard = () => {
                     iconBgClass="bg-green-50"
                     iconColorClass="text-green-600"
                     valueColorClass="text-success"
+                    colorClass="stat-green"
                     loading={loading}
                 />
                 <StatCard
@@ -183,6 +184,7 @@ const Dashboard = () => {
                     icon={<Users size={20} />}
                     iconBgClass="bg-blue-50"
                     iconColorClass="text-blue-600"
+                    colorClass="stat-blue"
                     loading={loading}
                 />
                 <StatCard
@@ -191,6 +193,7 @@ const Dashboard = () => {
                     icon={<Wrench size={20} />}
                     iconBgClass="bg-yellow-50"
                     iconColorClass="text-yellow-600"
+                    colorClass="stat-orange"
                     loading={loading}
                 />
                 <StatCard
@@ -199,6 +202,7 @@ const Dashboard = () => {
                     icon={<Clock size={20} />}
                     iconBgClass="bg-red-50"
                     iconColorClass="text-red-600"
+                    colorClass="stat-red"
                     loading={loading}
                 />
             </div>

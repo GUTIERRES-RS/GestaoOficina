@@ -3195,6 +3195,14 @@ table th {
     background: var(--warning-color);
 }
 
+.stat-red {
+    border-left-color: var(--danger-color);
+}
+
+.stat-red::before {
+    background: var(--danger-color);
+}
+
 .stat-value {
     font-size: 2rem;
     font-weight: 700;
