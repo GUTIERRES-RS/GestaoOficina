@@ -2,7 +2,7 @@ import React from 'react';
 import { Loader, Clock, Pencil, Printer, Calendar } from 'lucide-react';
 import { StatusBadge } from '../../utils/statusStyles';
 import TableEmptyState from '../../components/TableEmptyState';
-import { formatMoney, formatDate } from '../../utils/format';
+import { formatMoney, formatDate, formatUUID } from '../../utils/format';
 
 const OSList = ({ orders, loading, onEdit, onPrint }) => {
     if (loading) {
@@ -32,7 +32,7 @@ const OSList = ({ orders, loading, onEdit, onPrint }) => {
                 <tbody>
                     {orders.length > 0 ? orders.map((os) => (
                         <tr key={os.id}>
-                            <td className="font-bold text-primary-color">#{os.id}</td>
+                            <td className="font-bold text-primary-color">{formatUUID(os.id)}</td>
                             <td>
                                 <div className="flex flex-col">
                                     <span className="font-semibold">{os.client_name}</span>

@@ -1476,6 +1476,20 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
     }
+
+    .print-footer-technical {
+        margin-top: 40px !important;
+        padding-top: 10px !important;
+        border-top: 1px dashed #eee !important;
+        text-align: center !important;
+    }
+
+    .print-footer-technical p {
+        font-size: 8px !important;
+        color: #999 !important;
+        font-family: monospace !important;
+        margin: 0 !important;
+    }
 }
 
 /* Searchable Select Styles */

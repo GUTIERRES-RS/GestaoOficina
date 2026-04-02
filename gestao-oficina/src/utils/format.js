@@ -43,3 +43,14 @@ export const formatDate = (dateString, includeTime = false) => {
 export const formatPercent = (value) => {
     return `${(Number(value) || 0).toFixed(1)}%`;
 };
+
+/**
+ * Resume um UUID para exibição amigável (ex: #5ec309fe).
+ * @param {string} uuid - O UUID completo.
+ * @returns {string} UUID resumido com prefixo #.
+ */
+export const formatUUID = (uuid) => {
+    if (!uuid) return '--';
+    const cleanUuid = uuid.replace(/-/g, '');
+    return `#${cleanUuid.substring(0, 8).toUpperCase()}`;
+};

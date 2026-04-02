@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Loader, History } from 'lucide-react';
 import EmptyState from '../../components/EmptyState';
 import { StatusBadge } from '../../utils/statusStyles';
-import { formatMoney, formatDate } from '../../utils/format';
+import { formatMoney, formatDate, formatUUID } from '../../utils/format';
 import Pagination from '../../components/Pagination';
 import { useSettings } from '../../context/SettingsContext';
 
@@ -51,7 +51,7 @@ const VehicleHistory = ({ history, loading }) => {
                                 <tbody>
                                     {currentItems.map((os) => (
                                         <tr key={os.id} className="border-b border-color text-sm">
-                                            <td className="py-3 font-bold text-primary-color">#{String(os.id).padStart(4, '0')}</td>
+                                            <td className="py-3 font-bold text-primary-color">{formatUUID(os.id)}</td>
                                             <td className="py-3 text-secondary">{formatDate(os.created_at)}</td>
                                             <td className="py-3">
                                                 {(os.problem_reported || '').length > 30

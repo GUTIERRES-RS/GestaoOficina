@@ -6,6 +6,7 @@ import toast from 'react-hot-toast';
 import { useSettings } from '../context/SettingsContext';
 import { getPeriodDates, PERIODS } from '../utils/date';
 import Pagination from '../components/Pagination';
+import { formatUUID } from '../utils/format';
 
 // Modular Components
 import OSList from './service-orders/OSList';
@@ -56,6 +57,7 @@ const ServiceOrders = () => {
         invoice_number: '',
         payment_status: 'pendente',
         payment_method: '',
+        payment_date: '',
         vehicle_km: ''
     });
 
@@ -72,6 +74,7 @@ const ServiceOrders = () => {
         invoice_number: '',
         payment_status: 'pendente',
         payment_method: '',
+        payment_date: '',
         vehicle_km: ''
     });
 
@@ -192,19 +195,29 @@ const ServiceOrders = () => {
     };
 
     const handleEditOS = async (os) => {
-        setSelectedOS(os);
         try {
-            const res = await api.get('/mechanics');
-            setMechanics(res.data.filter(m => m.status === 'Ativo'));
-        } catch { /* silently ignore */ }
+            setSelectedOS(os);
+            const [osRes, mechanicsRes] = await Promise.all([
+                api.get(`/os/${os.id}`),
+                api.get('/mechanics')
+            ]);
+            
+            const detailedOS = osRes.data;
+            setMechanics(mechanicsRes.data.filter(m => m.status === 'Ativo'));
 
-        setEditFormData({
-            ...os,
-            expected_delivery_date: os.expected_delivery_date ? os.expected_delivery_date.split('T')[0] : '',
-            mechanic_id: os.mechanic_id || '',
-            mechanic_name: os.mechanic_name || ''
-        });
-        setIsEditModalOpen(true);
+            setEditFormData({
+                ...detailedOS,
+                expected_delivery_date: detailedOS.expected_delivery_date ? detailedOS.expected_delivery_date.split('T')[0] : '',
+                payment_date: detailedOS.payment_date ? detailedOS.payment_date.split('T')[0] : '',
+                mechanic_id: detailedOS.mechanic_id || '',
+                mechanic_name: detailedOS.mechanic_name || '',
+                payment_status: detailedOS.transaction_status || 'pendente'
+            });
+            setIsEditModalOpen(true);
+        } catch (err) {
+            console.error('Erro ao carregar detalhes da OS:', err);
+            toast.error('Não foi possível carregar os dados atualizados da OS.');
+        }
     };
 
     const handleUpdateOS = async (e, parts) => {
@@ -460,7 +473,7 @@ const ServiceOrders = () => {
             <Modal 
                 isOpen={isEditModalOpen} 
                 onClose={() => handleFormChange({ cancel: true })} 
-                title={`Editar OS #${selectedOS?.id}`} 
+                title={`Editar OS ${formatUUID(selectedOS?.id)}`} 
                 size="large"
                 footer={(
                     <div className="flex justify-end gap-3 w-full">

@@ -17,7 +17,7 @@ import { Link } from 'react-router-dom';
 
 import { StatusBadge, getStatusClass, getStatusColor } from '../utils/statusStyles';
 import TableEmptyState from '../components/TableEmptyState';
-import { formatMoney, formatDate } from '../utils/format';
+import { formatMoney, formatDate, formatUUID } from '../utils/format';
 import { getPeriodDates, PERIODS } from '../utils/date';
 import Pagination from '../components/Pagination';
 import { useSettings } from '../context/SettingsContext';
@@ -413,7 +413,7 @@ const Dashboard = () => {
                                     <tbody>
                                         {currentOSItems.length > 0 ? currentOSItems.map(os => (
                                             <tr key={os.id}>
-                                                <td className="font-medium text-primary-color">#{os.id}</td>
+                                                <td className="font-medium text-primary-color">{formatUUID(os.id)}</td>
                                                 <td>{os.client_name}</td>
                                                 <td className="text-secondary text-sm">{os.vehicle_model} ({os.plate})</td>
                                                 <td className="text-secondary text-sm">

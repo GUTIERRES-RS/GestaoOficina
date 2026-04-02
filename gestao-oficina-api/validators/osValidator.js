@@ -17,6 +17,7 @@ const osSchemas = {
         invoice_number: z.string().max(50).nullable().optional(),
         vehicle_km: z.coerce.number().int().min(0).nullable().optional(),
         expected_delivery_date: z.string().nullable().optional(),
+        payment_date: z.string().nullable().optional(),
         parts: z.array(z.object({
             part_id: uuid,
             quantity: z.coerce.number().int().min(1),
@@ -35,6 +36,7 @@ const osSchemas = {
         mechanic_id: uuid.nullable().optional(),
         mechanic_name: z.string().nullable().optional(),
         expected_delivery_date: z.string().nullable().optional(),
+        payment_date: z.string().nullable().optional(),
         invoice_number: z.string().nullable().optional(),
         vehicle_km: z.coerce.number().int().optional(),
         payment_method: z.string().nullable().optional(),
@@ -44,7 +46,23 @@ const osSchemas = {
             quantity: z.coerce.number().int().min(1),
             unit_price: z.coerce.number().min(0)
         })).optional()
-    }).partial()
+    }).partial(),
+
+    /**
+     * Esquema para ADICIONAR uma peça individual a uma OS existente
+     */
+    addPart: z.object({
+        part_id: uuid,
+        quantity: z.coerce.number().int().min(1, "Quantidade deve ser pelo menos 1"),
+        unit_price: z.coerce.number().min(0).optional()
+    }),
+
+    /**
+     * Esquema para ATUALIZAR a quantidade de uma peça já vinculada à OS
+     */
+    updatePart: z.object({
+        quantity: z.coerce.number().int().min(1, "Quantidade deve ser pelo menos 1")
+    })
 };
 
 module.exports = osSchemas;

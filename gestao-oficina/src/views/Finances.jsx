@@ -46,7 +46,7 @@ const Finances = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [modalType, setModalType] = useState('income'); // 'income' | 'expense'
-    const [formData, setFormData] = useState({ description: '', category: '', amount: '', date: '', status: 'pendente', payment_method: '', installments: 1, os_id: null });
+    const [formData, setFormData] = useState({ description: '', category: '', amount: '', payment_date: '', status: 'pendente', payment_method: '', installments: 1, os_id: null });
     const [itemToDelete, setItemToDelete] = useState(null); // This will now store the whole object if possible, or just ID
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -119,7 +119,7 @@ const Finances = () => {
 
     const handleOpenModal = (type) => {
         setModalType(type);
-        setFormData({ id: null, description: '', category: '', amount: '', date: new Date().toISOString().split('T')[0], status: 'pago', payment_method: '', installments: 1, os_id: null });
+        setFormData({ id: null, description: '', category: '', amount: '', payment_date: new Date().toISOString().split('T')[0], status: 'pago', payment_method: '', installments: 1, os_id: null });
         setIsModalOpen(true);
     };
 
@@ -130,7 +130,7 @@ const Finances = () => {
             description: transaction.description,
             category: transaction.category,
             amount: transaction.amount,
-            date: transaction.payment_date ? transaction.payment_date.split('T')[0] : '',
+            payment_date: transaction.payment_date ? transaction.payment_date.split('T')[0] : '',
             status: transaction.status,
             payment_method: transaction.payment_method || '',
             installments: 1,
@@ -166,7 +166,7 @@ const Finances = () => {
             const newStatus = transaction.status === 'pago' ? 'pendente' : 'pago';
             await api.put(`/finances/${transaction.id}`, {
                 ...transaction,
-                date: transaction.payment_date ? transaction.payment_date.split('T')[0] : transaction.date ? transaction.date.split('T')[0] : null,
+                payment_date: transaction.payment_date ? transaction.payment_date.split('T')[0] : null,
                 status: newStatus
             });
             toast.success('Status atualizado!');
@@ -186,7 +186,7 @@ const Finances = () => {
             if (formData.payment_method === 'Parcelado' && (parseInt(formData.installments) || 0) > 1) {
                 const totalInstallments = parseInt(formData.installments) || 2;
                 const installmentValue = (amountValue / totalInstallments).toFixed(2);
-                const baseDate = new Date(formData.date + 'T12:00:00');
+                const baseDate = new Date(formData.payment_date + 'T12:00:00');
 
                 for (let i = 0; i < totalInstallments; i++) {
                     const installmentDate = new Date(baseDate);
@@ -196,7 +196,7 @@ const Finances = () => {
                         description: `${formData.description} (${i + 1}/${totalInstallments})`,
                         category: formData.category,
                         amount: parseFloat(installmentValue),
-                        date: installmentDate.toISOString().split('T')[0],
+                        payment_date: installmentDate.toISOString().split('T')[0],
                         status: formData.status,
                         payment_method: 'Parcelado',
                         type: modalType,
@@ -545,8 +545,8 @@ const Finances = () => {
                                         <input
                                             type="date"
                                             className="form-control form-control-with-icon"
-                                            value={formData.date}
-                                            onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                                            value={formData.payment_date}
+                                            onChange={(e) => setFormData({ ...formData, payment_date: e.target.value })}
                                         />
                                     </div>
                                 </div>

@@ -1,5 +1,4 @@
-import React from 'react';
-import { formatDate, formatMoney } from '../../utils/format';
+import { formatDate, formatMoney, formatUUID } from '../../utils/format';
 
 const OSPrint = ({ os, settings }) => {
     if (!os) return null;
@@ -19,7 +18,7 @@ const OSPrint = ({ os, settings }) => {
                         <h1 className="print-title">{settings?.workshop_name || 'Nome da Oficina'}</h1>
                         <p className="print-subtitle">{settings?.workshop_address}</p>
                         <p className="print-subtitle">{settings?.workshop_phone} {settings?.workshop_document && `| CNPJ/CPF: ${settings.workshop_document}`}</p>
-                        <p className="print-os-id">Ordem de Serviço #{os.id}</p>
+                        <p className="print-os-id">Ordem de Serviço {formatUUID(os.id).toUpperCase()}</p>
                     </div>
                 </div>
                 <div className="print-meta-right">
@@ -113,6 +112,10 @@ const OSPrint = ({ os, settings }) => {
                 <div className="print-signature-line">
                     <p>{os.mechanic_name || 'Assinatura do Responsável'}</p>
                 </div>
+            </div>
+
+            <div className="print-footer-technical">
+                <p>Identificador Único (O.S.): {os.id?.toUpperCase()}</p>
             </div>
         </div>
     );

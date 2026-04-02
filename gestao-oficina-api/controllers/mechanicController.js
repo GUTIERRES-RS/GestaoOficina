@@ -2,34 +2,52 @@ const db = require('../config/database');
 const { v4: uuidv4 } = require('uuid');
 const logger = require('../services/logger');
 
+/**
+ * Controller de Mecânicos
+ * Responsável pela gestão da equipe técnica, acompanhamento de produtividade
+ * e geração de relatórios de comissões por período.
+ */
 const mechanicController = {
-    // Listar todos os mecânicos
+
+    /**
+     * Listar todos os mecânicos cadastrados.
+     * @route GET /mechanics
+     */
     getAll: async (req, res) => {
         try {
             const [rows] = await db.query(
                 'SELECT * FROM mechanics ORDER BY name ASC'
             );
-            res.json(rows);
+            res.json({ success: true, data: rows });
         } catch (error) {
-            logger.error(`FETCH MECHANICS ERROR: ${error.stack}`);
-            res.status(500).json({ message: 'Erro ao buscar mecânicos' });
+            logger.error(`[MECHANIC:LIST] Erro ao buscar lista: ${error.stack}`);
+            res.status(500).json({ success: false, message: 'Erro ao buscar equipe técnica' });
         }
     },
 
-    // Obter mecânico por ID
+    /**
+     * Obter detalhes técnicos de um mecânico específico.
+     */
     getById: async (req, res) => {
         try {
             const { id } = req.params;
             const [rows] = await db.query('SELECT * FROM mechanics WHERE id = ?', [id]);
-            if (rows.length === 0) return res.status(404).json({ message: 'Mecânico não encontrado' });
-            res.json(rows[0]);
+            
+            if (rows.length === 0) {
+                return res.status(404).json({ success: false, message: 'Mecânico não localizado' });
+            }
+            
+            res.json({ success: true, data: rows[0] });
         } catch (error) {
-            logger.error(`GET MECHANIC ERROR: ${error.stack}`);
-            res.status(500).json({ message: 'Erro ao buscar mecânico' });
+            logger.error(`[MECHANIC:GET] Erro ao buscar ${req.params.id}: ${error.stack}`);
+            res.status(500).json({ success: false, message: 'Erro ao processar consulta de mecânico' });
         }
     },
 
-    // Criar mecânico
+    /**
+     * Cadastrar novo mecânico na plataforma.
+     * Gera UUID automaticamente.
+     */
     create: async (req, res) => {
         try {
             const mechanicId = uuidv4();
@@ -50,51 +68,75 @@ const mechanicController = {
                     notes || null
                 ]
             );
-            logger.info(`Mechanic Created: ${mechanicId} - ${name}`);
-            res.status(201).json({ id: mechanicId, message: 'Mecânico cadastrado com sucesso!' });
+
+            logger.info(`[MECHANIC:CREATE] Mecânico cadastrado: ${mechanicId} (${name})`);
+            res.status(201).json({ 
+                success: true, 
+                id: mechanicId, 
+                message: 'Novo técnico integrado com sucesso!' 
+            });
         } catch (error) {
-            logger.error(`CREATE MECHANIC ERROR: ${error.stack}`);
-            res.status(500).json({ message: 'Erro ao cadastrar mecânico' });
+            logger.error(`[MECHANIC:CREATE] Erro no cadastro: ${error.stack}`);
+            res.status(500).json({ success: false, message: 'Erro ao registrar mecânico' });
         }
     },
 
-    // Atualizar mecânico
+    /**
+     * Atualizar dados cadastrais ou técnicos do mecânico.
+     */
     update: async (req, res) => {
         try {
             const { id } = req.params;
             const { name, phone, document, specialty, commission_rate, status, hire_date, notes } = req.body;
 
             const [result] = await db.query(
-                `UPDATE mechanics SET name = ?, phone = ?, document = ?, specialty = ?,
-                 commission_rate = ?, status = ?, hire_date = ?, notes = ?
+                `UPDATE mechanics SET 
+                    name = ?, phone = ?, document = ?, specialty = ?,
+                    commission_rate = ?, status = ?, hire_date = ?, notes = ?
                  WHERE id = ?`,
-                [name, phone, document, specialty, commission_rate, status, hire_date, notes, id]
+                [name.trim(), phone, document, specialty, commission_rate, status, hire_date, notes, id]
             );
 
-            if (result.affectedRows === 0) return res.status(404).json({ message: 'Mecânico não encontrado' });
-            logger.info(`Mechanic Updated: ${id}`);
-            res.json({ message: 'Mecânico atualizado com sucesso!' });
+            if (result.affectedRows === 0) {
+                return res.status(404).json({ success: false, message: 'Registro não localizado para edição' });
+            }
+
+            logger.info(`[MECHANIC:UPDATE] Mecânico atualizado: ${id}`);
+            res.json({ success: true, message: 'Cadastro do técnico atualizado com sucesso!' });
         } catch (error) {
-            logger.error(`UPDATE MECHANIC ERROR: ${error.stack}`);
-            res.status(500).json({ message: 'Erro ao atualizar mecânico' });
+            logger.error(`[MECHANIC:UPDATE] Erro na atualização ${req.params.id}: ${error.stack}`);
+            res.status(500).json({ success: false, message: 'Erro ao atualizar dados do mecânico' });
         }
     },
 
-    // Deletar mecânico
+    /**
+     * Remover um mecânico do sistema.
+     * Restrição: Mecânicos com OS vinculadas não podem ser excluídos.
+     */
     delete: async (req, res) => {
         try {
             const { id } = req.params;
             const [result] = await db.query('DELETE FROM mechanics WHERE id = ?', [id]);
-            if (result.affectedRows === 0) return res.status(404).json({ message: 'Mecânico não encontrado' });
-            logger.info(`Mechanic Deleted: ${id}`);
-            res.json({ message: 'Mecânico removido com sucesso!' });
+            
+            if (result.affectedRows === 0) {
+                return res.status(404).json({ success: false, message: 'Mecânico não encontrado para exclusão' });
+            }
+
+            logger.info(`[MECHANIC:DELETE] Mecânico removido: ${id}`);
+            res.json({ success: true, message: 'Técnico removido do catálogo com sucesso!' });
         } catch (error) {
-            logger.error(`DELETE MECHANIC ERROR: ${error.stack}`);
-            res.status(500).json({ message: 'Erro ao remover mecânico' });
+            if (error.code === 'ER_ROW_IS_REFERENCED_2') {
+                return res.status(400).json({ success: false, message: 'Impossível excluir: Este técnico possui Ordens de Serviço vinculadas.' });
+            }
+            logger.error(`[MECHANIC:DELETE] Erro ao remover ${req.params.id}: ${error.stack}`);
+            res.status(500).json({ success: false, message: 'Erro técnico ao tentar excluir o mecânico' });
         }
     },
 
-    // Relatório de comissão por mecânico (com filtro de período)
+    /**
+     * Gerar relatório consolidado de comensões por período e mecânico.
+     * @param {Object} req - Query: start_date, end_date (YYYY-MM-DD), mechanic_id (opcional).
+     */
     getCommissionReport: async (req, res) => {
         try {
             const { start_date, end_date, mechanic_id } = req.query;
@@ -135,14 +177,16 @@ const mechanicController = {
             `;
 
             const [rows] = await db.query(query, params);
-            res.json(rows);
+            res.json({ success: true, data: rows });
         } catch (error) {
-            logger.error(`COMMISSION REPORT ERROR: ${error.stack}`);
-            res.status(500).json({ message: 'Erro ao gerar relatório de comissão' });
+            logger.error(`[MECHANIC:COMMISSION] Falha ao gerar relatório: ${error.stack}`);
+            res.status(500).json({ success: false, message: 'Erro ao processar relatório de comissões' });
         }
     },
 
-    // Detalhe de OS de um mecânico específico (para drill-down)
+    /**
+     * Listar histórico detalhado de OS finalizadas por um mecânico no período.
+     */
     getMechanicOsList: async (req, res) => {
         try {
             const { id } = req.params;
@@ -167,10 +211,10 @@ const mechanicController = {
             `;
 
             const [rows] = await db.query(query, params);
-            res.json(rows);
+            res.json({ success: true, data: rows });
         } catch (error) {
-            logger.error(`GET MECHANIC OS LIST ERROR: ${error.stack}`);
-            res.status(500).json({ message: 'Erro ao buscar OS do mecânico' });
+            logger.error(`[MECHANIC:OS_LIST] Erro ao listar OS do técnico ${id}: ${error.stack}`);
+            res.status(500).json({ success: false, message: 'Erro ao recuperar histórico de atendimentos' });
         }
     }
 };

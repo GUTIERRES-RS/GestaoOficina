@@ -1,7 +1,7 @@
 import React from 'react';
 import { Loader, Edit, Trash2, ArrowUpCircle, ArrowDownCircle, Package } from 'lucide-react';
 import TableEmptyState from '../../components/TableEmptyState';
-import { formatMoney } from '../../utils/format';
+import { formatMoney, formatUUID } from '../../utils/format';
 
 const PartList = ({ 
     filteredInventory, 
@@ -39,7 +39,7 @@ const PartList = ({
                         const status = getStatusInfo(item.stock_quantity, item.min_stock);
                         return (
                             <tr key={idx}>
-                                <td className="text-xs font-medium text-secondary">{item.code || `INT-${item.id}`}</td>
+                                <td className="text-xs font-medium text-secondary">{item.code || formatUUID(item.id)}</td>
                                 <td className="font-medium">{item.name}</td>
                                 <td>
                                     <span className={`badge ${status.color}`}>

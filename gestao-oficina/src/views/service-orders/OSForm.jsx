@@ -541,6 +541,43 @@ const OSForm = ({
                     </div>
                 </div>
 
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+                    <div className="form-group">
+                        <label className="form-label">Forma de Pagamento</label>
+                        <div className="form-input-wrapper">
+                            <CreditCard className="input-icon" size={18} />
+                            <select
+                                className="form-control form-control-with-icon"
+                                value={formData.payment_method || ''}
+                                onChange={(e) => onChange({ payment_method: e.target.value })}
+                            >
+                                <option value="">Selecione...</option>
+                                <option value="Dinheiro">Dinheiro</option>
+                                <option value="Cartão de Crédito">Cartão de Crédito</option>
+                                <option value="Cartão de Débito">Cartão de Débito</option>
+                                <option value="Pix">Pix</option>
+                                <option value="Transferência">Transferência</option>
+                                <option value="Boleto">Boleto</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    {(formData.status === 'Entregue' || formData.payment_date) && (
+                        <div className="form-group animation-fade-in">
+                            <label className="form-label">Data do Pagamento / Recebimento</label>
+                            <div className="form-input-wrapper">
+                                <Calendar className="input-icon" size={18} />
+                                <input
+                                    type="date"
+                                    className="form-control form-control-with-icon"
+                                    value={formData.payment_date || ''}
+                                    onChange={(e) => onChange({ payment_date: e.target.value })}
+                                />
+                            </div>
+                        </div>
+                    )}
+                </div>
+
                 {/* Section 5: Resumo Final (Centered) */}
                 <div className="mt-10 pt-6 border-t border-dashed border-slate-200">
                     <div className="flex items-center gap-2 mb-6">

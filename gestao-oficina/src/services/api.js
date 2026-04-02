@@ -21,9 +21,21 @@ api.interceptors.request.use(
     }
 );
 
-// Interceptor para tratar erros globais
+// Interceptor para tratar respostas globais e normalizar o novo formato { success, data }
 api.interceptors.response.use(
     (response) => {
+        /**
+         * Lógica de Extração de Dados (Hotfix de Compatibilidade):
+         * Se o backend enviou o novo formato { success: true, data: [...] },
+         * retornamos o conteúdo de 'data' diretamente para o Axios.
+         * Isso evita qebra no código antigo que espera o array diretamente em res.data.
+         */
+        if (response.data && response.data.success === true && response.data.data !== undefined) {
+            return {
+                ...response,
+                data: response.data.data
+            };
+        }
         return response;
     },
     (error) => {

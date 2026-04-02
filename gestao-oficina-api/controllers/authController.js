@@ -1,97 +1,125 @@
 const db = require('../config/database');
-const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
 const logger = require('../services/logger');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'super_secret_key_123';
-const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'oficina_refresh_secret_2026_premium';
+// Verificação de segurança na inicialização
+if (!process.env.JWT_SECRET || !process.env.JWT_REFRESH_SECRET) {
+    logger.error('[AUTH:FATAL] JWT Secrets não configurados no arquivo .env');
+    process.exit(1); 
+}
 
-const generateTokens = (user) => {
-    const accessToken = jwt.sign(
-        { id: user.id, email: user.email, role: user.role, name: user.name },
-        JWT_SECRET,
-        { expiresIn: '2h' }
-    );
+/**
+ * Controller de Autenticação
+ * Gerencia o ciclo de vida de acesso: Login, Geração de Tokens (JWT) e Logout.
+ */
+const authController = {
 
-    const refreshToken = jwt.sign(
-        { id: user.id },
-        JWT_REFRESH_SECRET,
-        { expiresIn: '7d' }
-    );
+    /**
+     * Autenticar usuário e gerar tokens de acesso.
+     * @param {Object} req - Objeto de requisição Express.
+     * @param {Object} res - Objeto de resposta Express.
+     */
+    login: async (req, res) => {
+        try {
+            const { email, password } = req.body;
 
-    return { accessToken, refreshToken };
-};
-
-exports.login = async (req, res) => {
-    try {
-        const { email, password } = req.body;
-
-        const [users] = await db.query('SELECT * FROM users WHERE email = ?', [email]);
-        const user = users[0];
-
-        if (!user || !(await bcrypt.compare(password, user.password))) {
-            logger.warn(`Failed login attempt for email: ${email}`);
-            return res.status(401).json({ error: 'Credenciais inválidas' });
-        }
-
-        const { accessToken, refreshToken } = generateTokens(user);
-
-        // Store refresh token in DB
-        await db.query('UPDATE users SET refresh_token = ? WHERE id = ?', [refreshToken, user.id]);
-
-        logger.info(`User Logged In: ${user.id} (${user.email})`);
-
-        res.json({
-            message: 'Login realizado com sucesso',
-            token: accessToken,
-            refreshToken,
-            user: {
-                id: user.id,
-                name: user.name,
-                email: user.email,
-                role: user.role
+            const [rows] = await db.query('SELECT * FROM users WHERE email = ?', [email]);
+            if (rows.length === 0) {
+                return res.status(401).json({ success: false, message: 'Credenciais inválidas' });
             }
-        });
-    } catch (error) {
-        logger.error(`LOGIN ERROR: ${error.stack}`);
-        res.status(500).json({ error: 'Erro interno no servidor' });
-    }
-};
 
-exports.refresh = async (req, res) => {
-    try {
+            const user = rows[0];
+            const isMatch = await bcrypt.compare(password, user.password);
+            if (!isMatch) {
+                return res.status(401).json({ success: false, message: 'Credenciais inválidas' });
+            }
+
+            const { accessToken, refreshToken } = authController.generateTokens(user);
+
+            logger.info(`[AUTH:LOGIN] Usuário autenticado: ${user.email} (ID: ${user.id})`);
+            
+            res.json({
+                success: true,
+                data: {
+                    user: { id: user.id, name: user.name, email: user.email, role: user.role },
+                    token: accessToken,
+                    refreshToken: refreshToken
+                },
+                message: 'Bem-vindo ao sistema!'
+            });
+        } catch (error) {
+            logger.error(`[AUTH:LOGIN] Erro no processamento: ${error.stack}`);
+            res.status(500).json({ success: false, message: 'Erro ao processar autenticação' });
+        }
+    },
+
+    /**
+     * Renovar Access Token usando um Refresh Token válido.
+     * @param {Object} req - Objeto de requisição Express.
+     * @param {Object} res - Objeto de resposta Express.
+     */
+    refresh: async (req, res) => {
         const { refreshToken } = req.body;
-        if (!refreshToken) return res.status(401).json({ error: 'Refresh Token não fornecido' });
-
-        const decoded = jwt.verify(refreshToken, JWT_REFRESH_SECRET);
-        const [users] = await db.query('SELECT * FROM users WHERE id = ? AND refresh_token = ?', [decoded.id, refreshToken]);
-        const user = users[0];
-
-        if (!user) {
-            return res.status(401).json({ error: 'Refresh Token inválido ou revogado' });
+        if (!refreshToken) {
+            return res.status(401).json({ success: false, message: 'Token de atualização é obrigatório' });
         }
 
-        const tokens = generateTokens(user);
-        await db.query('UPDATE users SET refresh_token = ? WHERE id = ?', [tokens.refreshToken, user.id]);
+        try {
+            const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+            const [rows] = await db.query('SELECT * FROM users WHERE id = ?', [decoded.id]);
+            
+            if (rows.length === 0) {
+                return res.status(401).json({ success: false, message: 'Usuário não localizado' });
+            }
 
-        res.json({
-            token: tokens.accessToken,
-            refreshToken: tokens.refreshToken
-        });
-    } catch (error) {
-        logger.error(`REFRESH TOKEN ERROR: ${error.stack}`);
-        res.status(401).json({ error: 'Refresh Token expirado ou inválido' });
+            const user = rows[0];
+            const tokens = authController.generateTokens(user);
+
+            res.json({
+                success: true,
+                data: {
+                    token: tokens.accessToken,
+                    refreshToken: tokens.refreshToken
+                }
+            });
+        } catch (error) {
+            logger.warn(`[AUTH:REFRESH] Tentativa de refresh inválida: ${error.message}`);
+            res.status(401).json({ success: false, message: 'Sessão expirada. Faça login novamente.' });
+        }
+    },
+
+    /**
+     * Finalizar sessão do usuário.
+     * @param {Object} req - Objeto de requisição Express.
+     * @param {Object} res - Objeto de resposta Express.
+     */
+    logout: async (req, res) => {
+        logger.info(`[AUTH:LOGOUT] Encerrando sessão para ID: ${req.user?.id}`);
+        res.json({ success: true, message: 'Sessão encerrada com sucesso' });
+    },
+
+    /**
+     * Utilitário para emissão de novos tokens JWT.
+     * @param {Object} user - Objeto do usuário do banco de dados.
+     * @returns {Object} { accessToken, refreshToken }
+     * @private
+     */
+    generateTokens: (user) => {
+        const accessToken = jwt.sign(
+            { id: user.id, email: user.email, role: user.role },
+            process.env.JWT_SECRET,
+            { expiresIn: '8h' }
+        );
+
+        const refreshToken = jwt.sign(
+            { id: user.id },
+            process.env.JWT_REFRESH_SECRET,
+            { expiresIn: '7d' }
+        );
+
+        return { accessToken, refreshToken };
     }
 };
 
-exports.logout = async (req, res) => {
-    try {
-        const { id } = req.user;
-        await db.query('UPDATE users SET refresh_token = NULL WHERE id = ?', [id]);
-        logger.info(`User Logged Out: ${id}`);
-        res.json({ message: 'Logout realizado com sucesso' });
-    } catch (error) {
-        logger.error(`LOGOUT ERROR: ${error.stack}`);
-        res.status(500).json({ error: 'Erro ao realizar logout' });
-    }
-};
+module.exports = authController;
