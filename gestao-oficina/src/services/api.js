@@ -10,7 +10,7 @@ const api = axios.create({
 // Interceptor para adicionar o token em todas as requisições
 api.interceptors.request.use(
     (config) => {
-        const token = localStorage.getItem('@GestaoOficinaPro:token');
+        const token = localStorage.getItem('@LocalSTRG:token');
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
         }
@@ -39,16 +39,16 @@ api.interceptors.response.use(
                     return Promise.reject(error);
                 }
 
-                localStorage.removeItem('@GestaoOficinaPro:token');
-                localStorage.removeItem('@GestaoOficinaPro:user');
-                
+                localStorage.removeItem('@LocalSTRG:token');
+                localStorage.removeItem('@LocalSTRG:user');
+
                 // Exibe mensagem de erro e redireciona
                 toast.error(message);
-                
+
                 setTimeout(() => {
                     window.location.href = '/login';
                 }, 1500);
-                
+
                 return Promise.reject(error);
             }
         }

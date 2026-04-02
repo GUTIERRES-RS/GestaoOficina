@@ -17,7 +17,7 @@ export const SettingsProvider = ({ children }) => {
     const signed = auth?.signed;
 
     const [settings, setSettings] = useState(() => {
-        const savedTheme = localStorage.getItem('@GestaoOficinaPro:theme');
+        const savedTheme = localStorage.getItem('@LocalSTRG:theme');
         return {
             workshop_name: '',
             workshop_phone: '',
@@ -38,8 +38,8 @@ export const SettingsProvider = ({ children }) => {
     const fetchSettings = async () => {
         try {
             setLoading(true);
-            const token = localStorage.getItem('@GestaoOficinaPro:token');
-            
+            const token = localStorage.getItem('@LocalSTRG:token');
+
             let res;
             if (token) {
                 // Tenta buscar configurações completas se tiver token
@@ -52,7 +52,7 @@ export const SettingsProvider = ({ children }) => {
             if (res.data) {
                 setSettings(prev => ({ ...prev, ...res.data }));
                 if (res.data.theme) {
-                    localStorage.setItem('@GestaoOficinaPro:theme', res.data.theme);
+                    localStorage.setItem('@LocalSTRG:theme', res.data.theme);
                 }
             }
         } catch (error) {
@@ -63,7 +63,7 @@ export const SettingsProvider = ({ children }) => {
                     if (publicRes.data) {
                         setSettings(prev => ({ ...prev, ...publicRes.data }));
                         if (publicRes.data.theme) {
-                            localStorage.setItem('@GestaoOficinaPro:theme', publicRes.data.theme);
+                            localStorage.setItem('@LocalSTRG:theme', publicRes.data.theme);
                         }
                     }
                 } catch (publicError) {
@@ -84,7 +84,7 @@ export const SettingsProvider = ({ children }) => {
     useEffect(() => {
         if (settings.theme) {
             document.documentElement.setAttribute('data-theme', settings.theme);
-            localStorage.setItem('@GestaoOficinaPro:theme', settings.theme);
+            localStorage.setItem('@LocalSTRG:theme', settings.theme);
         }
     }, [settings.theme]);
 
@@ -105,7 +105,7 @@ export const SettingsProvider = ({ children }) => {
     const updateSettingsState = (newSettings) => {
         setSettings(newSettings);
         if (newSettings.theme) {
-            localStorage.setItem('@GestaoOficinaPro:theme', newSettings.theme);
+            localStorage.setItem('@LocalSTRG:theme', newSettings.theme);
         }
     };
 

@@ -8,13 +8,13 @@ export const AuthProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const storedToken = localStorage.getItem('@GestaoOficinaPro:token');
-        const storedUser = localStorage.getItem('@GestaoOficinaPro:user');
+        const storedToken = localStorage.getItem('@LocalSTRG:token');
+        const storedUser = localStorage.getItem('@LocalSTRG:user');
 
         if (storedToken && storedUser) {
             setUser(JSON.parse(storedUser));
         }
-        
+
         setLoading(false);
     }, []);
 
@@ -22,21 +22,21 @@ export const AuthProvider = ({ children }) => {
         const response = await api.post('/auth/login', { email, password });
         const { token, user } = response.data;
 
-        localStorage.setItem('@GestaoOficinaPro:token', token);
-        localStorage.setItem('@GestaoOficinaPro:user', JSON.stringify(user));
+        localStorage.setItem('@LocalSTRG:token', token);
+        localStorage.setItem('@LocalSTRG:user', JSON.stringify(user));
 
         setUser(user);
     };
 
     const logout = () => {
-        localStorage.removeItem('@GestaoOficinaPro:token');
-        localStorage.removeItem('@GestaoOficinaPro:user');
+        localStorage.removeItem('@LocalSTRG:token');
+        localStorage.removeItem('@LocalSTRG:user');
         setUser(null);
     };
 
     const updateAuthUser = (updatedUser) => {
         const newUser = { ...user, ...updatedUser };
-        localStorage.setItem('@GestaoOficinaPro:user', JSON.stringify(newUser));
+        localStorage.setItem('@LocalSTRG:user', JSON.stringify(newUser));
         setUser(newUser);
     };
 
