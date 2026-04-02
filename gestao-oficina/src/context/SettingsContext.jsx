@@ -18,15 +18,23 @@ export const SettingsProvider = ({ children }) => {
 
     const [settings, setSettings] = useState(() => {
         const savedTheme = localStorage.getItem('@LocalSTRG:theme');
+        const savedPublic = localStorage.getItem('@LocalSTRG:public_settings');
+        let initialPublic = {};
+        try {
+            initialPublic = savedPublic ? JSON.parse(savedPublic) : {};
+        } catch (e) {
+            console.warn('Erro ao ler cache de marca no context:', e);
+        }
+
         return {
-            workshop_name: '',
+            workshop_name: initialPublic.workshop_name || '',
             workshop_phone: '',
             workshop_email: '',
             workshop_address: '',
             workshop_document: '',
-            theme: savedTheme || 'dark',
+            theme: initialPublic.theme || savedTheme || 'dark',
             currency: 'BRL',
-            logo_url: null,
+            logo_url: initialPublic.logo_url || null,
             whatsapp: '',
             review_days: 30,
             next_os_number: 1,
@@ -40,28 +48,45 @@ export const SettingsProvider = ({ children }) => {
             setLoading(true);
             const token = localStorage.getItem('@LocalSTRG:token');
 
+            // Se já temos dados carregados pelo index.html (window.__PUBLIC_SETTINGS__) 
+            // e NÃO estamos logados, usamos eles em vez de fazer outro fetch
+            if (!token && window.__PUBLIC_SETTINGS__ && !signed) {
+                setSettings(prev => ({ ...prev, ...window.__PUBLIC_SETTINGS__ }));
+                setLoading(false);
+                return;
+            }
+
             let res;
             if (token) {
-                // Tenta buscar configurações completas se tiver token
                 res = await api.get('/settings');
             } else {
-                // Caso contrário, busca apenas o que é público (logo e tema)
                 res = await api.get('/settings/public');
             }
 
             if (res.data) {
                 setSettings(prev => ({ ...prev, ...res.data }));
+                
+                // Persistência para o anti-flash no próximo load
+                if (res.data.workshop_name || res.data.logo_url) {
+                    const publicData = {
+                        workshop_name: res.data.workshop_name,
+                        logo_url: res.data.logo_url,
+                        theme: res.data.theme
+                    };
+                    localStorage.setItem('@LocalSTRG:public_settings', JSON.stringify(publicData));
+                }
+
                 if (res.data.theme) {
                     localStorage.setItem('@LocalSTRG:theme', res.data.theme);
                 }
             }
         } catch (error) {
-            // Se falhou ao buscar as completas por 401, tenta as públicas
             if (error.response?.status === 401) {
                 try {
                     const publicRes = await api.get('/settings/public');
                     if (publicRes.data) {
                         setSettings(prev => ({ ...prev, ...publicRes.data }));
+                        localStorage.setItem('@LocalSTRG:public_settings', JSON.stringify(publicRes.data));
                         if (publicRes.data.theme) {
                             localStorage.setItem('@LocalSTRG:theme', publicRes.data.theme);
                         }
@@ -90,17 +115,24 @@ export const SettingsProvider = ({ children }) => {
 
     useEffect(() => {
         if (settings.logo_url) {
-            const link = document.querySelector("link[rel~='icon']");
+            let link = document.getElementById('dynamic-favicon');
             if (link) {
                 link.href = settings.logo_url;
             } else {
-                const newLink = document.createElement('link');
-                newLink.rel = 'icon';
-                newLink.href = settings.logo_url;
-                document.getElementsByTagName('head')[0].appendChild(newLink);
+                link = document.createElement('link');
+                link.rel = 'icon';
+                link.id = 'dynamic-favicon';
+                link.href = settings.logo_url;
+                document.getElementsByTagName('head')[0].appendChild(link);
             }
         }
     }, [settings.logo_url]);
+
+    useEffect(() => {
+        if (settings.workshop_name) {
+            document.title = settings.workshop_name;
+        }
+    }, [settings.workshop_name]);
 
     const updateSettingsState = (newSettings) => {
         setSettings(newSettings);

@@ -35,14 +35,19 @@ const Login = () => {
                 <div className="login-header">
                     {settings?.logo_url ? (
                         <div className="login-logo-container flex-center mb-6">
-                            <img src={settings.logo_url} alt="Logo" className="login-logo-img" />
+                            <img
+                                src={settings.logo_url}
+                                alt={settings.workshop_name || 'Logo'}
+                                className="login-logo-img"
+                                style={{ maxHeight: '80px', width: 'auto', objectFit: 'contain' }}
+                            />
                         </div>
                     ) : (
                         <div className="logo-icon-wrap login-logo">
                             <Wrench size={28} className="text-white" />
                         </div>
                     )}
-                    <h2>Gestão Oficina <span className="text-primary">Pro</span></h2>
+                    <h2>{settings?.workshop_name || ''}</h2>
                     <p className="text-secondary">Faça login para acessar o sistema</p>
                 </div>
 
@@ -89,6 +94,7 @@ const Login = () => {
                     <p className="text-sm text-secondary">
                         Ainda não tem conta? <a href="#">Cadastre sua oficina</a>
                     </p>
+                    <p className="text-secondary">Gestão Oficina <span className="text-primary">Pro</span></p>
                 </div>
             </div>
 

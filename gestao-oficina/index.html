@@ -1,10 +1,78 @@
 <!doctype html>
-<html lang="en">
+<html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Gestão Oficina</title>
+    <title>Carregando...</title>
+
+    <!-- ANTI-FLASH & BRANDING AUTO-INJECT -->
+    <script>
+      (function() {
+        // 1. Tentar ler do Cache Imediato (LocalStorage)
+        const saved = localStorage.getItem('@LocalSTRG:public_settings');
+        if (saved) {
+          try {
+            const data = JSON.parse(saved);
+            if (data.workshop_name) document.title = data.workshop_name;
+            if (data.theme) document.documentElement.setAttribute('data-theme', data.theme);
+            if (data.logo_url) {
+              const link = document.createElement('link');
+              link.rel = 'icon';
+              link.href = data.logo_url;
+              link.id = 'dynamic-favicon';
+              document.head.appendChild(link);
+            }
+          } catch (e) {
+            console.warn('Erro ao ler cache de marca:', e);
+          }
+        }
+
+        // 2. Fetch Ultra-Rápido (Mesmo no primeiro acesso)
+        // Oculta o body temporariamente para o usuário não ver o "Carregando..." genérico
+        const style = document.createElement('style');
+        style.id = 'anti-flash-style';
+        style.innerHTML = 'body { visibility: hidden !important; }';
+        document.head.appendChild(style);
+
+        const apiPort = 3000; // Porta padrão da API
+        const apiUrl = `http://${window.location.hostname}:${apiPort}/api/settings/public`;
+        
+        fetch(apiUrl)
+          .then(res => res.json())
+          .then(data => {
+            if (data) {
+              if (data.workshop_name) document.title = data.workshop_name;
+              if (data.theme) document.documentElement.setAttribute('data-theme', data.theme);
+              if (data.logo_url) {
+                let link = document.getElementById('dynamic-favicon');
+                if (!link) {
+                  link = document.createElement('link');
+                  link.rel = 'icon';
+                  link.id = 'dynamic-favicon';
+                  document.head.appendChild(link);
+                }
+                link.href = data.logo_url;
+              }
+              // Salva para a próxima visita ser instantânea
+              localStorage.setItem('@LocalSTRG:public_settings', JSON.stringify(data));
+              // Disponibiliza globalmente para o React
+              window.__PUBLIC_SETTINGS__ = data;
+            }
+          })
+          .catch(err => console.error('Erro no first-load branding:', err))
+          .finally(() => {
+            // Mostra o conteúdo
+            const el = document.getElementById('anti-flash-style');
+            if (el) el.remove();
+          });
+          
+        // Timeout de segurança: 1.5s (se a API cair, a página carrega mesmo assim)
+        setTimeout(() => {
+          const el = document.getElementById('anti-flash-style');
+          if (el) el.remove();
+        }, 1500);
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
