@@ -15,7 +15,7 @@ import { formatMoney, formatDate } from '../utils/format';
 import { getPeriodDates, PERIODS } from '../utils/date';
 import Pagination from '../components/Pagination';
 import { useSettings } from '../context/SettingsContext';
-import './Finances.css';
+
 
 const STATUS_LABELS = {
     pago: 'Pago',
@@ -283,18 +283,16 @@ const Finances = () => {
                                 type="date"
                                 value={customStart}
                                 onChange={e => setCustomStart(e.target.value)}
-                                className="search-input"
-                                style={{ padding: '0.4rem 0.8rem', minWidth: '130px' }}
+                                className="search-input min-w-130 py-1-5"
                             />
                             <span className="text-secondary text-sm">Até</span>
                             <input
                                 type="date"
                                 value={customEnd}
                                 onChange={e => setCustomEnd(e.target.value)}
-                                className="search-input"
-                                style={{ padding: '0.4rem 0.8rem', minWidth: '130px' }}
+                                className="search-input min-w-130 py-1-5"
                             />
-                            <button className="btn btn-primary ml-2" style={{ padding: '0.4rem 0.8rem' }} onClick={fetchFinancialData}>Filtrar</button>
+                            <button className="btn btn-primary ml-2 py-1-5 px-4" onClick={fetchFinancialData}>Filtrar</button>
                         </div>
                     )}
                 </div>
@@ -317,7 +315,7 @@ const Finances = () => {
                     <div className="stat-label">Saldo em Caixa</div>
                 </div>
 
-                <div className="stat-card stat-green" style={{ opacity: 0.85 }}>
+                <div className="stat-card stat-green opacity-85">
                     <div className="stat-value text-success-text">{loading ? '...' : formatMoney((summary.income || 0) + (summary.pending_income || 0))}</div>
                     <div className="stat-label">Faturamento Total</div>
                 </div>
@@ -380,7 +378,7 @@ const Finances = () => {
             </div>
 
             {error && (
-                <div className="alert-danger mb-4" style={{ padding: '1rem', background: '#fee2e2', color: '#b91c1c', borderRadius: '8px' }}>
+                <div className="alert-box alert-danger">
                     {error}
                 </div>
             )}
@@ -431,9 +429,8 @@ const Finances = () => {
                                         <td className="text-sm text-secondary">{formatDate(item.payment_date)}</td>
                                         <td>
                                             <span
-                                                className={`badge ${item.status === 'pago' ? 'badge-success' : item.status === 'cancelado' ? 'badge-danger' : 'badge-warning'}`}
+                                                className={`badge cursor-pointer ${item.status === 'pago' ? 'badge-success' : item.status === 'cancelado' ? 'badge-danger' : 'badge-warning'}`}
                                                 onClick={() => handleStatusToggle(item)}
-                                                style={{ cursor: 'pointer' }}
                                                 title="Clique para alternar status"
                                             >
                                                 {STATUS_LABELS[item.status] || item.status}

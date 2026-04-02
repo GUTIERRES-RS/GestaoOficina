@@ -4,7 +4,6 @@ import { useAuth } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
 import reminderService from '../services/reminderService';
 import NotificationDropdown from './NotificationDropdown';
-import './Topbar.css';
 
 const Topbar = ({ toggleSidebar }) => {
     const { user } = useAuth();

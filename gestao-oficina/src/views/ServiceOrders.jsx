@@ -289,7 +289,7 @@ const ServiceOrders = () => {
             </div>
 
             {error && (
-                <div className="alert-danger mb-4" style={{ padding: '1rem', background: '#fee2e2', color: '#b91c1c', borderRadius: '8px' }}>
+                <div className="alert-box alert-danger">
                     {error}
                 </div>
             )}
@@ -330,17 +330,15 @@ const ServiceOrders = () => {
                                 value={customStart}
                                 onChange={e => setCustomStart(e.target.value)}
                                 className="search-input"
-                                style={{ padding: '0.4rem 0.8rem', minWidth: '130px' }}
                             />
                             <span className="text-secondary">até</span>
                             <input
                                 type="date"
+                                className="form-control min-w-130 py-1-5"
                                 value={customEnd}
                                 onChange={e => setCustomEnd(e.target.value)}
-                                className="search-input"
-                                style={{ padding: '0.4rem 0.8rem', minWidth: '130px' }}
                             />
-                            <button className="btn btn-primary ml-2" style={{ padding: '0.4rem 0.8rem' }} onClick={fetchOrders}>Filtrar</button>
+                            <button className="btn btn-primary ml-2 py-1-5 px-4" onClick={fetchOrders}>Filtrar</button>
                         </div>
                     )}
                 </div>

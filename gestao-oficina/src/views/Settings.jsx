@@ -5,7 +5,7 @@ import toast from 'react-hot-toast';
 import { useSettings } from '../context/SettingsContext';
 import { useAuth } from '../context/AuthContext';
 import { useLocation, useNavigate } from 'react-router-dom';
-import './Settings.css';
+
 
 const Settings = () => {
     const { settings: globalSettings, updateSettingsState, loading } = useSettings();
@@ -500,9 +500,8 @@ const Settings = () => {
                         <div className="flex justify-end mt-8 pt-6 border-t border-color">
                             <button
                                 type="submit"
-                                className="btn btn-primary btn-lg"
+                                className="btn btn-primary py-3 px-8"
                                 disabled={saving}
-                                style={{ padding: '0.75rem 2rem' }}
                             >
                                 {saving ? <Loader className="animate-spin" size={18} /> : <Save size={18} />}
                                 <span className="ml-2">Salvar Alterações</span>

@@ -232,21 +232,21 @@ const Vehicles = () => {
 
             {/* Error */}
             {error && (
-                <div style={{ padding: '1rem', background: '#fee2e2', color: '#b91c1c', borderRadius: '8px', marginBottom: '1rem' }}>
+                <div className="alert-box alert-danger">
                     {error}
                 </div>
             )}
 
             {/* Vehicle Cards Grid */}
             {loading ? (
-                <div className="flex justify-center items-center" style={{ padding: '4rem' }}>
-                    <Loader className="animate-spin" size={32} style={{ color: 'var(--accent-color)' }} />
+                <div className="flex justify-center items-center py-16">
+                    <Loader className="animate-spin text-accent" size={32} />
                     <span className="ml-2 text-secondary">Carregando veículos...</span>
                 </div>
             ) : filtered.length === 0 ? (
-                <div className="card" style={{ textAlign: 'center', padding: '4rem' }}>
-                    <Car size={48} style={{ color: '#94a3b8', margin: '0 auto 1rem' }} />
-                    <h3 className="font-semibold" style={{ marginBottom: '0.5rem' }}>Nenhum veículo encontrado</h3>
+                <div className="card text-center py-16">
+                    <Car size={48} className="text-tertiary mx-auto mb-4" />
+                    <h3 className="font-semibold mb-2">Nenhum veículo encontrado</h3>
                     <p className="text-secondary text-sm">
                         {searchTerm ? 'Tente outra busca.' : 'Cadastre o primeiro veículo clicando em "Novo Veículo".'}
                     </p>
@@ -297,10 +297,10 @@ const Vehicles = () => {
                                             <div className="font-medium">{v.client_name || '--'}</div>
                                         </td>
                                         <td className="text-center">
-                                            <span className="font-bold text-primary-color" style={{ fontSize: '0.95rem' }}>{v.total_os || 0}</span>
+                                            <span className="font-bold text-primary-color text-md">{v.total_os || 0}</span>
                                         </td>
                                         <td className="text-left">
-                                            <span className="font-bold" style={{ color: '#3b82f6' }}>
+                                            <span className="font-bold text-info">
                                                 {formatMoney(v.total_faturado || 0)}
                                             </span>
                                         </td>

@@ -24,10 +24,10 @@ const AppContent = () => {
 
   if (isInitialCheck) {
     return (
-      <div className="flex h-screen w-screen items-center justify-center bg-[#0f172a]">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin"></div>
-          <span className="text-slate-400 font-medium">Verificando conexão...</span>
+      <div className="full-page-loader">
+        <div className="loader-content">
+          <div className="loading-spinner-large"></div>
+          <span className="loading-text-glow">Verificando conexão...</span>
         </div>
       </div>
     );

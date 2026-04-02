@@ -10,7 +10,7 @@ import Pagination from '../components/Pagination';
 import { useSettings } from '../context/SettingsContext';
 import toast from 'react-hot-toast';
 import api from '../services/api';
-import './Users.css';
+
 
 const emptyForm = {
     name: '', email: '', password: '', role: 'user'

@@ -146,15 +146,7 @@ const OSDetails = ({ os, onPrint }) => {
 
                 <div className="flex flex-col items-center justify-center text-center pb-8">
                     <span className="text-secondary text-base font-bold uppercase tracking-widest mb-2">Total Líquido Estimado</span>
-                    <div 
-                        style={{ 
-                            fontSize: 'clamp(32px, 8vw, 64px)', 
-                            lineHeight: '1',
-                            letterSpacing: '-0.02em',
-                            color: 'var(--accent-color)'
-                        }}
-                        className="font-black"
-                    >
+                    <div className="total-liquid-hero font-black">
                         {formatMoney(total_cost)}
                     </div>
                 </div>

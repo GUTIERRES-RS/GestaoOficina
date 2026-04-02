@@ -14,8 +14,8 @@ import {
 import { BarChart, Bar, XAxis, YAxis, Tooltip as RechartsTooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend, CartesianGrid, Label } from 'recharts';
 import api from '../services/api';
 import { Link } from 'react-router-dom';
-import './Dashboard.css';
-import { StatusBadge, getStatusStyle } from '../utils/statusStyles';
+
+import { StatusBadge, getStatusClass, getStatusColor } from '../utils/statusStyles';
 import TableEmptyState from '../components/TableEmptyState';
 import { formatMoney, formatDate } from '../utils/format';
 import { getPeriodDates, PERIODS } from '../utils/date';
@@ -219,7 +219,7 @@ const Dashboard = () => {
                     <div className="h-64 w-full relative">
                         {loading || !mounted ? (
                             <div className="flex justify-center items-center h-full">
-                                <Loader className="animate-spin" size={24} style={{ color: 'var(--accent-color)' }} />
+                                <Loader className="animate-spin text-accent" size={24} />
                             </div>
                         ) : (
                             <ResponsiveContainer width="100%" height={280}>
@@ -297,11 +297,11 @@ const Dashboard = () => {
                     <div className="h-64 w-full relative">
                         {loading || !mounted ? (
                             <div className="flex justify-center items-center h-full">
-                                <Loader className="animate-spin" size={24} style={{ color: 'var(--accent-color)' }} />
+                                <Loader className="animate-spin text-accent" size={24} />
                             </div>
                         ) : !stats?.status_chart || stats.status_chart.length === 0 ? (
-                            <div className="flex flex-col justify-center items-center h-full" style={{ gap: '0.5rem' }}>
-                                <Wrench size={32} style={{ color: '#94a3b8' }} />
+                            <div className="flex-center flex-col h-full gap-2">
+                                <Wrench size={32} className="text-tertiary" />
                                 <p className="text-secondary text-sm">Nenhuma OS cadastrada</p>
                             </div>
                         ) : (
@@ -319,7 +319,7 @@ const Dashboard = () => {
                                         cornerRadius={4}
                                     >
                                         {stats.status_chart.map((entry, index) => {
-                                            const color = getStatusStyle(entry.name).border.split(' ')[2];
+                                            const color = getStatusColor(entry.name);
                                             return <Cell key={`cell-${index}`} fill={color} stroke="transparent" />;
                                         })}
                                     </Pie>
@@ -355,14 +355,13 @@ const Dashboard = () => {
                                                             <span className="text-sm font-medium truncate text-secondary">{entry.value}</span>
                                                         </div>
                                                         <span 
-                                                            className="badge" 
+                                                            className={`status-badge ${getStatusClass(entry.value)}`}
                                                             style={{ 
-                                                                ...getStatusStyle(entry.value),
                                                                 fontSize: '0.65rem',
                                                                 fontWeight: '700',
                                                                 padding: '0.1rem 0.5rem',
                                                                 borderRadius: '999px',
-                                                                border: 'none', // Limpar borda para o dashboard ficar mais "clean"
+                                                                border: 'none',
                                                                 minWidth: '24px',
                                                                 textAlign: 'center'
                                                             }}

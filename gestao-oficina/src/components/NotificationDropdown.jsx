@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AlertCircle, Clock, ChevronRight } from 'lucide-react';
-import './NotificationDropdown.css';
+
 
 const NotificationDropdown = ({ reminders, onClose }) => {
     const navigate = useNavigate();

@@ -19,8 +19,7 @@ const VehicleForm = ({ formData, onChange, onSubmit, isSubmitting }) => {
                             <input
                                 type="text"
                                 name="plate"
-                                className="form-control form-control-with-icon uppercase-input"
-                                style={{ textTransform: 'uppercase' }}
+                                className="form-control form-control-with-icon uppercase-input uppercase"
                                 required
                                 placeholder="ABC-1234"
                                 value={formData.plate}

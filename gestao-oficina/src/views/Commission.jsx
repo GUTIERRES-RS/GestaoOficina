@@ -11,7 +11,7 @@ import api from '../services/api';
 import { StatusBadge } from '../utils/statusStyles';
 import { formatMoney, formatPercent, formatDate } from '../utils/format';
 import { getPeriodDates, PERIODS } from '../utils/date';
-import './Commission.css';
+
 
 export default function Commission() {
     const [report, setReport] = useState([]);
@@ -134,7 +134,7 @@ export default function Commission() {
                             <input type="date" value={customEnd}
                                 onChange={e => setCustomEnd(e.target.value)}
                                 className="search-input" style={{ padding: '0.4rem 0.8rem', minWidth: '130px' }} />
-                            <button className="btn btn-primary ml-2" style={{ padding: '0.4rem 0.8rem' }} onClick={fetchReport}>Filtrar</button>
+                            <button className="btn btn-primary ml-2 py-1-5 px-4" onClick={fetchReport}>Filtrar</button>
                         </div>
                     )}
                     <div className="search-box ml-auto">
@@ -143,10 +143,9 @@ export default function Commission() {
                             placeholder="Buscar mecânico..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="search-input"
-                            style={{ padding: '0.4rem 1rem 0.4rem 2.5rem', width: '220px' }}
+                            className="search-input py-1-5 pl-10 w-220"
                         />
-                        <div style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-tertiary)' }}>
+                        <div className="search-icon-absolute">
                             <Users size={16} />
                         </div>
                     </div>
@@ -171,7 +170,7 @@ export default function Commission() {
 
             {/* Commission Table */}
             <div className="commission-card card mt-6">
-                <div className="card-header" style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid var(--border-color)' }}>
+                <div className="card-header card-header-padded">
                     <h2 className="text-lg font-bold text-primary-color mb-1">Relatório de Comissões</h2>
                     <p className="text-sm text-secondary">Detalhamento de ganhos por mecânico</p>
                 </div>

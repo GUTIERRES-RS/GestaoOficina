@@ -11,7 +11,7 @@ import Pagination from '../components/Pagination';
 import { useSettings } from '../context/SettingsContext';
 import toast from 'react-hot-toast';
 import api from '../services/api';
-import './Mechanics.css';
+
 
 const SPECIALTIES = ['Motor', 'Elétrica', 'Funilaria & Pintura', 'Suspensão', 'Freios', 'Transmissão', 'Ar Condicionado', 'Geral'];
 

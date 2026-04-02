@@ -16,8 +16,6 @@ import VehicleForm from './clients/VehicleForm';
 import VehicleHistory from './clients/VehicleHistory';
 import OSForm from './service-orders/OSForm';
 
-import './Clients.css';
-
 const Clients = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [clients, setClients] = useState([]);
@@ -344,7 +342,7 @@ const Clients = () => {
             </div>
 
             {error && (
-                <div className="alert-danger mb-4" style={{ padding: '1rem', background: '#fee2e2', color: '#b91c1c', borderRadius: '8px' }}>
+                <div className="alert-box alert-danger">
                     {error}
                 </div>
             )}

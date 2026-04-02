@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Wrench, Mail, KeyRound } from 'lucide-react';
 import { useSettings } from '../context/SettingsContext';
 import { useAuth } from '../context/AuthContext';
-import './Login.css';
+
 
 const Login = () => {
     const navigate = useNavigate();
@@ -34,12 +34,12 @@ const Login = () => {
             <div className="login-card card">
                 <div className="login-header">
                     {settings?.logo_url ? (
-                        <div className="login-logo-container" style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.5rem' }}>
-                            <img src={settings.logo_url} alt="Logo" style={{ maxHeight: '60px', maxWidth: '200px', objectFit: 'contain' }} />
+                        <div className="login-logo-container flex-center mb-6">
+                            <img src={settings.logo_url} alt="Logo" className="login-logo-img" />
                         </div>
                     ) : (
                         <div className="logo-icon-wrap login-logo">
-                            <Wrench size={28} color="white" />
+                            <Wrench size={28} className="text-white" />
                         </div>
                     )}
                     <h2>Gestão Oficina <span className="text-primary">Pro</span></h2>

@@ -16,7 +16,7 @@ import {
 } from 'lucide-react';
 import { useSettings } from '../context/SettingsContext';
 import { useAuth } from '../context/AuthContext';
-import './Sidebar.css';
+
 
 const Sidebar = ({ isOpen, setIsOpen }) => {
     const { settings } = useSettings();
@@ -45,15 +45,15 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
                 <div className="sidebar-header">
                     <div className="logo-container">
                         {settings?.logo_url ? (
-                            <div className="logo-icon-wrap" style={{ background: 'transparent', width: 'auto', padding: 0 }}>
-                                <img src={settings.logo_url} alt="Logo" style={{ maxHeight: '32px', maxWidth: '100%', objectFit: 'contain' }} />
+                            <div className="logo-icon-wrap sidebar-logo-wrap">
+                                <img src={settings.logo_url} alt="Logo" className="sidebar-logo-img" />
                             </div>
                         ) : (
                             <div className="logo-icon-wrap">
                                 <LogoIcon size={20} color="white" />
                             </div>
                         )}
-                        <span className="logo-text">Gestão Oficina <br /><span style={{ fontSize: '0.75rem', fontWeight: '400', color: 'var(--text-secondary)' }}>Versão - 1.0</span></span>
+                        <span className="logo-text">Gestão Oficina <br /><span className="sidebar-version">Versão - 1.0</span></span>
                     </div>
                     <button className="close-btn mobile-only" onClick={() => setIsOpen(false)}>
                         <X size={24} />
@@ -92,32 +92,9 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
                         </div>
                     </Link>
                     <button
-                        className="logout-btn"
+                        className="logout-btn-clean"
                         onClick={logout}
                         title="Sair do sistema"
-                        style={{
-                            background: 'transparent',
-                            border: 'none',
-                            color: 'var(--text-secondary)',
-                            cursor: 'pointer',
-                            padding: '0.5rem',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            borderRadius: '0.5rem',
-                            transition: 'all 0.2s',
-                            marginTop: '0.5rem',
-                            width: '100%',
-                            gap: '0.5rem'
-                        }}
-                        onMouseEnter={(e) => {
-                            e.currentTarget.style.color = 'var(--danger-color)';
-                            e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.1)';
-                        }}
-                        onMouseLeave={(e) => {
-                            e.currentTarget.style.color = 'var(--text-secondary)';
-                            e.currentTarget.style.backgroundColor = 'transparent';
-                        }}
                     >
                         <X size={18} />
                         <span>Sair</span>
