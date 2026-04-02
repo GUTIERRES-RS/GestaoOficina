@@ -1,15 +1,16 @@
 # Dependencies
-gestao-oficina-api/node_modules/
+gestao-oficina/dist/
 gestao-oficina/node_modules/
+gestao-oficina-api/node_modules/
 
 # Logs
 gestao-oficina-api/logs/
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
+gestao-oficina-api/*.log
+gestao-oficina-api/npm-debug.log*
+gestao-oficina-api/yarn-debug.log*
+gestao-oficina-api/yarn-error.log*
+gestao-oficina-api/pnpm-debug.log*
+gestao-oficina-api/lerna-debug.log*
 
 # Environment
 #.env
@@ -17,13 +18,13 @@ lerna-debug.log*
 #.env.local
 
 # SSL local certs (if any)
-certs/*.key
-certs/*.cert
-certs/*.pem
+gestao-oficina-api/certs/*.key
+gestao-oficina-api/certs/*.cert
+gestao-oficina-api/certs/*.pem
 
 # Other
 .DS_Store
 .vscode/
 .idea/
-dist/
-build/
+gestao-oficina-api/dist/
+gestao-oficina-api/build/
